@@ -9,5 +9,6 @@ public enum DateTimeFormat
     SortableDateTime,
     UniversalSortableDateTime,
     FileName,
+    CompleteDateTime,
     Custom
 }

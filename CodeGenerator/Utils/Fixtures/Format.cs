@@ -29,7 +29,9 @@ public static class Format
 
                 return dateTime.ToString(customFormat, CultureInfo.InvariantCulture);
             case DateTimeFormat.FileName:
-                return dateTime.ToString("dd-MM-yyyy HH-mm-ss");
+                return dateTime.ToString("dd-MM-yyyy HH-mm");
+            case DateTimeFormat.CompleteDateTime:
+                return dateTime.ToString("dd/MM/yyyy HH:mm:ss");                
             default:
                 throw new ArgumentOutOfRangeException(nameof(format), format, null);
         }

@@ -1,5 +1,7 @@
 ﻿using CodeGenerator.Consts;
+using CodeGenerator.Enums;
 using System.Text;
+using static CodeGenerator.Utils.Fixtures.Format;
 using static CodeGenerator.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Utils.Fixtures;
@@ -64,6 +66,6 @@ public static class Generate
         string filePath = Path.Combine(folderPath, $"{fileName}{extension}");
         File.WriteAllText(filePath, content.TrimEnd());
 
-        Console.WriteLine($"File {fileName}{extension} generated successfully!");
+        Console.WriteLine($"{FormatDateTime(GetDateTime(), DateTimeFormat.CompleteDateTime)} | File {fileName}{extension} generated successfully!");
     }
 }
