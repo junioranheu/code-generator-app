@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 
 namespace CodeGenerator.Enums;
+
 public enum ExtensionsEnum
 {
     [Description(".cs")]

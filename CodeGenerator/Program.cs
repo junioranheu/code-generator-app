@@ -1,20 +1,30 @@
 ﻿using CodeGenerator.Enums;
 using CodeGenerator.Models;
+using CodeGenerator.Repositories;
 using static CodeGenerator.Utils.Fixtures.Generate;
 using static CodeGenerator.Utils.Fixtures.Get;
 
-List<Class> classes =
+string INPUT_solutionName = "Anheu";
+string path = GenerateDefaultDirectories(INPUT_solutionName);
+
+#region Models
+List<Model> INPUT_models =
 [
     new() { Name = "User", Props = "UserId Guid Name string Age int City string aeaaaaaa bool" },
-    new() { Name = "Log", Props = "LogId Guid Desc string Date DateTime" },
+    new() { Name = "Log", Props = "LogId Guid Desc string Date DateTime" }
 ];
 
-foreach (var item in classes)
+foreach (var model in INPUT_models)
 {
-    List<string> props = GenerateModelProps(item.Props);
-    string content = GenerateModel(item.Name, props);
-    GenerateFile(fileName: item.Name, content, GetEnumDesc(ExtensionsEnum.cs));
-}
+    Content content = new()
+    {
+        Value = ModelRepository.GenerateModel(INPUT_solutionName, model.Name, ModelRepository.GenerateModelProps(model.Props)),
+        Path = ContentPathEnum.Model
+    };
 
-Console.WriteLine("Press any key to exit the program");
+    GenerateFile(INPUT_solutionName, path, fileName: model.Name, content, GetEnumDesc(ExtensionsEnum.cs));
+}
+#endregion
+
+GetLog("Press any key to exit the program");
 Console.ReadLine();

@@ -1,5 +1,4 @@
-﻿using CodeGenerator.Consts;
-using CodeGenerator.Enums;
+﻿using CodeGenerator.Enums;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text;
@@ -16,9 +15,9 @@ public static class Get
         return TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone);
     }
 
-    public static string GetFileName()
+    public static string GetFileName(string solutionName)
     {
-        return $"{Misc.Name} {FormatDateTime(GetDateTime(), DateTimeFormat.FileName)}";
+        return $"{solutionName} {FormatDateTime(GetDateTime(), DateTimeFormat.FileName)}";
     }
 
     public static string GetStrCapitalizedFirstLetter(string input)
@@ -40,5 +39,38 @@ public static class Get
         DescriptionAttribute? attribute = CustomAttributeExtensions.GetCustomAttribute<DescriptionAttribute>(memInfo[0]);
 
         return attribute?.Description ?? string.Empty;
+    }
+
+    public static string GetLog(string msg)
+    {
+        string final = $"{FormatDateTime(GetDateTime(), DateTimeFormat.CompleteDateTime)} | {msg}";
+        Console.WriteLine(final);
+
+        return final;
+    }
+
+    /// <summary>
+    /// Retrieves descriptions from the specified enum type without hierarchical breakdown.
+    /// </summary>
+    /// <typeparam name="T">The enum type from which to retrieve descriptions. Must be an enum.</typeparam>
+    /// <returns>A list of descriptions as strings.</returns>
+    public static List<string> GetEnumDescriptionOfAllItemsAndAssignInListStr<T>() where T : Enum
+    {
+        var type = typeof(T);
+        var descriptions = new HashSet<string>();
+        var enumValues = Enum.GetValues(type).Cast<T>();
+
+        foreach (var value in enumValues)
+        {
+            var field = type.GetField(value.ToString());
+            var descriptionAttribute = field?.GetCustomAttribute<DescriptionAttribute>();
+
+            if (descriptionAttribute != null)
+            {
+                descriptions.Add(descriptionAttribute.Description);
+            }
+        }
+
+        return [.. descriptions.OrderBy(d => d)];
     }
 }

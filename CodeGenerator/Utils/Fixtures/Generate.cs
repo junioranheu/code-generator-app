@@ -1,71 +1,62 @@
-﻿using CodeGenerator.Consts;
-using CodeGenerator.Enums;
-using System.Text;
-using static CodeGenerator.Utils.Fixtures.Format;
+﻿using CodeGenerator.Enums;
+using CodeGenerator.Models;
 using static CodeGenerator.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Utils.Fixtures;
 
 public static class Generate
 {
-    public static List<string> GenerateModelProps(string classDefinition)
+    public static string GenerateDefaultDirectories(string solutionName)
     {
-        List<string> props = [];
-        string[] parts = classDefinition.Split(' ');
-
-        for (int i = 0; i < parts.Length; i += 2)
-        {
-            if (i + 1 < parts.Length)
-            {
-                string propName = GetStrCapitalizedFirstLetter(parts[i]);
-                string propType = parts[i + 1];
-
-                props.Add($"{propName} {propType}");
-            }
-        }
-
-        return props;
-    }
-
-    public static string GenerateModel(string className, List<string> props)
-    {
-        StringBuilder classBuilder = new();
-
-        classBuilder.AppendLine("using System;");
-        classBuilder.AppendLine();
-        classBuilder.AppendLine($"public class {className}");
-        classBuilder.AppendLine("{");
-
-        foreach (var prop in props)
-        {
-            string[] parts = prop.Split(' ');
-
-            if (parts.Length == 2)
-            {
-                string attrName = parts[0];
-                string attrType = parts[1];
-                classBuilder.AppendLine($"{Misc.Tab}public {attrType} {attrName} {{ get; set; }}");
-            }
-        }
-
-        classBuilder.AppendLine("}");
-
-        return classBuilder.ToString();
-    }
-
-    public static void GenerateFile(string fileName, string content, string extension)
-    {
+        #region Create main folder
         string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        string folderPath = Path.Combine(desktopPath, GetFileName());
+        string folderPath = Path.Combine(desktopPath, GetFileName(solutionName));
 
-        if (!Directory.Exists(folderPath))
+        if (Directory.Exists(folderPath))
         {
-            Directory.CreateDirectory(folderPath);
+            return folderPath;
         }
 
-        string filePath = Path.Combine(folderPath, $"{fileName}{extension}");
-        File.WriteAllText(filePath, content.TrimEnd());
+        Directory.CreateDirectory(folderPath);
+        #endregion
 
-        Console.WriteLine($"{FormatDateTime(GetDateTime(), DateTimeFormat.CompleteDateTime)} | File {fileName}{extension} generated successfully!");
+        #region Create children folders;
+        List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<ContentPathEnum>();
+
+        foreach (var path in contentPathEnums)
+        {
+            List<string> paths = [.. path.Split('/')];
+
+            for (int i = 0; i < paths.Count; i++)
+            {
+                bool isMainFolder = (i == 0);
+                string previousItemName = (isMainFolder ? string.Empty : $"{solutionName}.{paths[i - 1]}");
+                string currentItemName = Path.Combine(previousItemName, (isMainFolder ? $"{solutionName}.{paths[i]}" : paths[i]));
+
+                string finalPath = Path.Combine(folderPath, currentItemName);
+
+                if (Directory.Exists(finalPath))
+                {
+                    continue;
+                }
+
+                Directory.CreateDirectory(finalPath);
+            }
+        }
+        #endregion
+
+        GetLog("The default folders have been generated successfully");
+
+        return folderPath;
+    }
+
+    public static void GenerateFile(string solutionName, string path, string fileName, Content content, string extension)
+    {
+        string pathNormalized = Path.Combine(path, $"{solutionName}.{GetEnumDesc(content.Path)}");
+        string pathFinalFile = Path.Combine(pathNormalized, $"{fileName}{extension}");
+
+        File.WriteAllText(pathFinalFile, content.Value.TrimEnd());
+
+        GetLog($"File {fileName}{extension} generated successfully");
     }
 }
