@@ -1,10 +1,10 @@
-﻿using CodeGenerator.Enums;
+﻿using CodeGenerator.Consts;
+using CodeGenerator.Enums;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text;
 using TimeZoneConverter;
 using static CodeGenerator.Utils.Fixtures.Format;
-using S = CodeGenerator.Consts.System;
 
 namespace CodeGenerator.Utils.Fixtures;
 
@@ -18,7 +18,7 @@ public static class Get
 
     public static string GetFileName()
     {
-        return $"{S.Name} {FormatDateTime(GetDateTime(), DateTimeFormat.FileName)}";
+        return $"{Misc.Name} {FormatDateTime(GetDateTime(), DateTimeFormat.FileName)}";
     }
 
     public static string GetStrCapitalizedFirstLetter(string input)

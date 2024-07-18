@@ -1,13 +1,14 @@
-﻿using System.Text;
+﻿using CodeGenerator.Consts;
+using System.Text;
 using static CodeGenerator.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Utils.Fixtures;
 
 public static class Generate
 {
-    public static List<string> GenerateAttributes(string classDefinition)
+    public static List<string> GenerateModelProps(string classDefinition)
     {
-        List<string> attributes = [];
+        List<string> props = [];
         string[] parts = classDefinition.Split(' ');
 
         for (int i = 0; i < parts.Length; i += 2)
@@ -17,14 +18,14 @@ public static class Generate
                 string propName = GetStrCapitalizedFirstLetter(parts[i]);
                 string propType = parts[i + 1];
 
-                attributes.Add($"{propName} {propType}");
+                props.Add($"{propName} {propType}");
             }
         }
 
-        return attributes;
+        return props;
     }
 
-    public static string GenerateModel(string className, List<string> attributes)
+    public static string GenerateModel(string className, List<string> props)
     {
         StringBuilder classBuilder = new();
 
@@ -33,15 +34,15 @@ public static class Generate
         classBuilder.AppendLine($"public class {className}");
         classBuilder.AppendLine("{");
 
-        foreach (var attribute in attributes)
+        foreach (var prop in props)
         {
-            string[] parts = attribute.Split(' ');
+            string[] parts = prop.Split(' ');
 
             if (parts.Length == 2)
             {
                 string attrName = parts[0];
                 string attrType = parts[1];
-                classBuilder.AppendLine($"    public {attrType} {attrName} {{ get; set; }}");
+                classBuilder.AppendLine($"{Misc.Tab}public {attrType} {attrName} {{ get; set; }}");
             }
         }
 
@@ -61,6 +62,8 @@ public static class Generate
         }
 
         string filePath = Path.Combine(folderPath, $"{fileName}{extension}");
-        File.WriteAllText(filePath, content);
+        File.WriteAllText(filePath, content.TrimEnd());
+
+        Console.WriteLine($"File {fileName}{extension} generated successfully!");
     }
 }
