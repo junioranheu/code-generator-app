@@ -8,10 +8,10 @@ public enum ContentPathEnum
     Controller,
 
     [Description("Application/UseCases")]
-    UseCases,
+    UseCase,
 
     [Description("Domain/Entities")]
-    Model,
+    Entity,
 
     [Description("Domain/Enums")]
     Enum,

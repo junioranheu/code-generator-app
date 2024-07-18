@@ -4,20 +4,23 @@ using static CodeGenerator.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Repositories;
 
-public class ModelRepository
+public class EntityRepository
 {
-    public static string GenerateModel(string solutionName, string className, List<string> props)
+    public static string GenerateEntity(string solutionName, string className, List<string> props, bool isFKGuid = true)
     {
         StringBuilder classBuilder = new();
 
-        classBuilder.AppendLine("using System;");
+        classBuilder.AppendLine("using System.ComponentModel.DataAnnotations;");
         classBuilder.AppendLine();
 
         classBuilder.AppendLine($"namespace {solutionName}.Domain.Entities;");
         classBuilder.AppendLine();
 
-        classBuilder.AppendLine($"public class {className}");
+        classBuilder.AppendLine($"public sealed class {className}");
         classBuilder.AppendLine("{");
+
+        classBuilder.AppendLine($"{Misc.Tab}[Key]");
+        classBuilder.AppendLine($"{Misc.Tab}public {(isFKGuid ? "Guid" : "int")} {className}Id {{ get; set; }}");
 
         foreach (var prop in props)
         {
@@ -27,6 +30,8 @@ public class ModelRepository
             {
                 string attrName = parts[0];
                 string attrType = parts[1];
+
+                classBuilder.AppendLine();
                 classBuilder.AppendLine($"{Misc.Tab}public {attrType} {attrName} {{ get; set; }}");
             }
         }
@@ -36,7 +41,7 @@ public class ModelRepository
         return classBuilder.ToString();
     }
 
-    public static List<string> GenerateModelProps(string classDefinition)
+    public static List<string> GenerateEntityProps(string classDefinition)
     {
         List<string> props = [];
         string[] parts = classDefinition.Split(' ');
