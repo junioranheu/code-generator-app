@@ -10,30 +10,39 @@ public static class Generate
     {
         #region Create main folder
         string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        string folderPath = Path.Combine(desktopPath, GetFileName(solutionName));
+        string rootPath = Path.Combine(desktopPath, GetFileName(solutionName));
 
-        if (Directory.Exists(folderPath))
+        if (Directory.Exists(rootPath))
         {
-            return folderPath;
+            return rootPath;
         }
 
-        Directory.CreateDirectory(folderPath);
+        Directory.CreateDirectory(rootPath);
         #endregion
 
         #region Create children folders;
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<ContentPathEnum>();
+        GenerateFolderByPathList(solutionName, rootPath, paths: contentPathEnums);
+        #endregion
 
-        foreach (var path in contentPathEnums)
+        GetLog("The default folders have been generated successfully");
+
+        return rootPath;
+    }
+
+    public static void GenerateFolderByPathList(string solutionName, string rootPath, List<string> paths)
+    {
+        foreach (var path in paths)
         {
-            List<string> paths = [.. path.Split('/')];
+            List<string> splitedPaths = [.. path.Split('/')];
 
-            for (int i = 0; i < paths.Count; i++)
+            for (int i = 0; i < splitedPaths.Count; i++)
             {
                 bool isMainFolder = (i == 0);
-                string previousItemName = (isMainFolder ? string.Empty : $"{solutionName}.{paths[i - 1]}");
-                string currentItemName = Path.Combine(previousItemName, (isMainFolder ? $"{solutionName}.{paths[i]}" : paths[i]));
+                string previousItemName = (isMainFolder ? string.Empty : $"{solutionName}.{splitedPaths[i - 1]}");
+                string currentItemName = Path.Combine(previousItemName, (isMainFolder ? $"{solutionName}.{splitedPaths[i]}" : splitedPaths[i]));
 
-                string finalPath = Path.Combine(folderPath, currentItemName);
+                string finalPath = Path.Combine(rootPath, currentItemName);
 
                 if (Directory.Exists(finalPath))
                 {
@@ -43,16 +52,22 @@ public static class Generate
                 Directory.CreateDirectory(finalPath);
             }
         }
-        #endregion
-
-        GetLog("The default folders have been generated successfully");
-
-        return folderPath;
     }
 
-    public static void GenerateFile(string solutionName, string path, string fileName, Content content, string extension)
+    public static void GenerateFolder(string solutionName, string folderPath)
     {
-        string pathNormalized = Path.Combine(path, $"{solutionName}.{GetEnumDesc(content.Path)}");
+        if (Directory.Exists(folderPath))
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(folderPath);
+        GetLog($"Folder {GetStringAfterText(folderPath, $"{solutionName}.")} generated successfully");
+    }
+
+    public static void GenerateFile(string solutionName, string rootPath, string fileName, Content content, string extension)
+    {
+        string pathNormalized = Path.Combine(rootPath, $"{solutionName}.{GetEnumDesc(content.Path)}");
         string pathFinalFile = Path.Combine(pathNormalized, $"{fileName}{extension}");
 
         File.WriteAllText(pathFinalFile, content.Value.TrimEnd());

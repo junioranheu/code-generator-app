@@ -73,4 +73,83 @@ public static class Get
 
         return [.. descriptions.OrderBy(d => d)];
     }
+
+    public static string GetStrPlural(string singular, bool isEnglish = true)
+    {
+        if (string.IsNullOrEmpty(singular))
+        {
+            throw new ArgumentException($"The param {nameof(singular)} in {nameof(GetStrPlural)} can't be null");
+        }
+
+        return isEnglish ? PluralizeEnglish(singular) : PluralizePortuguese(singular);
+
+        static string PluralizeEnglish(string singular)
+        {
+            if (singular.EndsWith("y") && singular.Length > 1 && !IsVowel(singular[singular.Length - 2]))
+            {
+                return string.Concat(singular.AsSpan(0, singular.Length - 1), "ies");
+            }
+
+            if (singular.EndsWith("s") || singular.EndsWith("sh") || singular.EndsWith("ch") || singular.EndsWith("x") || singular.EndsWith("z"))
+            {
+                return singular + "es";
+            }
+
+            if (singular.EndsWith("f"))
+            {
+                return string.Concat(singular.AsSpan(0, singular.Length - 1), "ves");
+            }
+
+            if (singular.EndsWith("fe"))
+            {
+                return string.Concat(singular.AsSpan(0, singular.Length - 2), "ves");
+            }
+
+            return singular + "s";
+        }
+
+        static bool IsVowel(char c)
+        {
+            return "aeiouAEIOU".Contains(c);
+        }
+
+        static string PluralizePortuguese(string singular)
+        {
+            string[] terminacoesEs = ["r", "z", "s", "l", "ão"];
+            string[] terminacoesIs = ["m"];
+
+            foreach (var terminação in terminacoesEs)
+            {
+                if (singular.EndsWith(terminação))
+                {
+                    return singular + "es";
+                }
+            }
+
+            foreach (var terminação in terminacoesIs)
+            {
+                if (singular.EndsWith(terminação))
+                {
+                    return string.Concat(singular.AsSpan(0, singular.Length - 1), "ns");
+                }
+            }
+
+            return singular + "s";
+        }
+    }
+
+   public static string GetStringAfterText(string input, string searchText)
+    {
+        ReadOnlySpan<char> inputSpan = input.AsSpan();
+        ReadOnlySpan<char> searchTextSpan = searchText.AsSpan();
+
+        int index = inputSpan.IndexOf(searchTextSpan);
+
+        if (index != -1)
+        {
+            return inputSpan[(index + searchTextSpan.Length)..].ToString();
+        }
+
+        return input; 
+    }
 }
