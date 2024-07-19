@@ -1,4 +1,6 @@
 ﻿using CodeGenerator.Consts;
+using CodeGenerator.Enums;
+using CodeGenerator.Models;
 using System.Text;
 using static CodeGenerator.Utils.Fixtures.Get;
 
@@ -6,7 +8,26 @@ namespace CodeGenerator.Repositories;
 
 public class EntityRepository
 {
-    public static string GenerateEntity(string solutionName, string className, List<string> props, bool isFKGuid = true)
+    public static List<Content> GenerateEntity(string solutionName, string rootPath, string className, string props, bool isFKGuid = true)
+    {
+        ExtensionsEnum extension = ExtensionsEnum.CS;
+        ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.Entity;
+
+        List<Content> content =
+        [
+            new (
+                value: GenerateContent(solutionName, className, props: GenerateEntityProps(props), isFKGuid),
+                contentDirectory,
+                extension,
+                solutionName,
+                fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName:className, contentDirectory, extension)
+            )
+        ];
+
+        return content;
+    }
+
+    private static string GenerateContent(string solutionName, string className, List<string> props, bool isFKGuid)
     {
         StringBuilder classBuilder = new();
 
@@ -41,7 +62,7 @@ public class EntityRepository
         return classBuilder.ToString();
     }
 
-    public static List<string> GenerateEntityProps(string classDefinition)
+    private static List<string> GenerateEntityProps(string classDefinition)
     {
         List<string> props = [];
         string[] parts = classDefinition.Split(' ');

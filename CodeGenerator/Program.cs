@@ -16,17 +16,7 @@ List<Model> INPUT_models =
 foreach (var model in INPUT_models)
 {
     #region Entity
-    List<Content> entityContent =
-    [
-        new (
-            value: EntityRepository.GenerateEntity(INPUT_solutionName, className: model.Name, props: EntityRepository.GenerateEntityProps(model.Props)),
-            contentDirectory: ContentDirectoryEnum.Entity,
-            extension: ExtensionsEnum.CS,
-            solutionName: INPUT_solutionName,
-            fileFinalPath: GetFinalFilePath(INPUT_solutionName, rootPath, fileName: model.Name, contentDirectory: ContentDirectoryEnum.Entity, extension: ExtensionsEnum.CS)
-        )
-    ];
-
+    List<Content> entityContent = EntityRepository.GenerateEntity(INPUT_solutionName, rootPath, className: model.Name, props: model.Props );
     GenerateFile(contents: entityContent);
     #endregion
 

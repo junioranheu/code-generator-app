@@ -34,14 +34,15 @@ public class UseCaseRepository
         foreach (var item in contentPathEnums)
         {
             ExtensionsEnum extension = ExtensionsEnum.CS;
+            ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.UseCase;
             string fileName = Path.Combine(GetStrPlural(useCaseName), item, $"{item}{useCaseName}{GetEnumDesc(extension)}");
 
             content.Add(new(
                 value: CheckUseCaseEnumAndGenerateContent(item, solutionName, useCaseName),
-                contentDirectory: ContentDirectoryEnum.UseCase,
-                extension: ExtensionsEnum.CS,
-                solutionName: solutionName,
-                fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName, contentDirectory: ContentDirectoryEnum.UseCase, extension)
+                contentDirectory,
+                extension,
+                solutionName,
+                fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName, contentDirectory: contentDirectory, extension)
             ));
         }
 
