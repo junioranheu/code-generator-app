@@ -30,7 +30,7 @@ public static class Generate
 
         if (Directory.Exists(rootPath))
         {
-            return rootPath;
+            Directory.Delete(rootPath, true);
         }
 
         Directory.CreateDirectory(rootPath);
@@ -39,13 +39,13 @@ public static class Generate
 
         #region Create children folders;
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<ContentPathEnum>();
-        GenerateFolderByPathList(solutionName, rootPath, paths: contentPathEnums);
+        GenerateFolderByPathList(solutionName, rootPath, paths: contentPathEnums, isCheckMainFolder: true);
         #endregion
 
         return rootPath;
     }
 
-    public static void GenerateFolderByPathList(string solutionName, string rootPath, List<string> paths)
+    public static void GenerateFolderByPathList(string solutionName, string rootPath, List<string> paths, bool? isCheckMainFolder = false)
     {
         foreach (var path in paths)
         {
@@ -54,8 +54,8 @@ public static class Generate
             for (int i = 0; i < splitedPaths.Count; i++)
             {
                 bool isMainFolder = (i == 0);
-                string previousItemName = (isMainFolder ? string.Empty : $"{solutionName}.{splitedPaths[i - 1]}");
-                string currentItemName = Path.Combine(previousItemName, (isMainFolder ? $"{solutionName}.{splitedPaths[i]}" : splitedPaths[i]));
+                string previousItemName = (isCheckMainFolder.GetValueOrDefault() == false ? string.Empty : (isMainFolder ? string.Empty : $"{solutionName}.{splitedPaths[i - 1]}"));
+                string currentItemName = Path.Combine(previousItemName, ((isMainFolder && isCheckMainFolder.GetValueOrDefault()) ? $"{solutionName}.{splitedPaths[i]}" : splitedPaths[i]));
 
                 string finalPath = Path.Combine(rootPath, currentItemName);
 

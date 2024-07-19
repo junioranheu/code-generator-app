@@ -13,6 +13,9 @@ public class UseCaseRepository
         string mainFolderPath = Path.Combine(rootPath, $"{solutionName}.{GetEnumDesc(ContentPathEnum.UseCase)}", useCaseName);
         GenerateFolder(solutionName, folderPath: mainFolderPath);
 
+        List<string> contentPathEnums = ["a", "b", "c"];
+        GenerateFolderByPathList(solutionName, mainFolderPath, paths: contentPathEnums);
+
         StringBuilder classBuilder = new();
 
         classBuilder.AppendLine("using System.ComponentModel.DataAnnotations;");
@@ -25,20 +28,6 @@ public class UseCaseRepository
         classBuilder.AppendLine("{");
 
         classBuilder.AppendLine($"{Misc.Tab}[Key]");
-
-        //foreach (var prop in props)
-        //{
-        //    string[] parts = prop.Split(' ');
-
-        //    if (parts.Length == 2)
-        //    {
-        //        string attrName = parts[0];
-        //        string attrType = parts[1];
-
-        //        classBuilder.AppendLine();
-        //        classBuilder.AppendLine($"{Misc.Tab}public {attrType} {attrName} {{ get; set; }}");
-        //    }
-        //}
 
         classBuilder.AppendLine("}");
 
