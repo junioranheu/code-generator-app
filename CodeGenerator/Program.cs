@@ -19,24 +19,28 @@ foreach (var model in INPUT_models)
     Content modelContent = new()
     {
         Value = EntityRepository.GenerateEntity(INPUT_solutionName, className: model.Name, props: EntityRepository.GenerateEntityProps(model.Props)),
-        Path = ContentPathEnum.Entity
+        Path = ContentPathEnum.Entity,
+        Extension = ExtensionsEnum.cs
     };
 
-    GenerateFile(INPUT_solutionName, rootPath, fileName: model.Name, modelContent, GetEnumDesc(ExtensionsEnum.cs));
+    string aea = GetFinalFilePath(INPUT_solutionName, rootPath, fileName: model.Name, content: modelContent);
+    GenerateFile(solutionName: INPUT_solutionName, pathFinalFile: aea, content: modelContent);
     #endregion
 
     #region UseCase
-    Content useCaseContent = new()
-    {
-        Value = UseCaseRepository.GenerateUseCase(INPUT_solutionName, rootPath, useCaseName: GetStrPlural(model.Name)),
-        Path = ContentPathEnum.UseCase
-    };
+    //(string content, string mainFolderPath) = UseCaseRepository.GenerateUseCase(INPUT_solutionName, rootPath, useCaseName: GetStrPlural(model.Name));
 
-    GenerateFile(INPUT_solutionName, rootPath, fileName: GetStrPlural(model.Name), useCaseContent, GetEnumDesc(ExtensionsEnum.cs));
+    //Content useCaseContent = new()
+    //{
+    //    Value = content,
+    //    Path = ContentPathEnum.UseCase
+    //};
+
+    //GenerateFile(INPUT_solutionName, mainFolderPath, fileName: GetStrPlural(model.Name), useCaseContent, GetEnumDesc(ExtensionsEnum.cs));
     #endregion
 }
 
-GetLog("Press any key to exit the program");
+GetLog("Press any key to exit the program", type: LogEnum.Info);
 Console.ReadKey();
 
 Directory.Delete(rootPath, true); // XD

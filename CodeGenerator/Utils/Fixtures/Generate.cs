@@ -1,5 +1,6 @@
 ﻿using CodeGenerator.Enums;
 using CodeGenerator.Models;
+using System.Runtime.InteropServices;
 using static CodeGenerator.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Utils.Fixtures;
@@ -9,7 +10,22 @@ public static class Generate
     public static string GenerateDefaultDirectories(string solutionName)
     {
         #region Create main folder
-        string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        string desktopPath;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            string homePath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            desktopPath = Path.Combine(homePath, "Desktop");
+        }
+        else
+        {
+            throw new NotSupportedException("Unsupported operating system");
+        }
+
         string rootPath = Path.Combine(desktopPath, GetFileName(solutionName));
 
         if (Directory.Exists(rootPath))
@@ -18,14 +34,13 @@ public static class Generate
         }
 
         Directory.CreateDirectory(rootPath);
+        GetLog($"Main folder has been successfully generated");
         #endregion
 
         #region Create children folders;
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<ContentPathEnum>();
         GenerateFolderByPathList(solutionName, rootPath, paths: contentPathEnums);
         #endregion
-
-        GetLog("The default folders have been generated successfully");
 
         return rootPath;
     }
@@ -50,6 +65,7 @@ public static class Generate
                 }
 
                 Directory.CreateDirectory(finalPath);
+                GetLog($"Folder {GetStringAfterText(finalPath, $"{solutionName}.")} has been successfully generated");
             }
         }
     }
@@ -62,16 +78,12 @@ public static class Generate
         }
 
         Directory.CreateDirectory(folderPath);
-        GetLog($"Folder {GetStringAfterText(folderPath, $"{solutionName}.")} generated successfully");
+        GetLog($"Folder {GetStringAfterText(folderPath, $"{solutionName}.")} has been successfully generated");
     }
 
-    public static void GenerateFile(string solutionName, string rootPath, string fileName, Content content, string extension)
+    public static void GenerateFile(string solutionName, string pathFinalFile, Content content)
     {
-        string pathNormalized = Path.Combine(rootPath, $"{solutionName}.{GetEnumDesc(content.Path)}");
-        string pathFinalFile = Path.Combine(pathNormalized, $"{fileName}{extension}");
-
         File.WriteAllText(pathFinalFile, content.Value.TrimEnd());
-
-        GetLog($"File {fileName}{extension} generated successfully");
+        GetLog($"File {GetStringAfterText(pathFinalFile, $"{solutionName}.")} has been successfully generated");
     }
 }

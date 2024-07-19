@@ -1,4 +1,5 @@
 ﻿using CodeGenerator.Enums;
+using CodeGenerator.Models;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text;
@@ -41,10 +42,22 @@ public static class Get
         return attribute?.Description ?? string.Empty;
     }
 
-    public static string GetLog(string msg)
+    public static string GetLog(string msg, LogEnum? type = LogEnum.Success)
     {
+        ConsoleColor originalColor = ConsoleColor.Gray;
+
+        Console.ForegroundColor = type switch
+        {
+            LogEnum.Success => ConsoleColor.Cyan,
+            LogEnum.Fail => ConsoleColor.Red,
+            LogEnum.Warning => ConsoleColor.Yellow,
+            LogEnum.Info => originalColor,
+            _ => originalColor,
+        };
+
         string final = $"{FormatDateTime(GetDateTime(), DateTimeFormat.CompleteDateTime)} | {msg}";
         Console.WriteLine(final);
+        Console.ForegroundColor = originalColor;
 
         return final;
     }
@@ -85,17 +98,17 @@ public static class Get
 
         static string PluralizeEnglish(string singular)
         {
-            if (singular.EndsWith("y") && singular.Length > 1 && !IsVowel(singular[singular.Length - 2]))
+            if (singular.EndsWith('y') && singular.Length > 1 && !IsVowel(singular[^2]))
             {
                 return string.Concat(singular.AsSpan(0, singular.Length - 1), "ies");
             }
 
-            if (singular.EndsWith("s") || singular.EndsWith("sh") || singular.EndsWith("ch") || singular.EndsWith("x") || singular.EndsWith("z"))
+            if (singular.EndsWith('s') || singular.EndsWith("sh") || singular.EndsWith("ch") || singular.EndsWith('x') || singular.EndsWith('z'))
             {
                 return singular + "es";
             }
 
-            if (singular.EndsWith("f"))
+            if (singular.EndsWith('f'))
             {
                 return string.Concat(singular.AsSpan(0, singular.Length - 1), "ves");
             }
@@ -138,7 +151,7 @@ public static class Get
         }
     }
 
-   public static string GetStringAfterText(string input, string searchText)
+    public static string GetStringAfterText(string input, string searchText)
     {
         ReadOnlySpan<char> inputSpan = input.AsSpan();
         ReadOnlySpan<char> searchTextSpan = searchText.AsSpan();
@@ -150,6 +163,14 @@ public static class Get
             return inputSpan[(index + searchTextSpan.Length)..].ToString();
         }
 
-        return input; 
+        return input.Replace("\\", "/");
+    }
+
+    public static string GetFinalFilePath(string solutionName, string rootPath, string fileName, Content content)
+    {
+        string pathNormalized = Path.Combine(rootPath, $"{solutionName}.{GetEnumDesc(content.Path)}");
+        string pathFinalFile = Path.Combine(pathNormalized, $"{fileName}{GetEnumDesc(content.Extension)}");
+
+        return pathFinalFile;
     }
 }

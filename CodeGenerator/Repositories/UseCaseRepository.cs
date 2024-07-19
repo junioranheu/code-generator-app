@@ -8,7 +8,7 @@ namespace CodeGenerator.Repositories;
 
 public class UseCaseRepository
 {
-    public static string GenerateUseCase(string solutionName, string rootPath, string useCaseName)
+    public static (string content, string mainFolderPath) GenerateUseCase(string solutionName, string rootPath, string useCaseName)
     {
         string mainFolderPath = Path.Combine(rootPath, $"{solutionName}.{GetEnumDesc(ContentPathEnum.UseCase)}", useCaseName);
         GenerateFolder(solutionName, folderPath: mainFolderPath);
@@ -42,6 +42,6 @@ public class UseCaseRepository
 
         classBuilder.AppendLine("}");
 
-        return classBuilder.ToString();
+        return (classBuilder.ToString(), mainFolderPath);
     }
 }

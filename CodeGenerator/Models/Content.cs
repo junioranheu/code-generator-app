@@ -7,4 +7,6 @@ public sealed class Content
     public string Value { get; set; } = string.Empty;
 
     public ContentPathEnum Path { get; set; }
+
+    public ExtensionsEnum Extension { get; set; }
 }
