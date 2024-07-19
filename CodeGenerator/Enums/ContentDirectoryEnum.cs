@@ -2,7 +2,7 @@
 
 namespace CodeGenerator.Enums;
 
-public enum ContentPathEnum
+public enum ContentDirectoryEnum
 {
     [Description("API/Controllers")]
     Controller,

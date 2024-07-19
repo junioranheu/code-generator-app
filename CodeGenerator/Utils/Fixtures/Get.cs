@@ -166,10 +166,10 @@ public static class Get
         return input.Replace("\\", "/");
     }
 
-    public static string GetFinalFilePath(string solutionName, string rootPath, string fileName, Content content)
+    public static string GetFinalFilePath(string solutionName, string rootPath, string fileName, ContentDirectoryEnum contentDirectory, ExtensionsEnum extension)
     {
-        string pathNormalized = Path.Combine(rootPath, $"{solutionName}.{GetEnumDesc(content.Path)}");
-        string pathFinalFile = Path.Combine(pathNormalized, $"{fileName}{GetEnumDesc(content.Extension)}");
+        string pathNormalized = Path.Combine(rootPath, $"{solutionName}.{GetEnumDesc(contentDirectory)}");
+        string pathFinalFile = Path.Combine(pathNormalized, $"{fileName}{GetEnumDesc(extension)}");
 
         return pathFinalFile;
     }

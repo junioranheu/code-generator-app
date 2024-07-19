@@ -5,17 +5,17 @@ namespace CodeGenerator.Enums;
 public enum ExtensionsEnum
 {
     [Description(".cs")]
-    cs,
+    CS,
 
     [Description(".css")]
-    css,
+    CSS,
 
     [Description(".scss")]
-    scss,
+    SCSS,
 
     [Description(".js")]
-    js,
+    JS,
 
     [Description(".ts")]
-    ts
+    TS
 }

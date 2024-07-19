@@ -38,8 +38,8 @@ public static class Generate
         #endregion
 
         #region Create children folders;
-        List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<ContentPathEnum>();
-        GenerateFolderByPathList(solutionName, rootPath, paths: contentPathEnums, isCheckMainFolder: true);
+        List<string> contentDirectoryEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<ContentDirectoryEnum>();
+        GenerateFolderByPathList(solutionName, rootPath, paths: contentDirectoryEnums, isCheckMainFolder: true);
         #endregion
 
         return rootPath;
@@ -81,9 +81,12 @@ public static class Generate
         GetLog($"Folder {GetStringAfterText(folderPath, $"{solutionName}.")} has been successfully generated");
     }
 
-    public static void GenerateFile(string solutionName, string pathFinalFile, Content content)
+    public static void GenerateFile(List<Content> contents)
     {
-        File.WriteAllText(pathFinalFile, content.Value.TrimEnd());
-        GetLog($"File {GetStringAfterText(pathFinalFile, $"{solutionName}.")} has been successfully generated");
+        foreach (var content in contents)
+        {
+            File.WriteAllText(content.FileFinalPath, content.Value.TrimEnd());
+            GetLog($"File {GetStringAfterText(content.FileFinalPath, $"{content.SolutionName}.")} has been successfully generated");
+        }
     }
 }

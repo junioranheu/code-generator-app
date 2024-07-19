@@ -16,28 +16,23 @@ List<Model> INPUT_models =
 foreach (var model in INPUT_models)
 {
     #region Entity
-    Content entityContent = new()
-    {
-        Value = EntityRepository.GenerateEntity(INPUT_solutionName, className: model.Name, props: EntityRepository.GenerateEntityProps(model.Props)),
-        Path = ContentPathEnum.Entity,
-        Extension = ExtensionsEnum.cs
-    };
+    List<Content> entityContent =
+    [
+        new (
+            value: EntityRepository.GenerateEntity(INPUT_solutionName, className: model.Name, props: EntityRepository.GenerateEntityProps(model.Props)),
+            contentDirectory: ContentDirectoryEnum.Entity,
+            extension: ExtensionsEnum.CS,
+            solutionName: INPUT_solutionName,
+            fileFinalPath: GetFinalFilePath(INPUT_solutionName, rootPath, fileName: model.Name, contentDirectory: ContentDirectoryEnum.Entity, extension: ExtensionsEnum.CS)
+        )
+    ];
 
-    string entityFinalFilePath = GetFinalFilePath(INPUT_solutionName, rootPath, fileName: model.Name, content: entityContent);
-    GenerateFile(solutionName: INPUT_solutionName, pathFinalFile: entityFinalFilePath, content: entityContent);
+    GenerateFile(contents: entityContent);
     #endregion
 
     #region UseCase
-    (string useCaseContent_, string mainFolderPath) = UseCaseRepository.GenerateUseCase(INPUT_solutionName, rootPath, useCaseName: GetStrPlural(model.Name));
-
-    Content useCaseContent = new()
-    {
-        Value = useCaseContent_,
-        Path = ContentPathEnum.UseCase,
-        Extension = ExtensionsEnum.cs
-    };
-
-    GenerateFile(solutionName: INPUT_solutionName, pathFinalFile: mainFolderPath, content: entityContent);
+    List<Content> useCaseContent = UseCaseRepository.GenerateUseCase(INPUT_solutionName, rootPath, useCaseName: model.Name);
+    GenerateFile(contents: useCaseContent);
     #endregion
 }
 
