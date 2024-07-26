@@ -1,6 +1,6 @@
-﻿using CodeGenerator.Enums;
+﻿using System.Text;
+using CodeGenerator.Enums;
 using CodeGenerator.Models;
-using System.Text;
 using static CodeGenerator.Utils.Fixtures.Generate;
 using static CodeGenerator.Utils.Fixtures.Get;
 
@@ -31,12 +31,14 @@ public class UseCaseRepository
     {
         List<Content> content = [];
 
-        foreach (var item in contentPathEnums)
+        foreach (string item in contentPathEnums)
         {
             ExtensionsEnum extension = ExtensionsEnum.CS;
             ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.UseCase;
-            string fileName = Path.Combine(GetStrPlural(useCaseName), item, $"{item}{useCaseName}{GetEnumDesc(extension)}");
+            string fileName = GetFileName(useCaseName, item, isInterface: false);
+            string interfaceFileName = GetFileName(useCaseName, item, isInterface: true);
 
+            // Use Case;
             content.Add(new(
                 value: CheckUseCaseEnumAndGenerateContent(item, solutionName, useCaseName),
                 contentDirectory,
@@ -44,9 +46,23 @@ public class UseCaseRepository
                 solutionName,
                 fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName, contentDirectory: contentDirectory, extension)
             ));
+
+            // Interface;
+            content.Add(new(
+                value: GenerateInterface(item, solutionName, useCaseName),
+                contentDirectory,
+                extension,
+                solutionName,
+                fileFinalPath: GetFinalFilePath(solutionName, rootPath, interfaceFileName, contentDirectory: contentDirectory, extension)
+            ));
         }
 
         return content;
+    }
+
+    private static string GetFileName(string useCaseName, string item, bool isInterface)
+    {
+        return Path.Combine(GetStrPlural(useCaseName), item, $"{(isInterface ? "I" : string.Empty)}{item}{useCaseName}");
     }
 
     private static string CheckUseCaseEnumAndGenerateContent(string useCaseType, string solutionName, string useCaseName)
@@ -78,42 +94,85 @@ public class UseCaseRepository
     #region UseCases
     private static string GenerateUseCase_Get(string solutionName, string useCaseName)
     {
-        StringBuilder classBuilder = new();
-        classBuilder.AppendLine($"{nameof(GenerateUseCase_Get)} {useCaseName}");
+        StringBuilder content = new();
 
-        return classBuilder.ToString();
+        content.AppendLine($@"
+            using {solutionName}.Domain.Entities;
+            using {solutionName}.Infrastructure.Data;
+            using Microsoft.EntityFrameworkCore;
+
+            namespace {solutionName}.Application.UseCases.{useCaseName}.Get;
+
+            public sealed class Get{useCaseName}(CONTEXT context) : IGet{useCaseName}
+            {{
+                private readonly CONTEXT _context = context;
+
+                public async Task<{useCaseName}?> Execute(int? id, string? xxx)
+                {{
+                    var linq = await _context.Ocorrencias.
+                               Where(x =>
+                                  x.Status == true &&
+                                  (id == null || x.Id == id) &&
+                                  (string.IsNullOrEmpty(xxx) || x.XXX == xxx)
+                               ).
+                               AsNoTracking().FirstOrDefaultAsync();
+
+                    return linq;
+                }}
+            }}"
+        );
+
+        return content.ToString();
     }
 
     private static string GenerateUseCase_GetAll(string solutionName, string useCaseName)
     {
-        StringBuilder classBuilder = new();
-        classBuilder.AppendLine($"{nameof(GenerateUseCase_GetAll)} {useCaseName}");
+        StringBuilder content = new();
+        content.AppendLine($"{nameof(GenerateUseCase_GetAll)} {useCaseName}");
 
-        return classBuilder.ToString();
+        return content.ToString();
     }
 
     private static string GenerateUseCase_Create(string solutionName, string useCaseName)
     {
-        StringBuilder classBuilder = new();
-        classBuilder.AppendLine($"{nameof(GenerateUseCase_Create)} {useCaseName}");
+        StringBuilder content = new();
+        content.AppendLine($"{nameof(GenerateUseCase_Create)} {useCaseName}");
 
-        return classBuilder.ToString();
+        return content.ToString();
     }
 
     private static string GenerateUseCase_Update(string solutionName, string useCaseName)
     {
-        StringBuilder classBuilder = new();
-        classBuilder.AppendLine($"{nameof(GenerateUseCase_Update)} {useCaseName}");
+        StringBuilder content = new();
+        content.AppendLine($"{nameof(GenerateUseCase_Update)} {useCaseName}");
 
-        return classBuilder.ToString();
+        return content.ToString();
     }
 
     private static string GenerateUseCase_Delete(string solutionName, string useCaseName)
     {
-        StringBuilder classBuilder = new();
-        classBuilder.AppendLine($"{nameof(GenerateUseCase_Delete)} {useCaseName}");
+        StringBuilder content = new();
+        content.AppendLine($"{nameof(GenerateUseCase_Delete)} {useCaseName}");
 
-        return classBuilder.ToString();
+        return content.ToString();
+    }
+
+    private static string GenerateInterface(string useCaseType, string solutionName, string useCaseName)
+    {
+        StringBuilder content = new();
+
+        content.AppendLine(@$"
+            using {solutionName}.Backend.Domain.Entities;
+
+            namespace {solutionName}.Application.UseCases.{useCaseName}.{useCaseType};
+
+            public interface I{useCaseType}{useCaseName}
+            {{
+                Task<{useCaseName}?> Execute(int? id, string? xxx);
+            }}
+        ");
+
+        return content.ToString();
     }
     #endregion
 }

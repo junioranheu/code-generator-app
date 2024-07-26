@@ -29,19 +29,19 @@ public class EntityRepository
 
     private static string GenerateContent(string solutionName, string className, List<string> props, bool isFKGuid)
     {
-        StringBuilder classBuilder = new();
+        StringBuilder content = new();
 
-        classBuilder.AppendLine("using System.ComponentModel.DataAnnotations;");
-        classBuilder.AppendLine();
+        content.AppendLine("using System.ComponentModel.DataAnnotations;");
+        content.AppendLine();
 
-        classBuilder.AppendLine($"namespace {solutionName}.Domain.Entities;");
-        classBuilder.AppendLine();
+        content.AppendLine($"namespace {solutionName}.Domain.Entities;");
+        content.AppendLine();
 
-        classBuilder.AppendLine($"public sealed class {className}");
-        classBuilder.AppendLine("{");
+        content.AppendLine($"public sealed class {className}");
+        content.AppendLine("{");
 
-        classBuilder.AppendLine($"{Misc.Tab}[Key]");
-        classBuilder.AppendLine($"{Misc.Tab}public {(isFKGuid ? "Guid" : "int")} {className}Id {{ get; set; }}");
+        content.AppendLine($"{Misc.Tab}[Key]");
+        content.AppendLine($"{Misc.Tab}public {(isFKGuid ? "Guid" : "int")} {className}Id {{ get; set; }}");
 
         foreach (var prop in props)
         {
@@ -52,14 +52,14 @@ public class EntityRepository
                 string attrName = parts[0];
                 string attrType = parts[1];
 
-                classBuilder.AppendLine();
-                classBuilder.AppendLine($"{Misc.Tab}public {attrType} {attrName} {{ get; set; }}");
+                content.AppendLine();
+                content.AppendLine($"{Misc.Tab}public {attrType} {attrName} {{ get; set; }}");
             }
         }
 
-        classBuilder.AppendLine("}");
+        content.AppendLine("}");
 
-        return classBuilder.ToString();
+        return content.ToString();
     }
 
     private static List<string> GenerateEntityProps(string classDefinition)
