@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using CodeGenerator.Consts;
 using CodeGenerator.Enums;
 using CodeGenerator.Models;
 using static CodeGenerator.Utils.Fixtures.Get;
@@ -31,13 +32,14 @@ public sealed class ControllerRepository
         StringBuilder content = new();
         string parameters = GenerateParametersStringByProps(props);
         string parameterNamesOnly = GenerateParametersStringByProps(props, getBothNameAndType: false);
+        string parametersWithQuestionMark = GenerateParametersStringByProps(props, addQuestionMark: true);
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<UseCaseEnum>();
         List<string> contentPathEnums_LowerCase = contentPathEnums.Select(x => GetStringLowerFirstLetter(x)).ToList();
 
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;");
 
-        content.AppendLine($@"using AutoMapper;
-using {solutionName}.Application.UseCases.Shared;
+        content.AppendLine($@"using {solutionName}.Application.UseCases.Shared;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace {solutionName}.API.Controllers;
@@ -55,7 +57,16 @@ public class {className}Controller(");
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"private readonly IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} _REPLACE_VAR = REPLACE_VAR;");
         content.AppendLine();
 
-        content.AppendLine($@"[HttpGet(""GetAll"")]
+        content.AppendLine($@"[AllowAnonymous]
+    [HttpGet]
+    public async Task<ActionResult> Get({parametersWithQuestionMark})
+    {{
+        var result = await _get.Execute({parameterNamesOnly}) ?? throw new InvalidOperationException(""{Misc.WarningEmpty}"");
+        return Ok(_mapper.Map<{className}Output>(result));
+    }}
+
+    [AllowAnonymous]
+    [HttpGet(""GetAll"")]
     public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, {parameters})
     {{
         var result = await _getAll.Execute(pagination, {parameterNamesOnly});

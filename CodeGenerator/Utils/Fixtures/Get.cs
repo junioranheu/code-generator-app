@@ -244,7 +244,7 @@ public static class Get
     /// string[] props = { "Name string", "Age int", "Email string" };
     /// string params = GenerateParametersStringByProps(props, customText);
     /// </summary>
-    public static string GenerateParametersStringByProps(List<string> props, bool getBothNameAndType = true)
+    public static string GenerateParametersStringByProps(List<string> props, bool addQuestionMark = false, bool getBothNameAndType = true)
     {
         StringBuilder content = new();
 
@@ -259,7 +259,7 @@ public static class Get
 
                 if (getBothNameAndType)
                 {
-                    content.Append($"{attrType} {GetStringLowerFirstLetter(attrName)}, ");
+                    content.Append($"{attrType}{(addQuestionMark ? "?" : string.Empty)} {GetStringLowerFirstLetter(attrName)}, ");
                 } else
                 {
                     content.Append($"{GetStringLowerFirstLetter(attrName)}, ");
