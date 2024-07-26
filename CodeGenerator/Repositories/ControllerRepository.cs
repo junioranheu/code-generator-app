@@ -34,8 +34,8 @@ public sealed class ControllerRepository
         string parameterNamesOnly = GenerateParametersStringByProps(props, getBothNameAndType: false);
         string parametersWithQuestionMark = GenerateParametersStringByProps(props, addQuestionMark: true);
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<UseCaseEnum>();
-        List<string> contentPathEnums_LowerCase = contentPathEnums.Select(x => GetStringLowerFirstLetter(x)).ToList();
-        string paramId = GetClassId(className, isFKGuid); 
+        List<string> contentPathEnums_LowerCase = contentPathEnums.Select(x => GetStringLowerCaseFirstLetter(x)).ToList();
+        string paramId = GetClassId(className, isFKGuid, isLowerCaseFirstLetter: true); 
 
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;");
 
@@ -108,7 +108,7 @@ public class {className}Controller(");
     [HttpDelete]
     public async Task<ActionResult> Update({paramId})
     {{
-        await _delete.Execute({GetStringLowerFirstLetter(className)}Id);
+        await _delete.Execute({GetStringLowerCaseFirstLetter(className)}Id);
         return NoContent();
     }}
 }}");

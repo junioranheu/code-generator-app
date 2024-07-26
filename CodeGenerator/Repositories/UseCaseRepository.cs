@@ -33,11 +33,11 @@ public sealed class UseCaseRepository
     private static List<Content> GenerateContent(string solutionName, string context, string rootPath, string useCaseName, List<string> props, List<string> contentPathEnums, bool isFKGuid)
     {
         List<Content> finalContent = [];
+        ExtensionsEnum extension = ExtensionsEnum.CS;
+        ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.UseCase;
 
         foreach (string item in contentPathEnums)
         {
-            ExtensionsEnum extension = ExtensionsEnum.CS;
-            ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.UseCase;
             string fileName = GetFileName(useCaseName, item, isInterface: false);
             string interfaceFileName = GetFileName(useCaseName, item, isInterface: true);
 
@@ -63,9 +63,18 @@ public sealed class UseCaseRepository
                 contentDirectory,
                 extension,
                 solutionName,
-                fileFinalPath: GetFinalFilePath(solutionName, rootPath, interfaceFileName, contentDirectory, extension)
+                fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName: interfaceFileName, contentDirectory, extension)
             ));
         }
+
+        // Input;
+        finalContent.Add(new(
+            value: EntityRepository.GenerateContent(solutionName, className: useCaseName, props, isFKGuid, isInput: true),
+            contentDirectory,
+            extension,
+            solutionName,
+            fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName: $"{GetStrPlural(useCaseName)}/Shared/{useCaseName}Input", contentDirectory, extension)
+        ));
 
         return finalContent;
     }
@@ -270,7 +279,7 @@ public sealed class Update{useCaseName}({context} context) : IUpdate{useCaseName
     private static (string content, string parameters) GenerateUseCase_Delete(string solutionName, string context, string useCaseName, bool isFKGuid)
     {
         StringBuilder content = new();
-        string parameters = GetClassId(useCaseName, isFKGuid);
+        string parameters = GetClassId(useCaseName, isFKGuid, isLowerCaseFirstLetter: true);
 
         content.AppendLine($@"using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;

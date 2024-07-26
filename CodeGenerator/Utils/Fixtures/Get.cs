@@ -231,7 +231,7 @@ public static class Get
             if (parts.Length == 2)
             {
                 string attrName = parts[0];
-                string attrNameLowerCase = GetStringLowerFirstLetter(attrName);
+                string attrNameLowerCase = GetStringLowerCaseFirstLetter(attrName);
 
                 stringBuilder.AppendLine($"(string.IsNullOrEmpty({(hasInputPrefix ? "input." : string.Empty)}{attrNameLowerCase}) || x.{attrName} == {attrNameLowerCase}) {(i < max ? "&&" : string.Empty)}");
             }
@@ -259,10 +259,10 @@ public static class Get
 
                 if (getBothNameAndType)
                 {
-                    content.Append($"{attrType}{(addQuestionMark ? "?" : string.Empty)} {GetStringLowerFirstLetter(attrName)}, ");
+                    content.Append($"{attrType}{(addQuestionMark ? "?" : string.Empty)} {GetStringLowerCaseFirstLetter(attrName)}, ");
                 } else
                 {
-                    content.Append($"{GetStringLowerFirstLetter(attrName)}, ");
+                    content.Append($"{GetStringLowerCaseFirstLetter(attrName)}, ");
                 }
             }
         }
@@ -277,7 +277,7 @@ public static class Get
         return contentStr;
     }
 
-    public static string GetStringLowerFirstLetter(string input)
+    public static string GetStringLowerCaseFirstLetter(string input)
     {
         if (string.IsNullOrEmpty(input) || char.IsLower(input[0]))
         {
@@ -338,8 +338,8 @@ public static class Get
         }
     }
 
-    public static string GetClassId(string className, bool isFKGuid)
+    public static string GetClassId(string className, bool isFKGuid, bool isLowerCaseFirstLetter)
     {
-        return $"{(isFKGuid ? "Guid" : "int")} {GetStringLowerFirstLetter(className)}Id";
+        return $"{(isFKGuid ? "Guid" : "int")} {(isLowerCaseFirstLetter ? GetStringLowerCaseFirstLetter(className) : className)}Id";
     }
 }

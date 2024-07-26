@@ -4,16 +4,19 @@ using CodeGenerator.Repositories;
 using static CodeGenerator.Utils.Fixtures.Generate;
 using static CodeGenerator.Utils.Fixtures.Get;
 
+#region Input
 string INPUT_solutionName = "Anheu";
 string INPUT_contextName = "AnheuContext";
 bool INPUT_isFKGuid = true;
-string rootPath = GenerateDefaultDirectories(INPUT_solutionName);
 
 List<Model> INPUT_models =
 [
     new() { Name = "User", Props = "UserId Guid Name string Age int City string aeaaaaaa bool" },
     new() { Name = "Log", Props = "Desc string Date DateTime" }
 ];
+#endregion
+
+string rootPath = GenerateDefaultDirectories(INPUT_solutionName);
 
 foreach (var model in INPUT_models)
 {

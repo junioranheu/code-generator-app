@@ -1,7 +1,7 @@
-﻿using CodeGenerator.Consts;
+﻿using System.Text;
+using CodeGenerator.Consts;
 using CodeGenerator.Enums;
 using CodeGenerator.Models;
-using System.Text;
 using static CodeGenerator.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Repositories;
@@ -27,25 +27,34 @@ public sealed class EntityRepository
         return content;
     }
 
-    private static string GenerateContent(string solutionName, string className, List<string> props, bool isFKGuid)
+    public static string GenerateContent(string solutionName, string className, List<string> props, bool isFKGuid, bool isInput = false, bool isOutput = false)
     {
         StringBuilder content = new();
+        string paramId = GetClassId(className, isFKGuid, isLowerCaseFirstLetter: false);
+        bool isNormalEntity = (!isInput && !isOutput);
 
-        content.AppendLine("using System.ComponentModel.DataAnnotations;");
-        content.AppendLine();
+        if (isNormalEntity)
+        {
+            content.AppendLine("using System.ComponentModel.DataAnnotations;");
+            content.AppendLine();
+        }
 
         content.AppendLine($"namespace {solutionName}.Domain.Entities;");
         content.AppendLine();
 
-        content.AppendLine($"public sealed class {className}");
+        content.AppendLine($"public sealed class {className}{(isInput ? "Input" : string.Empty)}{(isOutput ? "Output" : string.Empty)}");
         content.AppendLine("{");
 
-        content.AppendLine($"{Misc.Tab}[Key]");
-        content.AppendLine($"{Misc.Tab}public {(isFKGuid ? "Guid" : "int")} {className}Id {{ get; set; }}");
+        if (isNormalEntity)
+        {
+            content.AppendLine("[Key]");
+            content.AppendLine($"public {paramId} {{ get; set; }}");
+        }
 
         GenerateCustomTextStringBuilderByProps(stringBuilder: content, props, $"{Misc.Tab}public REPLACE_VAR_TYPE REPLACE_VAR_NAME {{ get; set; }}");
+
         content.AppendLine("}");
 
-        return content.ToString();
+        return GetIndentedCode(content.ToString());
     }
 }
