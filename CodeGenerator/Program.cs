@@ -5,6 +5,7 @@ using static CodeGenerator.Utils.Fixtures.Generate;
 using static CodeGenerator.Utils.Fixtures.Get;
 
 string INPUT_solutionName = "Anheu";
+string INPUT_contextName = "AnheuContext";
 string rootPath = GenerateDefaultDirectories(INPUT_solutionName);
 
 List<Model> INPUT_models =
@@ -23,8 +24,11 @@ foreach (var model in INPUT_models)
     #endregion
 
     #region UseCase
-    List<Content> useCaseContent = UseCaseRepository.GenerateUseCase(INPUT_solutionName, rootPath, useCaseName: model.Name, props);
+    List<Content> useCaseContent = UseCaseRepository.GenerateUseCaseAndAllItsDependencies(INPUT_solutionName, INPUT_contextName, rootPath, useCaseName: model.Name, props);
     GenerateFile(contents: useCaseContent);
+    #endregion
+
+    #region Controller
     #endregion
 }
 

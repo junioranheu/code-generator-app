@@ -17,8 +17,5 @@ public enum UseCaseEnum
     Update,
 
     [Description("Delete")]
-    Delete,
-
-    [Description("Shared")]
-    Shared
+    Delete
 }
