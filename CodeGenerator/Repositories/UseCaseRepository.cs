@@ -13,9 +13,10 @@ public class UseCaseRepository
     public static List<Content> GenerateUseCase(string solutionName, string rootPath, string useCaseName, List<string> props)
     {
         List<string> contentPathEnums = GenerateFolders(solutionName, rootPath, useCaseName);
-        List<Content> content = GenerateContent(solutionName, rootPath, useCaseName, props, contentPathEnums);
+        List<Content> finalContent = GenerateContent(solutionName, rootPath, useCaseName, props, contentPathEnums);
+        GenerateDependencyInjection(finalContent, solutionName, rootPath, useCaseName, props);
 
-        return content;
+        return finalContent;
     }
 
     private static List<string> GenerateFolders(string solutionName, string rootPath, string useCaseName)
@@ -31,7 +32,7 @@ public class UseCaseRepository
 
     private static List<Content> GenerateContent(string solutionName, string rootPath, string useCaseName, List<string> props, List<string> contentPathEnums)
     {
-        List<Content> finalContents = [];
+        List<Content> finalContent = [];
 
         foreach (string item in contentPathEnums)
         {
@@ -42,27 +43,47 @@ public class UseCaseRepository
 
             (string content, string parameters) = CheckUseCaseEnumAndGenerateContent(item, solutionName, useCaseName, props);
 
+            if (string.IsNullOrEmpty(content))
+            {
+                continue;
+            }
+
             // Use Case;
-            finalContents.Add(new(
+            finalContent.Add(new(
                 value: content,
                 contentDirectory,
                 extension,
                 solutionName,
-                fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName, contentDirectory: contentDirectory, extension)
+                fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName, contentDirectory, extension)
             ));
 
             // Interface;
-            finalContents.Add(new(
+            finalContent.Add(new(
                 value: GenerateInterface(item, solutionName, useCaseName, props, parameters),
                 contentDirectory,
                 extension,
                 solutionName,
-                fileFinalPath: GetFinalFilePath(solutionName, rootPath, interfaceFileName, contentDirectory: contentDirectory, extension)
+                fileFinalPath: GetFinalFilePath(solutionName, rootPath, interfaceFileName, contentDirectory, extension)
             ));
         }
 
-        return finalContents;
+        return finalContent;
     }
+
+    private static void GenerateDependencyInjection(List<Content> finalContent, string solutionName, string rootPath, string useCaseName, List<string> props)
+    {
+        ExtensionsEnum extension = ExtensionsEnum.CS;
+        ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.UseCase;
+
+        finalContent.Add(new(
+            value: GenerateDependencyInjection(solutionName, useCaseName, props),
+            contentDirectory,
+            extension,
+            solutionName,
+            fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName: $"{GetStrPlural(useCaseName)}/DependencyInjection", contentDirectory, extension)
+        ));
+    }
+
     #endregion
 
     #region UseCases
@@ -188,6 +209,9 @@ return await PagedQuery.Execute(query, pagination);
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Delete))
         {
             return GenerateUseCase_Delete(solutionName, useCaseName);
+        } else if (useCaseType == GetEnumDesc(UseCaseEnum.Shared))
+        {
+            return (string.Empty, string.Empty);
         }
 
         throw new NotImplementedException();
@@ -197,13 +221,37 @@ return await PagedQuery.Execute(query, pagination);
     {
         StringBuilder content = new();
 
-        content.AppendLine(@$"using {solutionName}.Backend.Domain.Entities;
+        content.AppendLine(@$"using {solutionName}.Domain.Entities;
 
 namespace {solutionName}.Application.UseCases.{useCaseName}.{useCaseType};
 
 public interface I{useCaseType}{useCaseName}
 {{
     Task<{useCaseName}?> Execute({parameters});
+}}");
+
+        return GetIndentedCode(content.ToString());
+    }
+
+    private static string GenerateDependencyInjection(string solutionName, string useCaseName, List<string> props)
+    {
+        StringBuilder content = new();
+        string usings = $"using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.AAAAAAAAAA;";
+
+        content.AppendLine(@$"{usings}
+using Microsoft.Extensions.DependencyInjection;
+
+namespace {solutionName}.Application.UseCases.{useCaseName};
+
+public static class DependencyInjection
+{{
+    public static IServiceCollection Add{GetStrPlural(useCaseName)}Application(this IServiceCollection services)
+    {{
+        services.AddScoped<IGetOcorrencia, GetOcorrencia>();
+        services.AddScoped<IGetAllOcorrencia, GetAllOcorrencia>();
+
+        return services;
+    }}
 }}");
 
         return GetIndentedCode(content.ToString());
