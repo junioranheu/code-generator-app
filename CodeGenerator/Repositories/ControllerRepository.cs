@@ -32,26 +32,30 @@ public sealed class ControllerRepository
         string parameters = GenerateParametersStringByProps(props);
         string parameterNamesOnly = GenerateParametersStringByProps(props, getBothNameAndType: false);
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<UseCaseEnum>();
-
-        content.AppendLine($@"using AutoMapper;");
+        List<string> contentPathEnums_LowerCase = contentPathEnums.Select(x => GetStringLowerFirstLetter(x)).ToList();
 
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;");
 
-        content.AppendLine($@"using {solutionName}.Application.UseCases.Shared;
+        content.AppendLine($@"using AutoMapper;
+using {solutionName}.Application.UseCases.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace {solutionName}.API.Controllers;
 
 [ApiController]
 [Route(""api/[controller]"")]
-public class {className}Controller(
-IMapper mapper,
-IGetAll{className} getAll) : BaseController<{className}Controller>
-{{
-    private readonly IMapper _mapper = mapper;
-    private readonly IGetAll{className} _getAll = getAll;
+public class {className}Controller(");
 
-    [HttpGet(""GetAll"")]
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} REPLACE_VAR,");
+
+        content.AppendLine($@"IMapper mapper) : BaseController<{className}Controller>
+{{
+    private readonly IMapper _mapper = mapper;");
+
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"private readonly IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} _REPLACE_VAR = REPLACE_VAR;");
+        content.AppendLine();
+
+        content.AppendLine($@"[HttpGet(""GetAll"")]
     public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, {parameters})
     {{
         var result = await _getAll.Execute(pagination, {parameterNamesOnly});

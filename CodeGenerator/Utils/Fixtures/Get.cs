@@ -333,7 +333,7 @@ public static class Get
     {
         foreach (var prop in props)
         {
-            string formattedText = customText.Replace("REPLACE_VAR", prop);
+            string formattedText = customText.Replace("REPLACE_VAR_CAPITALIZEDFIRSTLETTER", GetStrCapitalizedFirstLetter(prop)).Replace("REPLACE_VAR", prop);
             stringBuilder.AppendLine(formattedText);
         }
     }
