@@ -16,7 +16,7 @@ public sealed class ControllerRepository
         List<Content> content =
         [
             new(
-                value: GenerateContent(solutionName, className, props),
+                value: GenerateContent(solutionName, className, props, isFKGuid),
                 contentDirectory,
                 extension,
                 solutionName,
@@ -27,7 +27,7 @@ public sealed class ControllerRepository
         return content;
     }
 
-    private static string GenerateContent(string solutionName, string className, List<string> props)
+    private static string GenerateContent(string solutionName, string className, List<string> props, bool isFKGuid)
     {
         StringBuilder content = new();
         string parameters = GenerateParametersStringByProps(props);
@@ -35,6 +35,7 @@ public sealed class ControllerRepository
         string parametersWithQuestionMark = GenerateParametersStringByProps(props, addQuestionMark: true);
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<UseCaseEnum>();
         List<string> contentPathEnums_LowerCase = contentPathEnums.Select(x => GetStringLowerFirstLetter(x)).ToList();
+        string paramId = GetClassId(className, isFKGuid); 
 
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;");
 
@@ -90,6 +91,24 @@ public class {className}Controller(");
         var list = _mapper.Map<List<{className}>>(input);
         await _createRange.Execute(list);
 
+        return NoContent();
+    }}
+
+    [AllowAnonymous]
+    [HttpPut]
+    public async Task<ActionResult> Update({className}Input input)
+    {{
+        var item = _mapper.Map<{className}>(input);
+        await _update.Execute(item);
+
+        return NoContent();
+    }}
+
+    [AllowAnonymous]
+    [HttpDelete]
+    public async Task<ActionResult> Update({paramId})
+    {{
+        await _delete.Execute({GetStringLowerFirstLetter(className)}Id);
         return NoContent();
     }}
 }}");

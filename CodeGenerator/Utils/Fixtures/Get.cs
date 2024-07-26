@@ -84,7 +84,7 @@ public static class Get
             }
         }
 
-        return [.. descriptions.OrderBy(d => d)];
+        return [..descriptions.OrderBy(d => d)];
     }
 
     public static string GetStrPlural(string singular, bool isEnglish = true)
@@ -197,7 +197,7 @@ public static class Get
     /// string[] props = { "Name string", "Age int", "Email string" };
     /// GenerateCustomTextStringBuilderByProps(stringBuilder, props, $"This is a attrName property named attrType.");
     /// </summary>
-    public static void GenerateCustomTextStringBuilderByProps(StringBuilder stringBuilder, List<string> props, string customText, bool isLowAttrName = false) 
+    public static void GenerateCustomTextStringBuilderByProps(StringBuilder stringBuilder, List<string> props, string customText, bool isLowAttrName = false)
     {
         foreach (var prop in props)
         {
@@ -336,5 +336,10 @@ public static class Get
             string formattedText = customText.Replace("REPLACE_VAR_CAPITALIZEDFIRSTLETTER", GetStrCapitalizedFirstLetter(prop)).Replace("REPLACE_VAR", prop);
             stringBuilder.AppendLine(formattedText);
         }
+    }
+
+    public static string GetClassId(string className, bool isFKGuid)
+    {
+        return $"{(isFKGuid ? "Guid" : "int")} {GetStringLowerFirstLetter(className)}Id";
     }
 }

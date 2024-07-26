@@ -270,7 +270,7 @@ public sealed class Update{useCaseName}({context} context) : IUpdate{useCaseName
     private static (string content, string parameters) GenerateUseCase_Delete(string solutionName, string context, string useCaseName, bool isFKGuid)
     {
         StringBuilder content = new();
-        string parameters = $"{(isFKGuid ? "Guid" : "int")} {useCaseName}Id";
+        string parameters = GetClassId(useCaseName, isFKGuid);
 
         content.AppendLine($@"using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
