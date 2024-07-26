@@ -99,21 +99,21 @@ namespace {solutionName}.Application.UseCases.{useCaseName}.Get;
 
 public sealed class Get{useCaseName}({context} context) : IGet{useCaseName}
 {{
-private readonly {context} _context = context;
+    private readonly {context} _context = context;
 
-public async Task<{useCaseName}?> Execute({parameters})
-{{
-var linq = await _context.{GetStrPlural(useCaseName)}.
-Where(x =>
-x.Status == true &&"
-);
+    public async Task<{useCaseName}?> Execute({parameters})
+    {{
+        var linq = await _context.{GetStrPlural(useCaseName)}.
+        Where(x =>
+        x.Status == true &&"
+    );
 
-GenerateWhereQueriesByProps(content, props);
+        GenerateWhereQueriesByProps(content, props);
 
-content.AppendLine($@").AsNoTracking().FirstOrDefaultAsync();
+        content.AppendLine($@").AsNoTracking().FirstOrDefaultAsync();
 
-return linq;
-}}
+        return linq;
+    }}
 }}");
 
         return (GetIndentedCode(content.ToString()), parameters);
@@ -134,22 +134,22 @@ namespace {solutionName}.Application.UseCases.{useCaseName}.GetAll;
 
 public sealed class GetAll{useCaseName}({context} context) : IGetAll{useCaseName}
 {{
-private readonly {context} _context = context;
+    private readonly {context} _context = context;
 
-public async Task<(IEnumerable<{useCaseName}> linq, int count)> Execute({parameters})
-{{
-var linq = await _context.{GetStrPlural(useCaseName)}.
-OrderBy(x => x.xxx).
-Where(x =>
-x.Status == true &&"
-);
+    public async Task<(IEnumerable<{useCaseName}> linq, int count)> Execute({parameters})
+    {{
+        var linq = await _context.{GetStrPlural(useCaseName)}.
+        OrderBy(x => x.xxx).
+        Where(x =>
+        x.Status == true &&"
+        );
 
         GenerateWhereQueriesByProps(content, props, hasInputPrefix: true);
 
         content.AppendLine($@").AsNoTracking();
 
-return await PagedQuery.Execute(query, pagination);
-}}
+        return await PagedQuery.Execute(query, pagination);
+    }}
 }}");
 
         return (GetIndentedCode(content.ToString()), parameters);
@@ -167,13 +167,71 @@ namespace {solutionName}.Application.UseCases.{useCaseName}.Create;
 
 public sealed class Create{useCaseName}({context} context) : ICreate{useCaseName}
 {{
-private readonly {context} _context = context;
+    private readonly {context} _context = context;
 
-public async Task Execute({parameters})
+    public async Task Execute({parameters})
+    {{
+        await _context.AddAsync(input);
+        await _context.SaveChangesAsync();
+    }}
+}}");
+
+        return (GetIndentedCode(content.ToString()), parameters);
+    }
+
+    private static (string content, string parameters) GenerateUseCase_CreateRange(string solutionName, string context, string useCaseName)
+    {
+        StringBuilder content = new();
+        string parameters = $"List<{useCaseName}> input";
+
+        content.AppendLine($@"using {solutionName}.Domain.Entities;
+using {solutionName}.Infrastructure.Data;
+
+namespace {solutionName}.Application.UseCases.{useCaseName}.CreateRange;
+
+public sealed class CreateRange{useCaseName}({context} context) : ICreateRange{useCaseName}
 {{
-    await _context.AddAsync(input);
-    await _context.SaveChangesAsync();
-}}
+    private readonly {context} _context = context;
+
+    public async Task Execute({parameters})
+    {{
+        if (input?.Count < 1 || input is null)
+        {{
+            return;
+        }}
+
+        var linqPrevious = await GetAllPrevious();
+
+        await _context.AddRangeAsync(input);
+        await _context.SaveChangesAsync();
+
+        await UpdateStatus(linqPrevious);
+    }}
+
+    private async Task<List<{useCaseName}>> GetAllPrevious()
+    {{
+        var linq = await _context.{GetStrPlural(useCaseName)}.
+                   Where(x => x.Status == true).
+                   AsNoTracking().ToListAsync();
+
+        return linq;
+    }}
+
+    private async Task UpdateStatus(List<{useCaseName}> linqPrevious)
+    {{
+        if (linqPrevious?.Count == 0)
+        {{
+            return;
+        }}
+
+        foreach (var l in linqPrevious)
+        {{
+            l.Status = false;
+        }}
+
+        _context.UpdateRange(linqPrevious);
+        await _context.SaveChangesAsync();
+    }}
 }}");
 
         return (GetIndentedCode(content.ToString()), parameters);
@@ -191,19 +249,19 @@ namespace {solutionName}.Application.UseCases.{useCaseName}.Update;
 
 public sealed class Update{useCaseName}({context} context) : IUpdate{useCaseName}
 {{
-private readonly {context} _context = context;
+    private readonly {context} _context = context;
 
-public async Task Execute({parameters})
-{{
-    var entity = await _context.{GetStrPlural(useCaseName)}.FindAsync(input.{useCaseName}Id);
+    public async Task Execute({parameters})
+    {{
+        var entity = await _context.{GetStrPlural(useCaseName)}.FindAsync(input.{useCaseName}Id);
 
-    if (entity is null) {{
-        return;
+        if (entity is null) {{
+            return;
+        }}
+
+        _context.Update(input);
+        await _context.SaveChangesAsync();
     }}
-
-    _context.Update(input);
-    await _context.SaveChangesAsync();
-}}
 }}");
 
         return (GetIndentedCode(content.ToString()), parameters);
@@ -221,19 +279,19 @@ namespace {solutionName}.Application.UseCases.{useCaseName}.Delete;
 
 public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName}
 {{
-private readonly {context} _context = context;
+    private readonly {context} _context = context;
 
-public async Task Execute({parameters})
-{{
-    var entity = await _context.{GetStrPlural(useCaseName)}.FindAsync({useCaseName}Id);
+    public async Task Execute({parameters})
+    {{
+        var entity = await _context.{GetStrPlural(useCaseName)}.FindAsync({useCaseName}Id);
 
-    if (entity is null) {{
-        return;
+        if (entity is null) {{
+            return;
+        }}
+
+        _context.Remove(input);
+        await _context.SaveChangesAsync();
     }}
-
-    _context.Remove(input);
-    await _context.SaveChangesAsync();
-}}
 }}");
 
         return (GetIndentedCode(content.ToString()), parameters);
@@ -260,6 +318,10 @@ public async Task Execute({parameters})
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Create))
         {
             return GenerateUseCase_Create(solutionName, context, useCaseName);
+        }
+        else if (useCaseType == GetEnumDesc(UseCaseEnum.CreateRange))
+        {
+            return GenerateUseCase_CreateRange(solutionName, context, useCaseName);
         }
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Update))
         {

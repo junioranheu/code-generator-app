@@ -13,6 +13,9 @@ public enum UseCaseEnum
     [Description("Create")]
     Create,
 
+    [Description("CreateRange")]
+    CreateRange,
+
     [Description("Update")]
     Update,
 

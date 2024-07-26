@@ -72,6 +72,26 @@ public class {className}Controller(");
         var result = await _getAll.Execute(pagination, {parameterNamesOnly});
         return Ok(_mapper.Map<IEnumerable<{className}Output>>(result));
     }}
+
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<ActionResult> Create({className}Input input)
+    {{
+        var item = _mapper.Map<{className}>(input);
+        await _create.Execute(item);
+
+        return NoContent();
+    }}
+
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<ActionResult> CreateRange(List<{className}Input> input)
+    {{
+        var list = _mapper.Map<List<{className}>>(input);
+        await _createRange.Execute(list);
+
+        return NoContent();
+    }}
 }}");
 
         return GetIndentedCode(content.ToString());
