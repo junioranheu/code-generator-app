@@ -14,7 +14,7 @@ public class UseCaseRepository
     {
         List<string> contentPathEnums = GenerateFolders(solutionName, rootPath, useCaseName);
         List<Content> finalContent = GenerateContent(solutionName, rootPath, useCaseName, props, contentPathEnums);
-        GenerateDependencyInjection(finalContent, solutionName, rootPath, useCaseName, props);
+        GenerateDependencyInjection(finalContent, solutionName, rootPath, useCaseName, contentPathEnums);
 
         return finalContent;
     }
@@ -70,13 +70,13 @@ public class UseCaseRepository
         return finalContent;
     }
 
-    private static void GenerateDependencyInjection(List<Content> finalContent, string solutionName, string rootPath, string useCaseName, List<string> props)
+    private static void GenerateDependencyInjection(List<Content> finalContent, string solutionName, string rootPath, string useCaseName, List<string> contentPathEnums)
     {
         ExtensionsEnum extension = ExtensionsEnum.CS;
         ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.UseCase;
 
         finalContent.Add(new(
-            value: GenerateDependencyInjection(solutionName, useCaseName, props),
+            value: GenerateDependencyInjection(solutionName, useCaseName, contentPathEnums),
             contentDirectory,
             extension,
             solutionName,
@@ -233,23 +233,24 @@ public interface I{useCaseType}{useCaseName}
         return GetIndentedCode(content.ToString());
     }
 
-    private static string GenerateDependencyInjection(string solutionName, string useCaseName, List<string> props)
+    private static string GenerateDependencyInjection(string solutionName, string useCaseName, List<string> contentPathEnums)
     {
         StringBuilder content = new();
-        string usings = $"using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.AAAAAAAAAA;";
 
-        content.AppendLine(@$"{usings}
-using Microsoft.Extensions.DependencyInjection;
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.REPLACE_VAR;");
+
+        content.AppendLine(@$"using Microsoft.Extensions.DependencyInjection;
 
 namespace {solutionName}.Application.UseCases.{useCaseName};
 
 public static class DependencyInjection
 {{
     public static IServiceCollection Add{GetStrPlural(useCaseName)}Application(this IServiceCollection services)
-    {{
-        services.AddScoped<IGetOcorrencia, GetOcorrencia>();
-        services.AddScoped<IGetAllOcorrencia, GetAllOcorrencia>();
+    {{");
 
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"services.AddScoped<IREPLACE_VAR{useCaseName}, REPLACE_VAR{useCaseName}>();");
+
+        content.AppendLine($@"
         return services;
     }}
 }}");

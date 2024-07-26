@@ -197,7 +197,7 @@ public static class Get
     /// string[] props = { "Name string", "Age int", "Email string" };
     /// GenerateCustomTextStringBuilderByProps(stringBuilder, props, $"This is a attrName property named attrType.");
     /// </summary>
-    public static StringBuilder GenerateCustomTextStringBuilderByProps(StringBuilder stringBuilder, List<string> props, string customText, bool isLowAttrName = false) 
+    public static void GenerateCustomTextStringBuilderByProps(StringBuilder stringBuilder, List<string> props, string customText, bool isLowAttrName = false) 
     {
         foreach (var prop in props)
         {
@@ -208,12 +208,10 @@ public static class Get
                 string attrName = parts[0];
                 string attrType = parts[1];
 
-                string formattedText = customText.Replace("attrName", attrName).Replace("attrType", attrType);
+                string formattedText = customText.Replace("REPLACE_VAR_NAME", attrName).Replace("REPLACE_VAR_TYPE", attrType);
                 stringBuilder.AppendLine(formattedText);
             }
         }
-
-        return stringBuilder;
     }
 
     /// <summary>
@@ -319,5 +317,18 @@ public static class Get
         }
 
         return indentedCode.ToString();
+    }
+
+    /// <summary>
+    /// string[] props = { "Name", "Age", "Email" };
+    /// GenerateCustomTextStringBuilderByListOfStrings(stringBuilder, props, $"There you go: REPLACE_VAR.");
+    /// </summary>
+    public static void GenerateCustomTextStringBuilderByListOfStrings(StringBuilder stringBuilder, List<string> props, string customText)
+    {
+        foreach (var prop in props)
+        {
+            string formattedText = customText.Replace("REPLACE_VAR", prop);
+            stringBuilder.AppendLine(formattedText);
+        }
     }
 }
