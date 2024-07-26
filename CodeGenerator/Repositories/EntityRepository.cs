@@ -6,7 +6,7 @@ using static CodeGenerator.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Repositories;
 
-public class EntityRepository
+public sealed class EntityRepository
 {
     public static List<Content> GenerateEntity(string solutionName, string rootPath, string className, List<string> props, bool isFKGuid = true)
     {

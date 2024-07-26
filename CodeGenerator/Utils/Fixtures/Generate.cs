@@ -81,7 +81,7 @@ public static class Generate
         GetLog($"Folder {GetStringAfterText(folderPath, $"{solutionName}.")} has been successfully generated");
     }
 
-    public static void GenerateFile(List<Content> contents)
+    public static void GenerateFiles(List<Content> contents)
     {
         foreach (var content in contents)
         {

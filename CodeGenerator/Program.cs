@@ -20,15 +20,17 @@ foreach (var model in INPUT_models)
 
     #region Entity
     List<Content> entityContent = EntityRepository.GenerateEntity(INPUT_solutionName, rootPath, className: model.Name, props );
-    GenerateFile(contents: entityContent);
+    GenerateFiles(contents: entityContent);
     #endregion
 
     #region UseCase
     List<Content> useCaseContent = UseCaseRepository.GenerateUseCaseAndAllItsDependencies(INPUT_solutionName, INPUT_contextName, rootPath, useCaseName: model.Name, props);
-    GenerateFile(contents: useCaseContent);
+    GenerateFiles(contents: useCaseContent);
     #endregion
 
     #region Controller
+    List<Content> controllerContent = ControllerRepository.GenerateController(INPUT_solutionName, rootPath, className: model.Name, props);
+    GenerateFiles(contents: controllerContent);
     #endregion
 }
 

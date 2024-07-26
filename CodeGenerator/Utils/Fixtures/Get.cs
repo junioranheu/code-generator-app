@@ -244,7 +244,7 @@ public static class Get
     /// string[] props = { "Name string", "Age int", "Email string" };
     /// string params = GenerateParametersStringByProps(props, customText);
     /// </summary>
-    public static string GenerateParametersStringByProps(List<string> props)
+    public static string GenerateParametersStringByProps(List<string> props, bool getBothNameAndType = true)
     {
         StringBuilder content = new();
 
@@ -257,7 +257,13 @@ public static class Get
                 string attrName = parts[0];
                 string attrType = parts[1];
 
-                content.Append($"{attrType} {GetStringLowerFirstLetter(attrName)}, ");
+                if (getBothNameAndType)
+                {
+                    content.Append($"{attrType} {GetStringLowerFirstLetter(attrName)}, ");
+                } else
+                {
+                    content.Append($"{GetStringLowerFirstLetter(attrName)}, ");
+                }
             }
         }
 

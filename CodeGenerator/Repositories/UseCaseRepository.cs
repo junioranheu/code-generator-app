@@ -6,7 +6,7 @@ using static CodeGenerator.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Repositories;
 
-public class UseCaseRepository
+public sealed class UseCaseRepository
 {
     #region Main
     public static List<Content> GenerateUseCaseAndAllItsDependencies(string solutionName, string context, string rootPath, string useCaseName, List<string> props)
@@ -83,7 +83,6 @@ public class UseCaseRepository
             fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName: $"{GetStrPlural(useCaseName)}/DependencyInjection", contentDirectory, extension)
         ));
     }
-
     #endregion
 
     #region UseCases
