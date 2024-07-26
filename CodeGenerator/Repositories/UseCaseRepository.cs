@@ -9,10 +9,10 @@ namespace CodeGenerator.Repositories;
 public sealed class UseCaseRepository
 {
     #region Main
-    public static List<Content> GenerateUseCaseAndAllItsDependencies(string solutionName, string context, string rootPath, string useCaseName, List<string> props)
+    public static List<Content> GenerateUseCaseAndAllItsDependencies(string solutionName, string context, string rootPath, string useCaseName, List<string> props, bool isFKGuid)
     {
         List<string> contentPathEnums = GenerateFolders(solutionName, rootPath, useCaseName);
-        List<Content> finalContent = GenerateContent(solutionName, context, rootPath, useCaseName, props, contentPathEnums);
+        List<Content> finalContent = GenerateContent(solutionName, context, rootPath, useCaseName, props, contentPathEnums, isFKGuid);
         GenerateDependencyInjection(finalContent, solutionName, rootPath, useCaseName, contentPathEnums);
 
         return finalContent;
@@ -30,7 +30,7 @@ public sealed class UseCaseRepository
         return contentPathEnums;
     }
 
-    private static List<Content> GenerateContent(string solutionName, string context, string rootPath, string useCaseName, List<string> props, List<string> contentPathEnums)
+    private static List<Content> GenerateContent(string solutionName, string context, string rootPath, string useCaseName, List<string> props, List<string> contentPathEnums, bool isFKGuid)
     {
         List<Content> finalContent = [];
 
@@ -41,7 +41,7 @@ public sealed class UseCaseRepository
             string fileName = GetFileName(useCaseName, item, isInterface: false);
             string interfaceFileName = GetFileName(useCaseName, item, isInterface: true);
 
-            (string content, string parameters) = CheckUseCaseEnumAndGenerateContent(item, solutionName, context, useCaseName, props);
+            (string content, string parameters) = CheckUseCaseEnumAndGenerateContent(item, solutionName, context, useCaseName, props, isFKGuid);
 
             if (string.IsNullOrEmpty(content))
             {
@@ -182,17 +182,61 @@ public async Task Execute({parameters})
     private static (string content, string parameters) GenerateUseCase_Update(string solutionName, string context, string useCaseName)
     {
         StringBuilder content = new();
-        content.AppendLine($"{nameof(GenerateUseCase_Update)} {useCaseName}");
+        string parameters = $"{useCaseName} input";
 
-        return (content.ToString(), "");
+        content.AppendLine($@"using {solutionName}.Domain.Entities;
+using {solutionName}.Infrastructure.Data;
+
+namespace {solutionName}.Application.UseCases.{useCaseName}.Update;
+
+public sealed class Update{useCaseName}({context} context) : IUpdate{useCaseName}
+{{
+private readonly {context} _context = context;
+
+public async Task Execute({parameters})
+{{
+    var entity = await _context.{GetStrPlural(useCaseName)}.FindAsync(input.{useCaseName}Id);
+
+    if (entity is null) {{
+        return;
+    }}
+
+    _context.Update(input);
+    await _context.SaveChangesAsync();
+}}
+}}");
+
+        return (GetIndentedCode(content.ToString()), parameters);
     }
 
-    private static (string content, string parameters) GenerateUseCase_Delete(string solutionName, string context, string useCaseName)
+    private static (string content, string parameters) GenerateUseCase_Delete(string solutionName, string context, string useCaseName, bool isFKGuid)
     {
         StringBuilder content = new();
-        content.AppendLine($"{nameof(GenerateUseCase_Delete)} {useCaseName}");
+        string parameters = $"{(isFKGuid ? "Guid" : "int")} {useCaseName}Id";
 
-        return (content.ToString(), "");
+        content.AppendLine($@"using {solutionName}.Domain.Entities;
+using {solutionName}.Infrastructure.Data;
+
+namespace {solutionName}.Application.UseCases.{useCaseName}.Delete;
+
+public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName}
+{{
+private readonly {context} _context = context;
+
+public async Task Execute({parameters})
+{{
+    var entity = await _context.{GetStrPlural(useCaseName)}.FindAsync({useCaseName}Id);
+
+    if (entity is null) {{
+        return;
+    }}
+
+    _context.Remove(input);
+    await _context.SaveChangesAsync();
+}}
+}}");
+
+        return (GetIndentedCode(content.ToString()), parameters);
     }
     #endregion
 
@@ -203,7 +247,7 @@ public async Task Execute({parameters})
         return Path.Combine(GetStrPlural(useCaseName), item, $"{(isInterface ? "I" : string.Empty)}{item}{useCaseName}");
     }
 
-    private static (string content, string parameters) CheckUseCaseEnumAndGenerateContent(string useCaseType, string solutionName, string context, string useCaseName, List<string> props)
+    private static (string content, string parameters) CheckUseCaseEnumAndGenerateContent(string useCaseType, string solutionName, string context, string useCaseName, List<string> props, bool isFKGuid)
     {
         if (useCaseType == GetEnumDesc(UseCaseEnum.Get))
         {
@@ -223,7 +267,7 @@ public async Task Execute({parameters})
         }
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Delete))
         {
-            return GenerateUseCase_Delete(solutionName, context, useCaseName);
+            return GenerateUseCase_Delete(solutionName, context, useCaseName, isFKGuid);
         } 
 
         throw new NotImplementedException();

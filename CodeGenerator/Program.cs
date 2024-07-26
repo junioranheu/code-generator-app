@@ -6,6 +6,7 @@ using static CodeGenerator.Utils.Fixtures.Get;
 
 string INPUT_solutionName = "Anheu";
 string INPUT_contextName = "AnheuContext";
+bool INPUT_isFKGuid = true;
 string rootPath = GenerateDefaultDirectories(INPUT_solutionName);
 
 List<Model> INPUT_models =
@@ -19,17 +20,17 @@ foreach (var model in INPUT_models)
     List<string> props = GetEntityPropsSplitted(model.Props);
 
     #region Entity
-    List<Content> entityContent = EntityRepository.GenerateEntity(INPUT_solutionName, rootPath, className: model.Name, props );
+    List<Content> entityContent = EntityRepository.GenerateEntity(INPUT_solutionName, rootPath, className: model.Name, props, INPUT_isFKGuid);
     GenerateFiles(contents: entityContent);
     #endregion
 
     #region UseCase
-    List<Content> useCaseContent = UseCaseRepository.GenerateUseCaseAndAllItsDependencies(INPUT_solutionName, INPUT_contextName, rootPath, useCaseName: model.Name, props);
+    List<Content> useCaseContent = UseCaseRepository.GenerateUseCaseAndAllItsDependencies(INPUT_solutionName, INPUT_contextName, rootPath, useCaseName: model.Name, props, INPUT_isFKGuid);
     GenerateFiles(contents: useCaseContent);
     #endregion
 
     #region Controller
-    List<Content> controllerContent = ControllerRepository.GenerateController(INPUT_solutionName, rootPath, className: model.Name, props);
+    List<Content> controllerContent = ControllerRepository.GenerateController(INPUT_solutionName, rootPath, className: model.Name, props, INPUT_isFKGuid);
     GenerateFiles(contents: controllerContent);
     #endregion
 }

@@ -7,7 +7,7 @@ namespace CodeGenerator.Repositories;
 
 public sealed class ControllerRepository
 {
-    public static List<Content> GenerateController(string solutionName, string rootPath, string className, List<string> props)
+    public static List<Content> GenerateController(string solutionName, string rootPath, string className, List<string> props, bool isFKGuid)
     {
         ExtensionsEnum extension = ExtensionsEnum.CS;
         ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.Controller;
