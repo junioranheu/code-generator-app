@@ -8,10 +8,10 @@ namespace CodeGenerator.Repositories;
 
 public class UseCaseRepository
 {
-    public static List<Content> GenerateUseCase(string solutionName, string rootPath, string useCaseName)
+    public static List<Content> GenerateUseCase(string solutionName, string rootPath, string useCaseName, List<string> props)
     {
         List<string> contentPathEnums = GenerateFolders(solutionName, rootPath, useCaseName);
-        List<Content> content = GenerateContent(solutionName, rootPath, useCaseName, contentPathEnums);
+        List<Content> content = GenerateContent(solutionName, rootPath, useCaseName, props, contentPathEnums);
 
         return content;
     }
@@ -27,7 +27,7 @@ public class UseCaseRepository
         return contentPathEnums;
     }
 
-    private static List<Content> GenerateContent(string solutionName, string rootPath, string useCaseName, List<string> contentPathEnums)
+    private static List<Content> GenerateContent(string solutionName, string rootPath, string useCaseName, List<string> props, List<string> contentPathEnums)
     {
         List<Content> content = [];
 
@@ -40,7 +40,7 @@ public class UseCaseRepository
 
             // Use Case;
             content.Add(new(
-                value: CheckUseCaseEnumAndGenerateContent(item, solutionName, useCaseName),
+                value: CheckUseCaseEnumAndGenerateContent(item, solutionName, useCaseName, props),
                 contentDirectory,
                 extension,
                 solutionName,
@@ -49,7 +49,7 @@ public class UseCaseRepository
 
             // Interface;
             content.Add(new(
-                value: GenerateInterface(item, solutionName, useCaseName),
+                value: GenerateInterface(item, solutionName, useCaseName, props),
                 contentDirectory,
                 extension,
                 solutionName,
@@ -65,34 +65,34 @@ public class UseCaseRepository
         return Path.Combine(GetStrPlural(useCaseName), item, $"{(isInterface ? "I" : string.Empty)}{item}{useCaseName}");
     }
 
-    private static string CheckUseCaseEnumAndGenerateContent(string useCaseType, string solutionName, string useCaseName)
+    private static string CheckUseCaseEnumAndGenerateContent(string useCaseType, string solutionName, string useCaseName, List<string> props)
     {
         if (useCaseType == GetEnumDesc(UseCaseEnum.Get))
         {
-            return GenerateUseCase_Get(solutionName, useCaseName);
+            return GenerateUseCase_Get(solutionName, useCaseName, props);
         }
         else if (useCaseType == GetEnumDesc(UseCaseEnum.GetAll))
         {
-            return GenerateUseCase_GetAll(solutionName, useCaseName);
+            return GenerateUseCase_GetAll(solutionName, useCaseName, props);
         }
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Create))
         {
-            return GenerateUseCase_Create(solutionName, useCaseName);
+            return GenerateUseCase_Create(solutionName, useCaseName, props);
         }
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Update))
         {
-            return GenerateUseCase_Update(solutionName, useCaseName);
+            return GenerateUseCase_Update(solutionName, useCaseName, props);
         }
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Delete))
         {
-            return GenerateUseCase_Delete(solutionName, useCaseName);
+            return GenerateUseCase_Delete(solutionName, useCaseName, props);
         }
 
         throw new NotImplementedException();
     }
 
     #region UseCases
-    private static string GenerateUseCase_Get(string solutionName, string useCaseName)
+    private static string GenerateUseCase_Get(string solutionName, string useCaseName, List<string> props)
     {
         StringBuilder content = new();
 
@@ -125,7 +125,7 @@ public class UseCaseRepository
         return content.ToString();
     }
 
-    private static string GenerateUseCase_GetAll(string solutionName, string useCaseName)
+    private static string GenerateUseCase_GetAll(string solutionName, string useCaseName, List<string> props)
     {
         StringBuilder content = new();
         content.AppendLine($"{nameof(GenerateUseCase_GetAll)} {useCaseName}");
@@ -133,7 +133,7 @@ public class UseCaseRepository
         return content.ToString();
     }
 
-    private static string GenerateUseCase_Create(string solutionName, string useCaseName)
+    private static string GenerateUseCase_Create(string solutionName, string useCaseName, List<string> props)
     {
         StringBuilder content = new();
         content.AppendLine($"{nameof(GenerateUseCase_Create)} {useCaseName}");
@@ -141,7 +141,7 @@ public class UseCaseRepository
         return content.ToString();
     }
 
-    private static string GenerateUseCase_Update(string solutionName, string useCaseName)
+    private static string GenerateUseCase_Update(string solutionName, string useCaseName, List<string> props)
     {
         StringBuilder content = new();
         content.AppendLine($"{nameof(GenerateUseCase_Update)} {useCaseName}");
@@ -149,7 +149,7 @@ public class UseCaseRepository
         return content.ToString();
     }
 
-    private static string GenerateUseCase_Delete(string solutionName, string useCaseName)
+    private static string GenerateUseCase_Delete(string solutionName, string useCaseName, List<string> props)
     {
         StringBuilder content = new();
         content.AppendLine($"{nameof(GenerateUseCase_Delete)} {useCaseName}");
@@ -157,7 +157,7 @@ public class UseCaseRepository
         return content.ToString();
     }
 
-    private static string GenerateInterface(string useCaseType, string solutionName, string useCaseName)
+    private static string GenerateInterface(string useCaseType, string solutionName, string useCaseName, List<string> props)
     {
         StringBuilder content = new();
 

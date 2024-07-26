@@ -15,13 +15,15 @@ List<Model> INPUT_models =
 
 foreach (var model in INPUT_models)
 {
+    List<string> props = GetEntityPropsSplitted(model.Props);
+
     #region Entity
-    List<Content> entityContent = EntityRepository.GenerateEntity(INPUT_solutionName, rootPath, className: model.Name, props: model.Props );
+    List<Content> entityContent = EntityRepository.GenerateEntity(INPUT_solutionName, rootPath, className: model.Name, props );
     GenerateFile(contents: entityContent);
     #endregion
 
     #region UseCase
-    List<Content> useCaseContent = UseCaseRepository.GenerateUseCase(INPUT_solutionName, rootPath, useCaseName: model.Name);
+    List<Content> useCaseContent = UseCaseRepository.GenerateUseCase(INPUT_solutionName, rootPath, useCaseName: model.Name, props);
     GenerateFile(contents: useCaseContent);
     #endregion
 }

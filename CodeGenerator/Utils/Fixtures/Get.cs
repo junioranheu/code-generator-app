@@ -1,4 +1,5 @@
-﻿using CodeGenerator.Enums;
+﻿using CodeGenerator.Consts;
+using CodeGenerator.Enums;
 using CodeGenerator.Models;
 using System.ComponentModel;
 using System.Reflection;
@@ -172,5 +173,48 @@ public static class Get
         string pathFinalFile = Path.Combine(pathNormalized, $"{fileName}{GetEnumDesc(extension)}");
 
         return pathFinalFile;
+    }
+
+    public static List<string> GetEntityPropsSplitted(string classDefinition)
+    {
+        List<string> props = [];
+        string[] parts = classDefinition.Split(' ');
+
+        for (int i = 0; i < parts.Length; i += 2)
+        {
+            if (i + 1 < parts.Length)
+            {
+                string propName = GetStrCapitalizedFirstLetter(parts[i]);
+                string propType = parts[i + 1];
+
+                props.Add($"{propName} {propType}");
+            }
+        }
+
+        return props;
+    }
+
+    /// <summary>
+    /// string[] props = { "Name string", "Age int", "Email string" };
+    /// string customText = $"This is a attrName property named attrType.";
+    /// GenerateProperties(stringBuilder, props, customText);
+    /// </summary>
+    public static StringBuilder GeneratePropertiesStringBuilder(StringBuilder stringBuilder, List<string> props, string customText)
+    {
+        foreach (var prop in props)
+        {
+            string[] parts = prop.Split(' ');
+
+            if (parts.Length == 2)
+            {
+                string attrName = parts[0];
+                string attrType = parts[1];
+
+                string formattedText = customText.Replace("attrName", attrName).Replace("attrType", attrType);
+                stringBuilder.AppendLine(formattedText);
+            }
+        }
+
+        return stringBuilder;
     }
 }
