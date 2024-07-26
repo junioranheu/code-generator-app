@@ -1,9 +1,7 @@
-﻿using CodeGenerator.Consts;
-using CodeGenerator.Enums;
-using CodeGenerator.Models;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Reflection;
 using System.Text;
+using CodeGenerator.Enums;
 using TimeZoneConverter;
 using static CodeGenerator.Utils.Fixtures.Format;
 
@@ -196,10 +194,9 @@ public static class Get
 
     /// <summary>
     /// string[] props = { "Name string", "Age int", "Email string" };
-    /// string customText = $"This is a attrName property named attrType.";
-    /// GenerateProperties(stringBuilder, props, customText);
+    /// GenerateCustomTextStringBuilderByProps(stringBuilder, props, $"This is a attrName property named attrType.");
     /// </summary>
-    public static StringBuilder GeneratePropertiesStringBuilder(StringBuilder stringBuilder, List<string> props, string customText)
+    public static StringBuilder GenerateCustomTextStringBuilderByProps(StringBuilder stringBuilder, List<string> props, string customText, bool isLowAttrName = false) 
     {
         foreach (var prop in props)
         {
@@ -216,5 +213,126 @@ public static class Get
         }
 
         return stringBuilder;
+    }
+
+    /// <summary>
+    /// string[] props = { "Name string", "Age int", "Email string" };
+    /// GenerateWhereQueriesByProps(stringBuilder, props);
+    /// </summary>
+    public static StringBuilder GenerateWhereQueriesByProps(StringBuilder stringBuilder, List<string> props)
+    {
+        int i = 0;
+        int max = props.Count;
+
+        foreach (var prop in props)
+        {
+            i++;
+            string[] parts = prop.Split(' ');
+
+            if (parts.Length == 2)
+            {
+                string attrName = parts[0];
+                string attrNameLowerCase = GetStringLowerFirstLetter(attrName);
+
+                stringBuilder.AppendLine($"(string.IsNullOrEmpty({attrNameLowerCase}) || x.{attrName} == {attrNameLowerCase}) {(i < max ? "&&" : string.Empty)}");
+            }
+        }
+
+        return stringBuilder;
+    }
+
+    /// <summary>
+    /// string[] props = { "Name string", "Age int", "Email string" };
+    /// string params = GenerateParametersStringByProps(props, customText);
+    /// </summary>
+    public static string GenerateParametersStringByProps(List<string> props)
+    {
+        StringBuilder content = new();
+
+        foreach (var prop in props)
+        {
+            string[] parts = prop.Split(' ');
+
+            if (parts.Length == 2)
+            {
+                string attrName = parts[0];
+                string attrType = parts[1];
+
+                content.Append($"{attrType} {GetStringLowerFirstLetter(attrName)}, ");
+            }
+        }
+
+        string contentStr = content.ToString();
+
+        if (contentStr.EndsWith(", "))
+        {
+            contentStr = contentStr[..contentStr.LastIndexOf(", ")];
+        }
+
+        return contentStr;
+    }
+
+    public static string GetStringLowerFirstLetter(string input)
+    {
+        if (string.IsNullOrEmpty(input) || char.IsLower(input[0]))
+        {
+            return input;
+        }
+
+        return char.ToLower(input[0]) + input[1..];
+    }
+
+    public static string GetIndentedCode(string code, int spacesPerIndent = 4)
+    {
+
+        // First, replace tabs with spaces
+        code = code.Replace("\t", new string(' ', spacesPerIndent));
+
+        var sb = new StringBuilder();
+        int indentLevel = 0;
+        bool insideString = false;
+
+        foreach (char c in code)
+        {
+            if (c == '\"')
+            {
+                insideString = !insideString;
+            }
+
+            if (insideString)
+            {
+                sb.Append(c);
+                continue;
+            }
+
+            if (c == '{')
+            {
+                sb.Append(c);
+                indentLevel++;
+                sb.AppendLine();
+                sb.Append(new string(' ', spacesPerIndent * indentLevel));
+            }
+            else if (c == '}')
+            {
+                sb.AppendLine();
+                indentLevel--;
+                sb.Append(new string(' ', spacesPerIndent * indentLevel));
+                sb.Append(c);
+            }
+            else if (c == '\n')
+            {
+                sb.Append(c);
+                if (sb.Length > 0 && sb[sb.Length - 2] != '\r') // Handle different new line styles
+                {
+                    sb.Append(new string(' ', spacesPerIndent * indentLevel));
+                }
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+
+        return sb.ToString();
     }
 }

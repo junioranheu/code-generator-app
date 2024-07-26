@@ -8,6 +8,7 @@ namespace CodeGenerator.Repositories;
 
 public class UseCaseRepository
 {
+    #region Main
     public static List<Content> GenerateUseCase(string solutionName, string rootPath, string useCaseName, List<string> props)
     {
         List<string> contentPathEnums = GenerateFolders(solutionName, rootPath, useCaseName);
@@ -59,6 +60,76 @@ public class UseCaseRepository
 
         return content;
     }
+    #endregion
+
+    #region UseCases
+    private static string GenerateUseCase_Get(string solutionName, string useCaseName, List<string> props)
+    {
+        StringBuilder content = new();
+        string parameters = GenerateParametersStringByProps(props);
+
+        content.AppendLine($@"using {solutionName}.Domain.Entities;
+using {solutionName}.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace {solutionName}.Application.UseCases.{useCaseName}.Get;
+
+public sealed class Get{useCaseName}(CONTEXT context) : IGet{useCaseName}
+{{
+private readonly CONTEXT _context = context;
+
+public async Task<{useCaseName}?> Execute({parameters})
+{{
+var linq = await _context.{GetStrPlural(useCaseName)}.
+Where(x =>
+x.Status == true &&"
+);
+
+GenerateWhereQueriesByProps(content, props);
+
+content.AppendLine($@").AsNoTracking().FirstOrDefaultAsync();
+
+return linq;
+}}
+}}");
+
+        return GetIndentedCode(content.ToString());
+    }
+
+    private static string GenerateUseCase_GetAll(string solutionName, string useCaseName, List<string> props)
+    {
+        StringBuilder content = new();
+        content.AppendLine($"{nameof(GenerateUseCase_GetAll)} {useCaseName}");
+
+        return content.ToString();
+    }
+
+    private static string GenerateUseCase_Create(string solutionName, string useCaseName)
+    {
+        StringBuilder content = new();
+        content.AppendLine($"{nameof(GenerateUseCase_Create)} {useCaseName}");
+
+        return content.ToString();
+    }
+
+    private static string GenerateUseCase_Update(string solutionName, string useCaseName)
+    {
+        StringBuilder content = new();
+        content.AppendLine($"{nameof(GenerateUseCase_Update)} {useCaseName}");
+
+        return content.ToString();
+    }
+
+    private static string GenerateUseCase_Delete(string solutionName, string useCaseName)
+    {
+        StringBuilder content = new();
+        content.AppendLine($"{nameof(GenerateUseCase_Delete)} {useCaseName}");
+
+        return content.ToString();
+    }
+    #endregion
+
+    #region Etc
 
     private static string GetFileName(string useCaseName, string item, bool isInterface)
     {
@@ -77,98 +148,32 @@ public class UseCaseRepository
         }
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Create))
         {
-            return GenerateUseCase_Create(solutionName, useCaseName, props);
+            return GenerateUseCase_Create(solutionName, useCaseName);
         }
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Update))
         {
-            return GenerateUseCase_Update(solutionName, useCaseName, props);
+            return GenerateUseCase_Update(solutionName, useCaseName);
         }
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Delete))
         {
-            return GenerateUseCase_Delete(solutionName, useCaseName, props);
+            return GenerateUseCase_Delete(solutionName, useCaseName);
         }
 
         throw new NotImplementedException();
     }
 
-    #region UseCases
-    private static string GenerateUseCase_Get(string solutionName, string useCaseName, List<string> props)
-    {
-        StringBuilder content = new();
-
-        content.AppendLine($@"
-            using {solutionName}.Domain.Entities;
-            using {solutionName}.Infrastructure.Data;
-            using Microsoft.EntityFrameworkCore;
-
-            namespace {solutionName}.Application.UseCases.{useCaseName}.Get;
-
-            public sealed class Get{useCaseName}(CONTEXT context) : IGet{useCaseName}
-            {{
-                private readonly CONTEXT _context = context;
-
-                public async Task<{useCaseName}?> Execute(int? id, string? xxx)
-                {{
-                    var linq = await _context.Ocorrencias.
-                               Where(x =>
-                                  x.Status == true &&
-                                  (id == null || x.Id == id) &&
-                                  (string.IsNullOrEmpty(xxx) || x.XXX == xxx)
-                               ).
-                               AsNoTracking().FirstOrDefaultAsync();
-
-                    return linq;
-                }}
-            }}"
-        );
-
-        return content.ToString();
-    }
-
-    private static string GenerateUseCase_GetAll(string solutionName, string useCaseName, List<string> props)
-    {
-        StringBuilder content = new();
-        content.AppendLine($"{nameof(GenerateUseCase_GetAll)} {useCaseName}");
-
-        return content.ToString();
-    }
-
-    private static string GenerateUseCase_Create(string solutionName, string useCaseName, List<string> props)
-    {
-        StringBuilder content = new();
-        content.AppendLine($"{nameof(GenerateUseCase_Create)} {useCaseName}");
-
-        return content.ToString();
-    }
-
-    private static string GenerateUseCase_Update(string solutionName, string useCaseName, List<string> props)
-    {
-        StringBuilder content = new();
-        content.AppendLine($"{nameof(GenerateUseCase_Update)} {useCaseName}");
-
-        return content.ToString();
-    }
-
-    private static string GenerateUseCase_Delete(string solutionName, string useCaseName, List<string> props)
-    {
-        StringBuilder content = new();
-        content.AppendLine($"{nameof(GenerateUseCase_Delete)} {useCaseName}");
-
-        return content.ToString();
-    }
-
     private static string GenerateInterface(string useCaseType, string solutionName, string useCaseName, List<string> props)
     {
         StringBuilder content = new();
+        string parameters = GenerateParametersStringByProps(props);
 
-        content.AppendLine(@$"
-            using {solutionName}.Backend.Domain.Entities;
+        content.AppendLine(@$"using {solutionName}.Backend.Domain.Entities;
 
             namespace {solutionName}.Application.UseCases.{useCaseName}.{useCaseType};
 
             public interface I{useCaseType}{useCaseName}
             {{
-                Task<{useCaseName}?> Execute(int? id, string? xxx);
+                Task<{useCaseName}?> Execute({parameters});
             }}
         ");
 

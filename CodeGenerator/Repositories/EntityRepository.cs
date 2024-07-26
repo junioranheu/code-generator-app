@@ -43,7 +43,7 @@ public class EntityRepository
         content.AppendLine($"{Misc.Tab}[Key]");
         content.AppendLine($"{Misc.Tab}public {(isFKGuid ? "Guid" : "int")} {className}Id {{ get; set; }}");
 
-        GeneratePropertiesStringBuilder(stringBuilder: content, props, $"{Misc.Tab}public attrType attrName {{ get; set; }}");
+        GenerateCustomTextStringBuilderByProps(stringBuilder: content, props, $"{Misc.Tab}public attrType attrName {{ get; set; }}");
         content.AppendLine("}");
 
         return content.ToString();
