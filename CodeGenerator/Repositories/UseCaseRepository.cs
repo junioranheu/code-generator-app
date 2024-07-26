@@ -170,15 +170,14 @@ return linq;
 
         content.AppendLine(@$"using {solutionName}.Backend.Domain.Entities;
 
-            namespace {solutionName}.Application.UseCases.{useCaseName}.{useCaseType};
+namespace {solutionName}.Application.UseCases.{useCaseName}.{useCaseType};
 
-            public interface I{useCaseType}{useCaseName}
-            {{
-                Task<{useCaseName}?> Execute({parameters});
-            }}
-        ");
+public interface I{useCaseType}{useCaseName}
+{{
+    Task<{useCaseName}?> Execute({parameters});
+}}");
 
-        return content.ToString();
+        return GetIndentedCode(content.ToString());
     }
     #endregion
 }

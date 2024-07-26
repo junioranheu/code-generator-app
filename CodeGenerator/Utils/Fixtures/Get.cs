@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using System.Text;
+using CodeGenerator.Consts;
 using CodeGenerator.Enums;
 using TimeZoneConverter;
 using static CodeGenerator.Utils.Fixtures.Format;
@@ -282,64 +283,41 @@ public static class Get
         return char.ToLower(input[0]) + input[1..];
     }
 
+    private const string getIndentedCode_Bracket = "}";
+    private const string getIndentedCode_Bracket2 = "{";
+    private static readonly char[] getIndentedCode_Lines = new[] { '\r', '\n' };
+
     public static string GetIndentedCode(string code, int spacesPerIndent = 4)
     {
-        code = code.Replace("\t", new string(' ', spacesPerIndent));
-
-        var sb = new StringBuilder();
+        StringBuilder indentedCode = new();
+        string[] lines = code.Split(getIndentedCode_Lines, StringSplitOptions.None);
         int indentLevel = 0;
-        bool insideString = false;
-        bool newLine = true;
+        string indentString = new(' ', spacesPerIndent);
 
-        foreach (char c in code)
+        foreach (string line in lines)
         {
-            if (c == '\"')
-            {
-                insideString = !insideString;
-            }
+            string trimmedLine = line.Trim();
 
-            if (insideString)
+            if (trimmedLine.StartsWith(getIndentedCode_Bracket))
             {
-                sb.Append(c);
-                continue;
-            }
-
-            if (newLine && !char.IsWhiteSpace(c))
-            {
-                sb.Append(new string(' ', spacesPerIndent * indentLevel));
-                newLine = false;
-            }
-
-            if (c == '{')
-            {
-                sb.Append(c);
-                indentLevel++;
-                sb.AppendLine();
-                newLine = true;
-            }
-            else if (c == '}')
-            {
-                sb.AppendLine();
                 indentLevel--;
-                sb.Append(new string(' ', spacesPerIndent * indentLevel));
-                sb.Append(c);
-                if (code.IndexOf(c) + 1 < code.Length && code[code.IndexOf(c) + 1] != '\n')
-                {
-                    sb.AppendLine();
-                }
-                newLine = true;
             }
-            else if (c == '\n')
+
+            if (!string.IsNullOrWhiteSpace(trimmedLine))
             {
-                sb.Append(c);
-                newLine = true;
+                indentedCode.AppendLine(new string(' ', indentLevel * indentString.Length) + trimmedLine);
             }
             else
             {
-                sb.Append(c);
+                indentedCode.AppendLine();
+            }
+
+            if (trimmedLine.EndsWith(getIndentedCode_Bracket2))
+            {
+                indentLevel++;
             }
         }
 
-        return sb.ToString();
+        return indentedCode.ToString();
     }
 }
