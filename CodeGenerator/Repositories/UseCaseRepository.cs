@@ -31,7 +31,7 @@ public class UseCaseRepository
 
     private static List<Content> GenerateContent(string solutionName, string rootPath, string useCaseName, List<string> props, List<string> contentPathEnums)
     {
-        List<Content> content = [];
+        List<Content> finalContents = [];
 
         foreach (string item in contentPathEnums)
         {
@@ -40,9 +40,11 @@ public class UseCaseRepository
             string fileName = GetFileName(useCaseName, item, isInterface: false);
             string interfaceFileName = GetFileName(useCaseName, item, isInterface: true);
 
+            (string content, string parameters) = CheckUseCaseEnumAndGenerateContent(item, solutionName, useCaseName, props);
+
             // Use Case;
-            content.Add(new(
-                value: CheckUseCaseEnumAndGenerateContent(item, solutionName, useCaseName, props),
+            finalContents.Add(new(
+                value: content,
                 contentDirectory,
                 extension,
                 solutionName,
@@ -50,8 +52,8 @@ public class UseCaseRepository
             ));
 
             // Interface;
-            content.Add(new(
-                value: GenerateInterface(item, solutionName, useCaseName, props),
+            finalContents.Add(new(
+                value: GenerateInterface(item, solutionName, useCaseName, props, parameters),
                 contentDirectory,
                 extension,
                 solutionName,
@@ -59,12 +61,12 @@ public class UseCaseRepository
             ));
         }
 
-        return content;
+        return finalContents;
     }
     #endregion
 
     #region UseCases
-    private static string GenerateUseCase_Get(string solutionName, string useCaseName, List<string> props)
+    private static (string content, string parameters) GenerateUseCase_Get(string solutionName, string useCaseName, List<string> props)
     {
         StringBuilder content = new();
         string parameters = GenerateParametersStringByProps(props);
@@ -94,39 +96,67 @@ return linq;
 }}
 }}");
 
-        return GetIndentedCode(content.ToString());
+        return (GetIndentedCode(content.ToString()), parameters);
     }
 
-    private static string GenerateUseCase_GetAll(string solutionName, string useCaseName, List<string> props)
+    private static (string content, string parameters) GenerateUseCase_GetAll(string solutionName, string useCaseName, List<string> props)
     {
         StringBuilder content = new();
-        content.AppendLine($"{nameof(GenerateUseCase_GetAll)} {useCaseName}");
+        string parameters = $"PaginationInput pagination, {useCaseName}Input input";
 
-        return content.ToString();
+        content.AppendLine($@"using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Shared;
+using {solutionName}.Application.UseCases.Shared;
+using {solutionName}.Domain.Entities;
+using {solutionName}.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace {solutionName}.Application.UseCases.{useCaseName}.GetAll;
+
+public sealed class GetAll{useCaseName}({Misc.Context} context) : IGetAll{useCaseName}
+{{
+private readonly {Misc.Context} _context = context;
+
+public async Task<(IEnumerable<{useCaseName}> linq, int count)> Execute({parameters})
+{{
+var linq = await _context.{GetStrPlural(useCaseName)}.
+OrderBy(x => x.xxx).
+Where(x =>
+x.Status == true &&"
+);
+
+        GenerateWhereQueriesByProps(content, props, hasInputPrefix: true);
+
+        content.AppendLine($@").AsNoTracking();
+
+return await PagedQuery.Execute(query, pagination);
+}}
+}}");
+
+        return (GetIndentedCode(content.ToString()), parameters);
     }
 
-    private static string GenerateUseCase_Create(string solutionName, string useCaseName)
+    private static (string content, string parameters) GenerateUseCase_Create(string solutionName, string useCaseName)
     {
         StringBuilder content = new();
         content.AppendLine($"{nameof(GenerateUseCase_Create)} {useCaseName}");
 
-        return content.ToString();
+        return (content.ToString(), "");
     }
 
-    private static string GenerateUseCase_Update(string solutionName, string useCaseName)
+    private static (string content, string parameters) GenerateUseCase_Update(string solutionName, string useCaseName)
     {
         StringBuilder content = new();
         content.AppendLine($"{nameof(GenerateUseCase_Update)} {useCaseName}");
 
-        return content.ToString();
+        return (content.ToString(), "");
     }
 
-    private static string GenerateUseCase_Delete(string solutionName, string useCaseName)
+    private static (string content, string parameters) GenerateUseCase_Delete(string solutionName, string useCaseName)
     {
         StringBuilder content = new();
         content.AppendLine($"{nameof(GenerateUseCase_Delete)} {useCaseName}");
 
-        return content.ToString();
+        return (content.ToString(), "");
     }
     #endregion
 
@@ -137,7 +167,7 @@ return linq;
         return Path.Combine(GetStrPlural(useCaseName), item, $"{(isInterface ? "I" : string.Empty)}{item}{useCaseName}");
     }
 
-    private static string CheckUseCaseEnumAndGenerateContent(string useCaseType, string solutionName, string useCaseName, List<string> props)
+    private static (string content, string parameters) CheckUseCaseEnumAndGenerateContent(string useCaseType, string solutionName, string useCaseName, List<string> props)
     {
         if (useCaseType == GetEnumDesc(UseCaseEnum.Get))
         {
@@ -163,10 +193,9 @@ return linq;
         throw new NotImplementedException();
     }
 
-    private static string GenerateInterface(string useCaseType, string solutionName, string useCaseName, List<string> props)
+    private static string GenerateInterface(string useCaseType, string solutionName, string useCaseName, List<string> props, string parameters)
     {
         StringBuilder content = new();
-        string parameters = GenerateParametersStringByProps(props);
 
         content.AppendLine(@$"using {solutionName}.Backend.Domain.Entities;
 

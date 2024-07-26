@@ -220,7 +220,7 @@ public static class Get
     /// string[] props = { "Name string", "Age int", "Email string" };
     /// GenerateWhereQueriesByProps(stringBuilder, props);
     /// </summary>
-    public static StringBuilder GenerateWhereQueriesByProps(StringBuilder stringBuilder, List<string> props)
+    public static StringBuilder GenerateWhereQueriesByProps(StringBuilder stringBuilder, List<string> props, bool hasInputPrefix = false)
     {
         int i = 0;
         int max = props.Count;
@@ -235,7 +235,7 @@ public static class Get
                 string attrName = parts[0];
                 string attrNameLowerCase = GetStringLowerFirstLetter(attrName);
 
-                stringBuilder.AppendLine($"(string.IsNullOrEmpty({attrNameLowerCase}) || x.{attrName} == {attrNameLowerCase}) {(i < max ? "&&" : string.Empty)}");
+                stringBuilder.AppendLine($"(string.IsNullOrEmpty({(hasInputPrefix ? "input." : string.Empty)}{attrNameLowerCase}) || x.{attrName} == {attrNameLowerCase}) {(i < max ? "&&" : string.Empty)}");
             }
         }
 
