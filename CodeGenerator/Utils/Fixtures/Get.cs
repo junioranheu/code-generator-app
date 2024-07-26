@@ -284,13 +284,12 @@ public static class Get
 
     public static string GetIndentedCode(string code, int spacesPerIndent = 4)
     {
-
-        // First, replace tabs with spaces
         code = code.Replace("\t", new string(' ', spacesPerIndent));
 
         var sb = new StringBuilder();
         int indentLevel = 0;
         bool insideString = false;
+        bool newLine = true;
 
         foreach (char c in code)
         {
@@ -305,12 +304,18 @@ public static class Get
                 continue;
             }
 
+            if (newLine && !char.IsWhiteSpace(c))
+            {
+                sb.Append(new string(' ', spacesPerIndent * indentLevel));
+                newLine = false;
+            }
+
             if (c == '{')
             {
                 sb.Append(c);
                 indentLevel++;
                 sb.AppendLine();
-                sb.Append(new string(' ', spacesPerIndent * indentLevel));
+                newLine = true;
             }
             else if (c == '}')
             {
@@ -318,14 +323,16 @@ public static class Get
                 indentLevel--;
                 sb.Append(new string(' ', spacesPerIndent * indentLevel));
                 sb.Append(c);
+                if (code.IndexOf(c) + 1 < code.Length && code[code.IndexOf(c) + 1] != '\n')
+                {
+                    sb.AppendLine();
+                }
+                newLine = true;
             }
             else if (c == '\n')
             {
                 sb.Append(c);
-                if (sb.Length > 0 && sb[sb.Length - 2] != '\r') // Handle different new line styles
-                {
-                    sb.Append(new string(' ', spacesPerIndent * indentLevel));
-                }
+                newLine = true;
             }
             else
             {

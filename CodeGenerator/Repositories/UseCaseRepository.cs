@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using CodeGenerator.Consts;
 using CodeGenerator.Enums;
 using CodeGenerator.Models;
 using static CodeGenerator.Utils.Fixtures.Generate;
@@ -74,9 +75,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace {solutionName}.Application.UseCases.{useCaseName}.Get;
 
-public sealed class Get{useCaseName}(CONTEXT context) : IGet{useCaseName}
+public sealed class Get{useCaseName}({Misc.Context} context) : IGet{useCaseName}
 {{
-private readonly CONTEXT _context = context;
+private readonly {Misc.Context} _context = context;
 
 public async Task<{useCaseName}?> Execute({parameters})
 {{
