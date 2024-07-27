@@ -35,7 +35,7 @@ public class Main
             #endregion
         }
 
-        #region zip
+        #region Zip
         if (isGenerateZip)
         {
             string rootPathZipFile = GenerateZipFromFolder(solutionName, pathToZip: rootPath);
@@ -50,6 +50,7 @@ public class Main
         return Array.Empty<byte>();
     }
 
+    #region Misc
     private static void CheckVariables(string solutionName, string contextName, List<Model> models)
     {
         if (string.IsNullOrEmpty(solutionName))
@@ -67,4 +68,5 @@ public class Main
             throw new ArgumentException("Models can not be empty");
         }
     }
+    #endregion
 }

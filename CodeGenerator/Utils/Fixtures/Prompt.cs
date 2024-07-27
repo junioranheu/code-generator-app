@@ -40,7 +40,7 @@ public static class Prompt
         bool keepWhile = true;
 
         Sys.Console.WriteLine("\nClass name example: Person");
-        Sys.Console.WriteLine("Class name example: Name string LastName string Age int Height double IsUnder18 bool Country Country\n");
+        Sys.Console.WriteLine("Class name example: Name string LastName? string Age int Height double IsUnder18 bool Country Country\n");
 
         while (keepWhile)
         {
