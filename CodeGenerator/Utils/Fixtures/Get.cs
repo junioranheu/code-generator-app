@@ -177,7 +177,7 @@ public static class Get
         if (parts.Length % 2 != 0)
         {
             DeleteFolder(rootPath);
-            throw new ArgumentException("Properties do not match");
+            throw new ArgumentException("Properties do not match. The entities properties can not be odd!");
         }
 
         for (int i = 0; i < parts.Length; i += 2)
