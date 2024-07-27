@@ -1,40 +1,51 @@
-﻿using CodeGenerator.Enums;
+﻿using System.Runtime.InteropServices;
+using CodeGenerator.Enums;
 using CodeGenerator.Models;
-using System.Runtime.InteropServices;
 using static CodeGenerator.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Utils.Fixtures;
 
 public static class Generate
 {
-    public static string GenerateDefaultDirectories(string solutionName)
+    public static string GenerateDefaultDirectories(string solutionName, bool isGenerateZip)
     {
         #region Create main folder
-        string desktopPath;
+        string rootPath = string.Empty;
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (isGenerateZip)
         {
-            desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            string homePath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            desktopPath = Path.Combine(homePath, "Desktop");
+            string projectDirectory = GetProjectDirectory();
+            rootPath = Path.Combine(projectDirectory, "Temp");
         }
         else
         {
-            throw new NotSupportedException("Unsupported operating system");
-        }
+            string desktopPath;
 
-        string rootPath = Path.Combine(desktopPath, GetFileName(solutionName));
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                string homePath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                desktopPath = Path.Combine(homePath, "Desktop");
+            }
+            else
+            {
+                throw new NotSupportedException("Unsupported operating system");
+            }
 
-        if (Directory.Exists(rootPath))
-        {
-            Directory.Delete(rootPath, true);
-        }
+            string folderName = GetMainFolderName(solutionName);
+            rootPath = Path.Combine(desktopPath, folderName);
 
-        Directory.CreateDirectory(rootPath);
-        GetLog($"Main folder has been successfully generated");
+            if (Directory.Exists(rootPath))
+            {
+                Directory.Delete(rootPath, true);
+            }
+
+            Directory.CreateDirectory(rootPath);
+            GetLog($"Main folder has been successfully generated: {folderName}");
+        }  
         #endregion
 
         #region Create children folders;
@@ -81,7 +92,7 @@ public static class Generate
         GetLog($"Folder {GetStringAfterText(folderPath, $"{solutionName}.")} has been successfully generated");
     }
 
-    public static void GenerateFiles(List<Content> contents)
+    public static void GenerateFiles(List<Content> contents, bool isGenerateZip)
     {
         foreach (var content in contents)
         {

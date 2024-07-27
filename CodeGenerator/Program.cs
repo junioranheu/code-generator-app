@@ -7,15 +7,16 @@ using static CodeGenerator.Utils.Fixtures.Get;
 string INPUT_solutionName = "Anheu";
 string INPUT_contextName = "AnheuContext";
 bool INPUT_isFKGuid = true;
+bool INPUT_isGenerateZip = true;
 
 List<Model> INPUT_models =
 [
-    new() { Name = "User", Props = "UserId Guid Name string Age int City string aeaaaaaa bool" },
-    new() { Name = "Log", Props = "Desc string Date DateTime" }
+    new() { Name = "Author", Props = "Name string Age int LastName string" },
+    new() { Name = "Book", Props = "Name string Price double Type string Author Author" }
 ];
 #endregion
 
-string rootPath = Main.Execute(INPUT_solutionName, INPUT_contextName, INPUT_isFKGuid, INPUT_models);
+string rootPath = Main.Execute(INPUT_solutionName, INPUT_contextName, INPUT_isFKGuid, INPUT_models, INPUT_isGenerateZip);
 
 GetLog("Press any key to exit the program", type: LogEnum.Info);
 Console.ReadKey();

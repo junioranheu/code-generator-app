@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using System.Text;
-using CodeGenerator.Consts;
 using CodeGenerator.Enums;
 using TimeZoneConverter;
 using static CodeGenerator.Utils.Fixtures.Format;
@@ -16,9 +15,9 @@ public static class Get
         return TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone);
     }
 
-    public static string GetFileName(string solutionName)
+    public static string GetMainFolderName(string solutionName)
     {
-        return $"{solutionName} {FormatDateTime(GetDateTime(), DateTimeFormat.FileName)}";
+        return $"{solutionName} {FormatDateTime(GetDateTime(), DateTimeFormat.FileName)} {Guid.NewGuid()}";
     }
 
     public static string GetStrCapitalizedFirstLetter(string input)
@@ -341,5 +340,44 @@ public static class Get
     public static string GetClassId(string className, bool isFKGuid, bool isLowerCaseFirstLetter)
     {
         return $"{(isFKGuid ? "Guid" : "int")} {(isLowerCaseFirstLetter ? GetStringLowerCaseFirstLetter(className) : className)}Id";
+    }
+
+    public static string GetSolutionName()
+    {
+        string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        DirectoryInfo directoryInfo = new(currentDirectory);
+
+        while (directoryInfo != null)
+        {
+            var solutionFile = directoryInfo.GetFiles("*.sln").FirstOrDefault();
+
+            if (solutionFile != null)
+            {
+                return Path.GetFileNameWithoutExtension(solutionFile.Name);
+            }
+
+            directoryInfo = directoryInfo.Parent!;
+        }
+
+        return string.Empty;
+    }
+
+    public static string GetProjectDirectory()
+    {
+        string assemblyPath = Assembly.GetExecutingAssembly().Location;
+        DirectoryInfo directory = new(Path.GetDirectoryName(assemblyPath) ?? string.Empty);
+        string projectName = GetSolutionName();
+
+        while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, ".git")) && !File.Exists(Path.Combine(directory.FullName, $"{projectName}.sln")))
+        {
+            directory = directory.Parent!;
+        }
+
+        if (directory is null)
+        {
+            throw new InvalidOperationException("Project root directory not found.");
+        }
+
+        return $"{directory.FullName}/{projectName}";
     }
 }
