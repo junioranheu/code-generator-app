@@ -175,21 +175,33 @@ public static class Get
 
     public static List<string> GetEntityPropsSplitted(string classDefinition)
     {
-        List<string> props = [];
-        string[] parts = classDefinition.Split(' ');
-
-        for (int i = 0; i < parts.Length; i += 2)
+        try
         {
-            if (i + 1 < parts.Length)
+            List<string> props = [];
+            string[] parts = classDefinition.Split(' ');
+
+            for (int i = 0; i < parts.Length; i += 2)
             {
-                string propName = GetStrCapitalizedFirstLetter(parts[i]);
-                string propType = parts[i + 1];
+                if (i + 1 < parts.Length)
+                {
+                    string propName = GetStrCapitalizedFirstLetter(parts[i]);
+                    string propType = parts[i + 1];
 
-                props.Add($"{propName} {propType}");
+                    if (string.IsNullOrEmpty(propName) || string.IsNullOrEmpty(propType))
+                    {
+                        throw new Exception();
+                    }
+
+                    props.Add($"{propName} {propType}");
+                }
             }
-        }
 
-        return props;
+            return props;
+        }
+        catch (Exception)
+        {
+            throw new ArgumentException("Properties do not match");
+        }
     }
 
     /// <summary>
@@ -198,6 +210,9 @@ public static class Get
     /// </summary>
     public static void GenerateCustomTextStringBuilderByProps(StringBuilder stringBuilder, List<string> props, string customText, bool isLowAttrName = false)
     {
+        int max = props.Count;
+        int i = 1;
+
         foreach (var prop in props)
         {
             string[] parts = prop.Split(' ');
@@ -209,6 +224,17 @@ public static class Get
 
                 string formattedText = customText.Replace("REPLACE_VAR_NAME", attrName).Replace("REPLACE_VAR_TYPE", attrType);
                 stringBuilder.AppendLine(formattedText);
+
+                if (i < max)
+                {
+                    stringBuilder.AppendLine();
+                }
+
+                i++;
+            }
+            else
+            {
+                throw new ArgumentException("Properties do not match");
             }
         }
     }
