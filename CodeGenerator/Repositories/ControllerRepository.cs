@@ -20,7 +20,7 @@ public sealed class ControllerRepository
                 contentDirectory,
                 extension,
                 solutionName,
-                fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName: className, contentDirectory, extension)
+                fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName: $"{GetStrCapitalizedFirstLetter(className)}Controller", contentDirectory, extension)
             )
         ];
 
