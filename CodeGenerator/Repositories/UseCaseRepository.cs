@@ -1,10 +1,10 @@
 ﻿using System.Text;
-using CodeGenerator.Enums;
-using CodeGenerator.Models;
-using static CodeGenerator.Utils.Fixtures.Generate;
-using static CodeGenerator.Utils.Fixtures.Get;
+using CodeGenerator.Console.Enums;
+using CodeGenerator.Console.Models;
+using static CodeGenerator.Console.Utils.Fixtures.Generate;
+using static CodeGenerator.Console.Utils.Fixtures.Get;
 
-namespace CodeGenerator.Repositories;
+namespace CodeGenerator.Console.Repositories;
 
 public sealed class UseCaseRepository
 {

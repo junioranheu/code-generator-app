@@ -1,7 +1,7 @@
-﻿using CodeGenerator.Enums;
+﻿using CodeGenerator.Console.Enums;
 using System.Globalization;
 
-namespace CodeGenerator.Utils.Fixtures;
+namespace CodeGenerator.Console.Utils.Fixtures;
 
 public static class Format
 {

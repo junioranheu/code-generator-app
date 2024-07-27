@@ -1,10 +1,10 @@
-﻿using CodeGenerator.Models;
-using CodeGenerator.Repositories;
-using static CodeGenerator.Utils.Fixtures.Delete;
-using static CodeGenerator.Utils.Fixtures.Generate;
-using static CodeGenerator.Utils.Fixtures.Get;
+﻿using CodeGenerator.Console.Models;
+using CodeGenerator.Console.Repositories;
+using static CodeGenerator.Console.Utils.Fixtures.Delete;
+using static CodeGenerator.Console.Utils.Fixtures.Generate;
+using static CodeGenerator.Console.Utils.Fixtures.Get;
 
-namespace CodeGenerator;
+namespace CodeGenerator.Console;
 
 public class Main
 {
@@ -36,7 +36,7 @@ public class Main
         #region zip
         if (isGenerateZip)
         {
-            string rootPathZipFile = GenerateZipFolder(solutionName, pathToZip: rootPath);
+            string rootPathZipFile = GenerateZipFromFolder(solutionName, pathToZip: rootPath);
             byte[] bytes = GetArrayOfBytesFromPath(rootPathZipFile);
 
             DeleteFile(rootPathZipFile);

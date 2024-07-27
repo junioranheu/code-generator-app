@@ -1,8 +1,8 @@
-﻿using CodeGenerator.Enums;
+﻿using CodeGenerator.Console.Enums;
 using System.ComponentModel.DataAnnotations;
-using static CodeGenerator.Utils.Fixtures.Validate;
+using static CodeGenerator.Console.Utils.Fixtures.Validate;
 
-namespace CodeGenerator.Models;
+namespace CodeGenerator.Console.Models;
 
 public sealed class Content
 {

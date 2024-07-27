@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using System.Text;
-using CodeGenerator.Enums;
+using CodeGenerator.Console.Enums;
 using TimeZoneConverter;
-using static CodeGenerator.Utils.Fixtures.Format;
-using static CodeGenerator.Utils.Fixtures.Delete;
+using static CodeGenerator.Console.Utils.Fixtures.Format;
+using static CodeGenerator.Console.Utils.Fixtures.Delete;
 
-namespace CodeGenerator.Utils.Fixtures;
+namespace CodeGenerator.Console.Utils.Fixtures;
 
 public static class Get
 {

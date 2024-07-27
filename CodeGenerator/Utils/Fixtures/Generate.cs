@@ -1,13 +1,13 @@
 ﻿using System.IO.Compression;
 using System.Runtime.InteropServices;
-using CodeGenerator.Consts;
-using CodeGenerator.Enums;
-using CodeGenerator.Models;
-using static CodeGenerator.Utils.Fixtures.Delete;
-using static CodeGenerator.Utils.Fixtures.Get;
-using static CodeGenerator.Utils.Fixtures.Prompt;
+using CodeGenerator.Console.Consts;
+using CodeGenerator.Console.Enums;
+using CodeGenerator.Console.Models;
+using static CodeGenerator.Console.Utils.Fixtures.Delete;
+using static CodeGenerator.Console.Utils.Fixtures.Get;
+using static CodeGenerator.Console.Utils.Fixtures.Prompt;
 
-namespace CodeGenerator.Utils.Fixtures;
+namespace CodeGenerator.Console.Utils.Fixtures;
 
 public static class Generate
 {
@@ -107,7 +107,7 @@ public static class Generate
         }
     }
 
-    public static string GenerateZipFolder(string solutionName, string pathToZip, string pathToSaveTheNewZip = "")
+    public static string GenerateZipFromFolder(string solutionName, string pathToZip, string pathToSaveTheNewZip = "")
     {
         if (string.IsNullOrEmpty(pathToSaveTheNewZip))
         {

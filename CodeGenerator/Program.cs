@@ -1,7 +1,7 @@
-﻿using CodeGenerator;
-using CodeGenerator.Enums;
-using CodeGenerator.Models;
-using static CodeGenerator.Utils.Fixtures.Prompt;
+﻿using CodeGenerator.Console;
+using CodeGenerator.Console.Enums;
+using CodeGenerator.Console.Models;
+using static CodeGenerator.Console.Utils.Fixtures.Prompt;
 
 #region Input
 string solutionName = PromptInput("Solution name?");

@@ -1,4 +1,4 @@
-﻿namespace CodeGenerator.Utils.Fixtures;
+﻿namespace CodeGenerator.Console.Utils.Fixtures;
 
 public static partial class Validate
 {

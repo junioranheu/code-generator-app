@@ -1,7 +1,7 @@
-﻿using static CodeGenerator.Utils.Fixtures.Get;
-using static CodeGenerator.Utils.Fixtures.Prompt;
+﻿using static CodeGenerator.Console.Utils.Fixtures.Get;
+using static CodeGenerator.Console.Utils.Fixtures.Prompt;
 
-namespace CodeGenerator.Utils.Fixtures;
+namespace CodeGenerator.Console.Utils.Fixtures;
 
 public static class Delete
 {

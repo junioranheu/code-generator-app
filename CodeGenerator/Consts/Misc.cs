@@ -1,4 +1,4 @@
-﻿namespace CodeGenerator.Consts;
+﻿namespace CodeGenerator.Console.Consts;
 
 public static class Misc
 {

@@ -1,16 +1,17 @@
-﻿using CodeGenerator.Enums;
-using CodeGenerator.Models;
-using static CodeGenerator.Utils.Fixtures.Format;
-using static CodeGenerator.Utils.Fixtures.Get;
+﻿using CodeGenerator.Console.Enums;
+using CodeGenerator.Console.Models;
+using static CodeGenerator.Console.Utils.Fixtures.Format;
+using static CodeGenerator.Console.Utils.Fixtures.Get;
+using Sys = System;
 
-namespace CodeGenerator.Utils.Fixtures;
+namespace CodeGenerator.Console.Utils.Fixtures;
 
 public static class Prompt
 {
     public static string PromptInput(string msg)
     {
-        Console.WriteLine(msg);
-        string? input = Console.ReadLine();
+        Sys.Console.WriteLine(msg);
+        string? input = Sys.Console.ReadLine();
 
         if (string.IsNullOrEmpty(input))
         {
@@ -22,8 +23,8 @@ public static class Prompt
 
     public static bool PromptInputForBool(string msg)
     {
-        Console.WriteLine($"{msg} (Answer y or n)");
-        string? input = Console.ReadLine();
+        Sys.Console.WriteLine($"{msg} (Answer y or n)");
+        string? input = Sys.Console.ReadLine();
 
         if (string.IsNullOrEmpty(input))
         {
@@ -38,8 +39,8 @@ public static class Prompt
         List<Model> models = new();
         bool keepWhile = true;
 
-        Console.WriteLine("\nClass name example: Person");
-        Console.WriteLine("Class name example: Name string LastName string Age int Height double IsUnder18 bool Country Country\n");
+        Sys.Console.WriteLine("\nClass name example: Person");
+        Sys.Console.WriteLine("Class name example: Name string LastName string Age int Height double IsUnder18 bool Country Country\n");
 
         while (keepWhile)
         {
@@ -57,7 +58,7 @@ public static class Prompt
     {
         ConsoleColor originalColor = ConsoleColor.Gray;
 
-        Console.ForegroundColor = type switch
+        Sys.Console.ForegroundColor = type switch
         {
             LogEnum.Success => ConsoleColor.Cyan,
             LogEnum.Fail => ConsoleColor.Red,
@@ -67,8 +68,8 @@ public static class Prompt
         };
 
         string final = $"{FormatDateTime(GetDateTime(), DateTimeFormat.CompleteDateTime)} | {msg}";
-        Console.WriteLine(final);
-        Console.ForegroundColor = originalColor;
+        Sys.Console.WriteLine(final);
+        Sys.Console.ForegroundColor = originalColor;
 
         return final;
     }

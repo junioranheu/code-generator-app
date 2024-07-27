@@ -1,4 +1,4 @@
-﻿namespace CodeGenerator.Enums;
+﻿namespace CodeGenerator.Console.Enums;
 
 public enum LogEnum
 {

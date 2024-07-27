@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace CodeGenerator.Enums;
+namespace CodeGenerator.Console.Enums;
 
 public enum UseCaseEnum
 {
