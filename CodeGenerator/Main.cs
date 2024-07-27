@@ -15,7 +15,7 @@ public class Main
 
         foreach (var model in models)
         {
-            List<string> props = GetEntityPropsSplitted(model.Props);
+            List<string> props = GetEntityPropsSplitted(classDefinition: model.Props, rootPath);
 
             #region Entity
             List<Content> entityContent = EntityRepository.GenerateEntity(solutionName, rootPath, className: model.Name, props, isPKGuid);

@@ -4,6 +4,7 @@ using System.Text;
 using CodeGenerator.Enums;
 using TimeZoneConverter;
 using static CodeGenerator.Utils.Fixtures.Format;
+using static CodeGenerator.Utils.Fixtures.Delete;
 
 namespace CodeGenerator.Utils.Fixtures;
 
@@ -168,35 +169,34 @@ public static class Get
         return pathFinalFile;
     }
 
-    public static List<string> GetEntityPropsSplitted(string classDefinition)
+    public static List<string> GetEntityPropsSplitted(string classDefinition, string rootPath)
     {
-        try
+        List<string> props = [];
+        string[] parts = classDefinition.Split(' ');
+
+        if (parts.Length % 2 != 0)
         {
-            List<string> props = [];
-            string[] parts = classDefinition.Split(' ');
-
-            for (int i = 0; i < parts.Length; i += 2)
-            {
-                if (i + 1 < parts.Length)
-                {
-                    string propName = GetStrCapitalizedFirstLetter(parts[i]);
-                    string propType = parts[i + 1];
-
-                    if (string.IsNullOrEmpty(propName) || string.IsNullOrEmpty(propType))
-                    {
-                        throw new Exception();
-                    }
-
-                    props.Add($"{propName} {propType}");
-                }
-            }
-
-            return props;
-        }
-        catch (Exception)
-        {
+            DeleteFolder(rootPath);
             throw new ArgumentException("Properties do not match");
         }
+
+        for (int i = 0; i < parts.Length; i += 2)
+        {
+            if (i + 1 < parts.Length)
+            {
+                string propName = GetStrCapitalizedFirstLetter(parts[i]);
+                string propType = parts[i + 1];
+
+                if (string.IsNullOrEmpty(propName) || string.IsNullOrEmpty(propType))
+                {
+                    throw new Exception();
+                }
+
+                props.Add($"{propName} {propType}");
+            }
+        }
+
+        return props;
     }
 
     /// <summary>
