@@ -38,16 +38,16 @@ public static class Prompt
         List<Model> models = new();
         bool keepWhile = true;
 
-        Console.WriteLine("Class name example: Person");
-        Console.WriteLine("Class name example: Name string LastName string Age int Height double IsUnder18 bool\n");
+        Console.WriteLine("\nClass name example: Person");
+        Console.WriteLine("Class name example: Name string LastName string Age int Height double IsUnder18 bool Country Country\n");
 
         while (keepWhile)
         {
-            string className = PromptInput("\nClass name:");
+            string className = PromptInput("Class name:");
             string props = PromptInput("Props:");
             models.Add(new() { Name = className, Props = props });
 
-            keepWhile = PromptInputForBool("Do you want to add one more item? (Answer y or n)");
+            keepWhile = PromptInputForBool("\nDo you want to add one more item? (Answer y or n)");
         }
 
         return models;

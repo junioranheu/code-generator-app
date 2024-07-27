@@ -106,7 +106,7 @@ public class {className}Controller(");
 
     [AllowAnonymous]
     [HttpDelete]
-    public async Task<ActionResult> Update({paramId})
+    public async Task<ActionResult> Delete({paramId})
     {{
         await _delete.Execute({GetStringLowerCaseFirstLetter(className)}Id);
         return NoContent();
