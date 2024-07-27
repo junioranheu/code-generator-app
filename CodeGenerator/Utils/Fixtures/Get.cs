@@ -16,9 +16,9 @@ public static class Get
         return TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone);
     }
 
-    public static string GetMainFolderName(string solutionName)
+    public static string GetMainFolderName(string solutionName, Guid guid)
     {
-        return $"{solutionName} {FormatDateTime(GetDateTime(), DateTimeFormat.FileName)} {Guid.NewGuid()}";
+        return $"{solutionName} {FormatDateTime(GetDateTime(), DateTimeFormat.FileName)} {guid}";
     }
 
     public static string GetStrCapitalizedFirstLetter(string input)

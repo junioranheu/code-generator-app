@@ -21,9 +21,9 @@ app.UseHttpsRedirection();
 app.MapPost("/GenerateCode", (GenerateCodeRequest request) =>
 {
     request.IsGenerateZip = true;
-    byte[] bytes = Main.Execute(request);
+    (byte[] bytes, Guid guid) = Main.Execute(request);
 
-    return Results.File(bytes, "application/zip", $"{request.SolutionName}{Guid.NewGuid()}.zip");
+    return Results.File(bytes, "application/zip", $"{request.SolutionName}{guid}.zip");
 });
 
 app.Run();

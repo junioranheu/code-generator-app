@@ -11,11 +11,11 @@ namespace CodeGenerator.Console.Utils.Fixtures;
 
 public static class Generate
 {
-    public static string GenerateDefaultDirectories(string solutionName, bool isGenerateZip)
+    public static string GenerateDefaultDirectories(string solutionName, bool isGenerateZip, Guid guid)
     {
         #region Create main folder
         string rootPath = string.Empty;
-        string folderName = GetMainFolderName(solutionName);
+        string folderName = GetMainFolderName(solutionName, guid);
 
         if (isGenerateZip)
         {

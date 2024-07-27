@@ -8,12 +8,13 @@ namespace CodeGenerator.Console;
 
 public class Main
 {
-    public static byte[] Execute(GenerateCodeRequest request)
+    public static (byte[] bytes, Guid guid) Execute(GenerateCodeRequest request)
     {
         (string solutionName, string contextName, bool isPKGuid, List<Model> models, bool isGenerateZip) = request;
 
         CheckVariables(solutionName, contextName, models);
-        string rootPath = GenerateDefaultDirectories(solutionName, isGenerateZip);
+        Guid guid = Guid.NewGuid();
+        string rootPath = GenerateDefaultDirectories(solutionName, isGenerateZip, guid);
 
         foreach (var model in models)
         {
@@ -43,11 +44,11 @@ public class Main
 
             DeleteFile(rootPathZipFile);
 
-            return bytes;
+            return (bytes, guid);
         }
         #endregion
 
-        return Array.Empty<byte>();
+        return (Array.Empty<byte>(), guid);
     }
 
     #region Misc
