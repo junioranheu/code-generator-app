@@ -1,4 +1,5 @@
 ﻿using CodeGenerator.Console.Models;
+using Main = CodeGenerator.Console.Main;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,11 +18,10 @@ app.UseHttpsRedirection();
 
 app.MapPost("/GenerateCode", (GenerateCodeRequest request) =>
 {
-    var (solutionName, contextName, isPKGuid, models, isGenerateZip) = request;
+    request.IsGenerateZip = true;
+    byte[] bytes = Main.Execute(request);
 
-    // Your logic here
-
-    return Results.Ok("Code generated successfully.");
+    return Results.Ok("Code generated successfully");
 });
 
 app.Run();

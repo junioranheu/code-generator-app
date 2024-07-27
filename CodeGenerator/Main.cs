@@ -10,7 +10,7 @@ public class Main
 {
     public static byte[] Execute(GenerateCodeRequest request)
     {
-        var (solutionName, contextName, isPKGuid, models, isGenerateZip) = request;
+        (string solutionName, string contextName, bool isPKGuid, List<Model> models, bool isGenerateZip) = request;
 
         CheckVariables(solutionName, contextName, models);
         string rootPath = GenerateDefaultDirectories(solutionName, isGenerateZip);
