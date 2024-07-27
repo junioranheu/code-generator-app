@@ -1,6 +1,7 @@
 ﻿using CodeGenerator.Console.Models;
 using Main = CodeGenerator.Console.Main;
 
+#region Program
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -15,13 +16,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+#endregion
 
 app.MapPost("/GenerateCode", (GenerateCodeRequest request) =>
 {
     request.IsGenerateZip = true;
     byte[] bytes = Main.Execute(request);
 
-    return Results.Ok("Code generated successfully");
+    return Results.File(bytes, "application/zip", $"{request.SolutionName}{Guid.NewGuid()}.zip");
 });
 
 app.Run();
