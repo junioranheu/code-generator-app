@@ -4,14 +4,17 @@ using CodeGenerator.Console.Models;
 using static CodeGenerator.Console.Utils.Fixtures.Prompt;
 
 #region Input
-string solutionName = PromptInput("Solution name?");
-string contextName = PromptInput("Context name?");
-bool isPKGuid = PromptInputForBool("Are the primary keys (PKs) Guids?");
-bool isGenerateZip = PromptInputForBool("Do you want to generate a ZIP file?");
-List<Model> models = PromptInputForModel();
+GenerateCodeRequest request = new()
+{
+    SolutionName = PromptInput("Solution name?"),
+    ContextName = PromptInput("Context name?"),
+    IsPKGuid = PromptInputForBool("Are the primary keys (PKs) Guids?"),
+    IsGenerateZip = PromptInputForBool("Do you want to generate a ZIP file?"),
+    Models = PromptInputForModel()
+};
 #endregion
 
-Main.Execute(solutionName, contextName, isPKGuid, models, isGenerateZip);
+Main.Execute(request);
 
 PromptLog("Press any key to exit the program", type: LogEnum.Info);
 Console.ReadKey();
