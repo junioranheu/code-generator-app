@@ -7,7 +7,7 @@ using static CodeGenerator.Utils.Fixtures.Get;
 string INPUT_solutionName = "Anheu";
 string INPUT_contextName = "AnheuContext";
 bool INPUT_isFKGuid = true;
-bool INPUT_isGenerateZip = false;
+bool INPUT_isGenerateZip = true;
 
 List<Model> INPUT_models =
 [

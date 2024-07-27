@@ -222,7 +222,20 @@ public static class Get
                 string attrName = parts[0];
                 string attrType = parts[1];
 
-                string formattedText = customText.Replace("REPLACE_VAR_NAME", attrName).Replace("REPLACE_VAR_TYPE", attrType);
+                string formattedText = string.Empty;
+
+                if (!GetIsCommonTypeName(attrType))
+                {
+                    stringBuilder.AppendLine($"[ForeignKey(nameof({attrName}))]");
+                    stringBuilder.AppendLine($"public int {attrName}Id {{ get; set; }}");
+
+                    formattedText = customText.Replace("REPLACE_VAR_NAME", GetStrPlural(attrName)).Replace("REPLACE_VAR_TYPE", $"{attrType}?");
+                }
+                else
+                {
+                    formattedText = customText.Replace("REPLACE_VAR_NAME", attrName).Replace("REPLACE_VAR_TYPE", attrType);
+                }
+
                 stringBuilder.AppendLine(formattedText);
 
                 if (i < max)
@@ -405,5 +418,29 @@ public static class Get
         }
 
         return $"{directory.FullName}/{projectName}";
+    }
+
+    public static bool GetIsCommonTypeName(string input)
+    {
+        HashSet<string> CommonTypeNames = new()
+        {
+            "string",
+            "bool",
+            "int",
+            "double",
+            "float",
+            "DateTime",
+            "char",
+            "byte",
+            "short",
+            "long",
+            "decimal",
+            "uint",
+            "ulong",
+            "ushort",
+            "sbyte"
+        };
+
+        return CommonTypeNames.Contains(input);
     }
 }
