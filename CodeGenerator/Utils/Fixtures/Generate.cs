@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.IO.Compression;
+using System.Runtime.InteropServices;
+using CodeGenerator.Consts;
 using CodeGenerator.Enums;
 using CodeGenerator.Models;
 using static CodeGenerator.Utils.Fixtures.Get;
@@ -16,7 +18,7 @@ public static class Generate
         if (isGenerateZip)
         {
             string projectDirectory = GetProjectDirectory();
-            string pathTemp = $"{projectDirectory}/Temp";
+            string pathTemp = $"{projectDirectory}/{Misc.FolderTemp}";
 
             if (!Directory.Exists(pathTemp))
             {
@@ -101,5 +103,43 @@ public static class Generate
             File.WriteAllText(content.FileFinalPath, content.Value.TrimEnd());
             GetLog($"File {GetStringAfterText(content.FileFinalPath, $"{content.SolutionName}.")} has been successfully generated");
         }
+    }
+
+    public static void GenerateZipFolder(string solutionName, string pathToZip, string pathToSaveTheNewZip = "")
+    {
+        if (string.IsNullOrEmpty(pathToSaveTheNewZip))
+        {
+            pathToSaveTheNewZip = pathToZip;
+        }
+
+        if (string.IsNullOrEmpty(pathToSaveTheNewZip))
+        {
+            throw new ArgumentException("Zip file path cannot be null or empty", nameof(pathToSaveTheNewZip));
+        }
+
+        string extension = ".zip";
+
+        if (!pathToSaveTheNewZip.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+        {
+            pathToSaveTheNewZip += extension;
+        }
+
+        if (string.IsNullOrEmpty(pathToZip))
+        {
+            throw new ArgumentException("Source directory cannot be null or empty", nameof(pathToZip));
+        }
+
+        if (!Directory.Exists(pathToZip))
+        {
+            throw new ArgumentException("Source directory does not exist", nameof(pathToZip));
+        }
+
+        if (File.Exists(pathToSaveTheNewZip))
+        {
+            File.Delete(pathToSaveTheNewZip);
+        }
+
+        ZipFile.CreateFromDirectory(pathToZip, pathToSaveTheNewZip, CompressionLevel.Optimal, false);
+        GetLog($"Folder {GetStringAfterText(pathToZip, $"{solutionName}.")} has been successfully zipped");
     }
 }

@@ -33,7 +33,7 @@ public class Main
 
         if (isGenerateZip)
         {
-            // ZIP rootPath;
+            GenerateZipFolder(solutionName, pathToZip: rootPath);
         }
 
         return rootPath;

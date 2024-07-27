@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.IO.Compression;
 using System.Reflection;
 using System.Text;
 using CodeGenerator.Enums;
@@ -160,6 +161,21 @@ public static class Get
         if (index != -1)
         {
             return inputSpan[(index + searchTextSpan.Length)..].ToString();
+        }
+
+        return input.Replace("\\", "/");
+    }
+
+    public static string GetStringBeforeText(string input, string searchText)
+    {
+        ReadOnlySpan<char> inputSpan = input.AsSpan();
+        ReadOnlySpan<char> searchTextSpan = searchText.AsSpan();
+
+        int index = inputSpan.IndexOf(searchTextSpan);
+
+        if (index != -1)
+        {
+            return inputSpan[..index].ToString();
         }
 
         return input.Replace("\\", "/");
