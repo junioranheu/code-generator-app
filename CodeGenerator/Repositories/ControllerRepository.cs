@@ -8,7 +8,7 @@ namespace CodeGenerator.Repositories;
 
 public sealed class ControllerRepository
 {
-    public static List<Content> GenerateController(string solutionName, string rootPath, string className, List<string> props, bool isFKGuid)
+    public static List<Content> GenerateController(string solutionName, string rootPath, string className, List<string> props, bool isPKGuid)
     {
         ExtensionsEnum extension = ExtensionsEnum.CS;
         ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.Controller;
@@ -16,7 +16,7 @@ public sealed class ControllerRepository
         List<Content> content =
         [
             new(
-                value: GenerateContent(solutionName, className, props, isFKGuid),
+                value: GenerateContent(solutionName, className, props, isPKGuid),
                 contentDirectory,
                 extension,
                 solutionName,
@@ -27,7 +27,7 @@ public sealed class ControllerRepository
         return content;
     }
 
-    private static string GenerateContent(string solutionName, string className, List<string> props, bool isFKGuid)
+    private static string GenerateContent(string solutionName, string className, List<string> props, bool isPKGuid)
     {
         StringBuilder content = new();
         string parameters = GenerateParametersStringByProps(props);
@@ -35,7 +35,7 @@ public sealed class ControllerRepository
         string parametersWithQuestionMark = GenerateParametersStringByProps(props, addQuestionMark: true);
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<UseCaseEnum>();
         List<string> contentPathEnums_LowerCase = contentPathEnums.Select(x => GetStringLowerCaseFirstLetter(x)).ToList();
-        string paramId = GetClassId(className, isFKGuid, isLowerCaseFirstLetter: true); 
+        string paramId = GetClassId(className, isPKGuid, isLowerCaseFirstLetter: true); 
 
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;");
 

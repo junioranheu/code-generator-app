@@ -1,4 +1,5 @@
 ﻿using CodeGenerator.Enums;
+using CodeGenerator.Models;
 using static CodeGenerator.Utils.Fixtures.Format;
 using static CodeGenerator.Utils.Fixtures.Get;
 
@@ -13,7 +14,7 @@ public static class Prompt
 
         if (string.IsNullOrEmpty(input))
         {
-            throw new ArgumentException("User input can not be empty", nameof(input));
+            throw new ArgumentException("User input can not be empty");
         }
 
         return input;
@@ -26,10 +27,30 @@ public static class Prompt
 
         if (string.IsNullOrEmpty(input))
         {
-            throw new ArgumentException("User input can not be empty", nameof(input));
+            throw new ArgumentException("User input can not be empty");
         }
 
         return input.Equals("y", StringComparison.CurrentCultureIgnoreCase);
+    }
+
+    public static List<Model> PromptInputForModel()
+    {
+        List<Model> models = new();
+        bool keepWhile = true;
+
+        Console.WriteLine("Class name example: Person");
+        Console.WriteLine("Class name example: Name string LastName string Age int Height double IsUnder18 bool\n");
+
+        while (keepWhile)
+        {
+            string className = PromptInput("\nClass name:");
+            string props = PromptInput("Props:");
+            models.Add(new() { Name = className, Props = props });
+
+            keepWhile = PromptInputForBool("Do you want to add one more item? (Answer y or n)");
+        }
+
+        return models;
     }
 
     public static string PromptLog(string msg, LogEnum? type = LogEnum.Success)

@@ -9,10 +9,10 @@ namespace CodeGenerator.Repositories;
 public sealed class UseCaseRepository
 {
     #region Main
-    public static List<Content> GenerateUseCaseAndAllItsDependencies(string solutionName, string context, string rootPath, string useCaseName, List<string> props, bool isFKGuid)
+    public static List<Content> GenerateUseCaseAndAllItsDependencies(string solutionName, string context, string rootPath, string useCaseName, List<string> props, bool isPKGuid)
     {
         List<string> contentPathEnums = GenerateFolders(solutionName, rootPath, useCaseName);
-        List<Content> finalContent = GenerateContent(solutionName, context, rootPath, useCaseName, props, contentPathEnums, isFKGuid);
+        List<Content> finalContent = GenerateContent(solutionName, context, rootPath, useCaseName, props, contentPathEnums, isPKGuid);
         GenerateDependencyInjection(finalContent, solutionName, rootPath, useCaseName, contentPathEnums);
 
         return finalContent;
@@ -30,7 +30,7 @@ public sealed class UseCaseRepository
         return contentPathEnums;
     }
 
-    private static List<Content> GenerateContent(string solutionName, string context, string rootPath, string useCaseName, List<string> props, List<string> contentPathEnums, bool isFKGuid)
+    private static List<Content> GenerateContent(string solutionName, string context, string rootPath, string useCaseName, List<string> props, List<string> contentPathEnums, bool isPKGuid)
     {
         List<Content> finalContent = [];
         ExtensionsEnum extension = ExtensionsEnum.CS;
@@ -41,7 +41,7 @@ public sealed class UseCaseRepository
             string fileName = GetFileName(useCaseName, item, isInterface: false);
             string interfaceFileName = GetFileName(useCaseName, item, isInterface: true);
 
-            (string content, string parameters) = CheckUseCaseEnumAndGenerateContent(item, solutionName, context, useCaseName, props, isFKGuid);
+            (string content, string parameters) = CheckUseCaseEnumAndGenerateContent(item, solutionName, context, useCaseName, props, isPKGuid);
 
             if (string.IsNullOrEmpty(content))
             {
@@ -69,7 +69,7 @@ public sealed class UseCaseRepository
 
         // Input;
         finalContent.Add(new(
-            value: EntityRepository.GenerateContent(solutionName, className: useCaseName, props, isFKGuid, isInput: true),
+            value: EntityRepository.GenerateContent(solutionName, className: useCaseName, props, isPKGuid, isInput: true),
             contentDirectory,
             extension,
             solutionName,
@@ -276,10 +276,10 @@ public sealed class Update{useCaseName}({context} context) : IUpdate{useCaseName
         return (GetIndentedCode(content.ToString()), parameters);
     }
 
-    private static (string content, string parameters) GenerateUseCase_Delete(string solutionName, string context, string useCaseName, bool isFKGuid)
+    private static (string content, string parameters) GenerateUseCase_Delete(string solutionName, string context, string useCaseName, bool isPKGuid)
     {
         StringBuilder content = new();
-        string parameters = GetClassId(useCaseName, isFKGuid, isLowerCaseFirstLetter: true);
+        string parameters = GetClassId(useCaseName, isPKGuid, isLowerCaseFirstLetter: true);
 
         content.AppendLine($@"using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
@@ -314,7 +314,7 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
         return Path.Combine(GetStrPlural(useCaseName), item, $"{(isInterface ? "I" : string.Empty)}{item}{useCaseName}");
     }
 
-    private static (string content, string parameters) CheckUseCaseEnumAndGenerateContent(string useCaseType, string solutionName, string context, string useCaseName, List<string> props, bool isFKGuid)
+    private static (string content, string parameters) CheckUseCaseEnumAndGenerateContent(string useCaseType, string solutionName, string context, string useCaseName, List<string> props, bool isPKGuid)
     {
         if (useCaseType == GetEnumDesc(UseCaseEnum.Get))
         {
@@ -338,7 +338,7 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
         }
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Delete))
         {
-            return GenerateUseCase_Delete(solutionName, context, useCaseName, isFKGuid);
+            return GenerateUseCase_Delete(solutionName, context, useCaseName, isPKGuid);
         } 
 
         throw new NotImplementedException();

@@ -371,9 +371,9 @@ public static class Get
         }
     }
 
-    public static string GetClassId(string className, bool isFKGuid, bool isLowerCaseFirstLetter)
+    public static string GetClassId(string className, bool isPKGuid, bool isLowerCaseFirstLetter)
     {
-        return $"{(isFKGuid ? "Guid" : "int")} {(isLowerCaseFirstLetter ? GetStringLowerCaseFirstLetter(className) : className)}Id";
+        return $"{(isPKGuid ? "Guid" : "int")} {(isLowerCaseFirstLetter ? GetStringLowerCaseFirstLetter(className) : className)}Id";
     }
 
     public static string GetSolutionName()

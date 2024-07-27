@@ -8,7 +8,7 @@ namespace CodeGenerator.Repositories;
 
 public sealed class EntityRepository
 {
-    public static List<Content> GenerateEntity(string solutionName, string rootPath, string className, List<string> props, bool isFKGuid)
+    public static List<Content> GenerateEntity(string solutionName, string rootPath, string className, List<string> props, bool isPKGuid)
     {
         ExtensionsEnum extension = ExtensionsEnum.CS;
         ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.Entity;
@@ -16,7 +16,7 @@ public sealed class EntityRepository
         List<Content> content =
         [
             new (
-                value: GenerateContent(solutionName, className, props, isFKGuid),
+                value: GenerateContent(solutionName, className, props, isPKGuid),
                 contentDirectory,
                 extension,
                 solutionName,
@@ -27,10 +27,10 @@ public sealed class EntityRepository
         return content;
     }
 
-    public static string GenerateContent(string solutionName, string className, List<string> props, bool isFKGuid, bool isInput = false, bool isOutput = false)
+    public static string GenerateContent(string solutionName, string className, List<string> props, bool isPKGuid, bool isInput = false, bool isOutput = false)
     {
         StringBuilder content = new();
-        string paramId = GetClassId(className, isFKGuid, isLowerCaseFirstLetter: false);
+        string paramId = GetClassId(className, isPKGuid, isLowerCaseFirstLetter: false);
         bool isNormalEntity = (!isInput && !isOutput);
 
         if (isNormalEntity)
