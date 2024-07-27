@@ -11,11 +11,19 @@ public static class Generate
     {
         #region Create main folder
         string rootPath = string.Empty;
+        string folderName = GetMainFolderName(solutionName);
 
         if (isGenerateZip)
         {
             string projectDirectory = GetProjectDirectory();
-            rootPath = Path.Combine(projectDirectory, "Temp");
+            string pathTemp = $"{projectDirectory}/Temp";
+
+            if (!Directory.Exists(pathTemp))
+            {
+                Directory.CreateDirectory(pathTemp);
+            }
+
+            rootPath = Path.Combine(pathTemp, folderName);
         }
         else
         {
@@ -35,17 +43,11 @@ public static class Generate
                 throw new NotSupportedException("Unsupported operating system");
             }
 
-            string folderName = GetMainFolderName(solutionName);
             rootPath = Path.Combine(desktopPath, folderName);
-
-            if (Directory.Exists(rootPath))
-            {
-                Directory.Delete(rootPath, true);
-            }
-
             Directory.CreateDirectory(rootPath);
-            GetLog($"Main folder has been successfully generated: {folderName}");
-        }  
+        }
+
+        GetLog($"Main folder has been successfully generated: {folderName}");
         #endregion
 
         #region Create children folders;

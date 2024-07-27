@@ -31,6 +31,11 @@ public class Main
             #endregion
         }
 
+        if (isGenerateZip)
+        {
+            // ZIP rootPath;
+        }
+
         return rootPath;
     }
 }
