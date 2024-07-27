@@ -4,6 +4,7 @@ using CodeGenerator.Consts;
 using CodeGenerator.Enums;
 using CodeGenerator.Models;
 using static CodeGenerator.Utils.Fixtures.Get;
+using static CodeGenerator.Utils.Fixtures.Delete;
 
 namespace CodeGenerator.Utils.Fixtures;
 
@@ -105,7 +106,7 @@ public static class Generate
         }
     }
 
-    public static void GenerateZipFolder(string solutionName, string pathToZip, string pathToSaveTheNewZip = "")
+    public static string GenerateZipFolder(string solutionName, string pathToZip, string pathToSaveTheNewZip = "")
     {
         if (string.IsNullOrEmpty(pathToSaveTheNewZip))
         {
@@ -140,6 +141,10 @@ public static class Generate
         }
 
         ZipFile.CreateFromDirectory(pathToZip, pathToSaveTheNewZip, CompressionLevel.Optimal, false);
-        GetLog($"Folder {GetStringAfterText(pathToZip, $"{solutionName}.")} has been successfully zipped");
+        GetLog($"Folder {GetStringAfterText(pathToZip, GetSolutionName())} has been successfully zipped");
+
+        DeleteFolder(pathToZip);
+
+        return pathToSaveTheNewZip;
     }
 }

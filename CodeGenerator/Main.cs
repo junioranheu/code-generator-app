@@ -1,5 +1,6 @@
 ﻿using CodeGenerator.Models;
 using CodeGenerator.Repositories;
+using static CodeGenerator.Utils.Fixtures.Delete;
 using static CodeGenerator.Utils.Fixtures.Generate;
 using static CodeGenerator.Utils.Fixtures.Get;
 
@@ -7,7 +8,7 @@ namespace CodeGenerator;
 
 public class Main
 {
-    public static string Execute(string solutionName, string contextName, bool isFKGuid, List<Model> models, bool isGenerateZip)
+    public static byte[] Execute(string solutionName, string contextName, bool isFKGuid, List<Model> models, bool isGenerateZip)
     {
         string rootPath = GenerateDefaultDirectories(solutionName, isGenerateZip);
 
@@ -33,9 +34,14 @@ public class Main
 
         if (isGenerateZip)
         {
-            GenerateZipFolder(solutionName, pathToZip: rootPath);
+            string rootPathZipFile = GenerateZipFolder(solutionName, pathToZip: rootPath);
+            byte[] bytes = GetArrayOfBytesFromPath(rootPathZipFile);
+
+            DeleteFile(rootPathZipFile);
+
+            return bytes;
         }
 
-        return rootPath;
+        return Array.Empty<byte>();
     }
 }

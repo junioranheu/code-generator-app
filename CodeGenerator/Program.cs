@@ -16,9 +16,7 @@ List<Model> INPUT_models =
 ];
 #endregion
 
-string rootPath = Main.Execute(INPUT_solutionName, INPUT_contextName, INPUT_isFKGuid, INPUT_models, INPUT_isGenerateZip);
+Main.Execute(INPUT_solutionName, INPUT_contextName, INPUT_isFKGuid, INPUT_models, INPUT_isGenerateZip);
 
 GetLog("Press any key to exit the program", type: LogEnum.Info);
 Console.ReadKey();
-
-Directory.Delete(rootPath, true); // XD

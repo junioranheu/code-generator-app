@@ -459,4 +459,19 @@ public static class Get
 
         return CommonTypeNames.Contains(input);
     }
+
+    public static byte[] GetArrayOfBytesFromPath(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            throw new ArgumentException("File path cannot be null or empty", nameof(path));
+        }
+
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("File not found", path);
+        }
+
+        return File.ReadAllBytes(path);
+    }
 }
