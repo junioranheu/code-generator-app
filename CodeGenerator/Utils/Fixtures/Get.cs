@@ -381,11 +381,11 @@ public static class Get
         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
         DirectoryInfo directoryInfo = new(currentDirectory);
 
-        while (directoryInfo != null)
+        while (directoryInfo is not null)
         {
             var solutionFile = directoryInfo.GetFiles("*.sln").FirstOrDefault();
 
-            if (solutionFile != null)
+            if (solutionFile is not null)
             {
                 return Path.GetFileNameWithoutExtension(solutionFile.Name);
             }
