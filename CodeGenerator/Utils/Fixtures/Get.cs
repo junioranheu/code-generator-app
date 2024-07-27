@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.IO.Compression;
 using System.Reflection;
 using System.Text;
 using CodeGenerator.Enums;
@@ -40,26 +39,6 @@ public static class Get
         DescriptionAttribute? attribute = CustomAttributeExtensions.GetCustomAttribute<DescriptionAttribute>(memInfo[0]);
 
         return attribute?.Description ?? string.Empty;
-    }
-
-    public static string GetLog(string msg, LogEnum? type = LogEnum.Success)
-    {
-        ConsoleColor originalColor = ConsoleColor.Gray;
-
-        Console.ForegroundColor = type switch
-        {
-            LogEnum.Success => ConsoleColor.Cyan,
-            LogEnum.Fail => ConsoleColor.Red,
-            LogEnum.Warning => ConsoleColor.Yellow,
-            LogEnum.Info => originalColor,
-            _ => originalColor,
-        };
-
-        string final = $"{FormatDateTime(GetDateTime(), DateTimeFormat.CompleteDateTime)} | {msg}";
-        Console.WriteLine(final);
-        Console.ForegroundColor = originalColor;
-
-        return final;
     }
 
     /// <summary>

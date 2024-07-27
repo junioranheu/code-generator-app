@@ -1,13 +1,13 @@
 ﻿using CodeGenerator;
 using CodeGenerator.Enums;
 using CodeGenerator.Models;
-using static CodeGenerator.Utils.Fixtures.Get;
+using static CodeGenerator.Utils.Fixtures.Prompt;
 
 #region Input
-string INPUT_solutionName = "Anheu";
-string INPUT_contextName = "AnheuContext";
-bool INPUT_isFKGuid = true;
-bool INPUT_isGenerateZip = true;
+string solutionName = PromptInput("Solution name?");
+string contextName = PromptInput("Context name?");
+bool isFKGuid = PromptInputForBool("Are the PKs Guids?");
+bool isGenerateZip = PromptInputForBool("Do you want to generate a zip file?");
 
 List<Model> INPUT_models =
 [
@@ -16,7 +16,7 @@ List<Model> INPUT_models =
 ];
 #endregion
 
-Main.Execute(INPUT_solutionName, INPUT_contextName, INPUT_isFKGuid, INPUT_models, INPUT_isGenerateZip);
+Main.Execute(solutionName, contextName, isFKGuid, INPUT_models, isGenerateZip);
 
-GetLog("Press any key to exit the program", type: LogEnum.Info);
+PromptLog("Press any key to exit the program", type: LogEnum.Info);
 Console.ReadKey();

@@ -3,8 +3,9 @@ using System.Runtime.InteropServices;
 using CodeGenerator.Consts;
 using CodeGenerator.Enums;
 using CodeGenerator.Models;
-using static CodeGenerator.Utils.Fixtures.Get;
 using static CodeGenerator.Utils.Fixtures.Delete;
+using static CodeGenerator.Utils.Fixtures.Get;
+using static CodeGenerator.Utils.Fixtures.Prompt;
 
 namespace CodeGenerator.Utils.Fixtures;
 
@@ -50,7 +51,7 @@ public static class Generate
             Directory.CreateDirectory(rootPath);
         }
 
-        GetLog($"Main folder has been successfully generated: {folderName}");
+        PromptLog($"Main folder has been successfully generated: {folderName}");
         #endregion
 
         #region Create children folders;
@@ -81,7 +82,7 @@ public static class Generate
                 }
 
                 Directory.CreateDirectory(finalPath);
-                GetLog($"Folder {GetStringAfterText(finalPath, $"{solutionName}.")} has been successfully generated");
+                PromptLog($"Folder {GetStringAfterText(finalPath, $"{solutionName}.")} has been successfully generated");
             }
         }
     }
@@ -94,7 +95,7 @@ public static class Generate
         }
 
         Directory.CreateDirectory(folderPath);
-        GetLog($"Folder {GetStringAfterText(folderPath, $"{solutionName}.")} has been successfully generated");
+        PromptLog($"Folder {GetStringAfterText(folderPath, $"{solutionName}.")} has been successfully generated");
     }
 
     public static void GenerateFiles(List<Content> contents, bool isGenerateZip)
@@ -102,7 +103,7 @@ public static class Generate
         foreach (var content in contents)
         {
             File.WriteAllText(content.FileFinalPath, content.Value.TrimEnd());
-            GetLog($"File {GetStringAfterText(content.FileFinalPath, $"{content.SolutionName}.")} has been successfully generated");
+            PromptLog($"File {GetStringAfterText(content.FileFinalPath, $"{content.SolutionName}.")} has been successfully generated");
         }
     }
 
@@ -141,7 +142,7 @@ public static class Generate
         }
 
         ZipFile.CreateFromDirectory(pathToZip, pathToSaveTheNewZip, CompressionLevel.Optimal, false);
-        GetLog($"Folder {GetStringAfterText(pathToZip, GetSolutionName())} has been successfully zipped");
+        PromptLog($"Folder {GetStringAfterText(pathToZip, GetSolutionName())} has been successfully zipped");
 
         DeleteFolder(pathToZip);
 

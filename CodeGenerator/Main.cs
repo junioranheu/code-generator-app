@@ -32,6 +32,7 @@ public class Main
             #endregion
         }
 
+        #region zip
         if (isGenerateZip)
         {
             string rootPathZipFile = GenerateZipFolder(solutionName, pathToZip: rootPath);
@@ -41,6 +42,7 @@ public class Main
 
             return bytes;
         }
+        #endregion
 
         return Array.Empty<byte>();
     }

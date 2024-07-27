@@ -1,4 +1,5 @@
 ﻿using static CodeGenerator.Utils.Fixtures.Get;
+using static CodeGenerator.Utils.Fixtures.Prompt;
 
 namespace CodeGenerator.Utils.Fixtures;
 
@@ -12,7 +13,7 @@ public static class Delete
         }
 
         Directory.Delete(path, true);
-        GetLog($"Folder {GetStringAfterText(path, GetSolutionName())} has been deleted");
+        PromptLog($"Folder {GetStringAfterText(path, GetSolutionName())} has been deleted");
     }
 
     public static void DeleteFile(string path)
@@ -23,6 +24,6 @@ public static class Delete
         }
 
         File.Delete(path);
-        GetLog($"Folder {GetStringAfterText(path, GetSolutionName())} has been deleted");
+        PromptLog($"Folder {GetStringAfterText(path, GetSolutionName())} has been deleted");
     }
 }
