@@ -26,16 +26,16 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore .NET dependencies
-        run: dotnet restore
+        run: dotnet restore CodeGenerator.API/CodeGenerator.API.csproj
 
       - name: Build .NET project
-        run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }}
+        run: dotnet build CodeGenerator.API/CodeGenerator.API.csproj --configuration ${{ env.BUILD_CONFIGURATION }}
 
       - name: Run unit tests
-        run: dotnet test --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal
+        run: dotnet test CodeGenerator.API/CodeGenerator.API.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal
 
       - name: Publish .NET project
-        run: dotnet publish --configuration ${{ env.BUILD_CONFIGURATION }} --output ${{ github.workspace }}/publish
+        run: dotnet publish CodeGenerator.API/CodeGenerator.API.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --output ${{ github.workspace }}/publish
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
