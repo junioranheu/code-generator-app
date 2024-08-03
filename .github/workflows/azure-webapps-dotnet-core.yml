@@ -39,6 +39,9 @@ jobs:
       - name: Publish with dotnet
         run: dotnet publish CodeGenerator.API/CodeGenerator.API.csproj --configuration Release --output ${{ github.workspace }}/publish
 
+      - name: List published files
+        run: ls -R ${{ github.workspace }}/publish
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
@@ -57,6 +60,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: .net-api
+
+      - name: List files in artifact
+        run: ls -R
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
