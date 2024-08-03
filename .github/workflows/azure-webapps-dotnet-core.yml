@@ -56,7 +56,7 @@ jobs:
           name: .net-api
 
       - name: List files in artifact
-        run: ls -R
+        run: ls -R ${{ github.workspace }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
