@@ -1,4 +1,5 @@
-﻿using CodeGenerator.Console.Models;
+﻿using CodeGenerator.Console.Enums;
+using CodeGenerator.Console.Models;
 using Main = CodeGenerator.Console.Main;
 
 #region Program
@@ -32,6 +33,7 @@ app.UseCors("AllowAll");
 app.MapPost("/GenerateCode", (GenerateCodeRequest request) =>
 {
     request.IsGenerateZip = true;
+    request.RequestType = RequestTypeEnum.API;
     (byte[] bytes, Guid guid) = Main.Execute(request);
 
     return Results.File(bytes, "application/zip", $"{request.SolutionName}{guid}.zip");

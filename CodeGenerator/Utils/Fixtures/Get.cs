@@ -396,10 +396,21 @@ public static class Get
         return string.Empty;
     }
 
-    public static string GetProjectDirectory()
+    public static string GetProjectDirectory(RequestTypeEnum requestType)
     {
-        string assemblyPath = Assembly.GetExecutingAssembly().Location;
-        DirectoryInfo directory = new(Path.GetDirectoryName(assemblyPath) ?? string.Empty);
+        DirectoryInfo directory;
+
+        if (requestType == RequestTypeEnum.API)
+        {
+            string basePath = AppContext.BaseDirectory;
+            directory = new(basePath ?? string.Empty);
+        }
+        else
+        {
+            string assemblyPath = Assembly.GetExecutingAssembly().Location;
+            directory = new(Path.GetDirectoryName(assemblyPath) ?? string.Empty);
+        }
+
         string projectName = GetSolutionName();
 
         while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, ".git")) && !File.Exists(Path.Combine(directory.FullName, $"{projectName}.sln")))

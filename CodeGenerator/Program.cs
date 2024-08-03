@@ -11,7 +11,8 @@ GenerateCodeRequest request = new()
     ContextName = GetStrCapitalizedFirstLetter(PromptInput("Context name?")),
     IsPKGuid = PromptInputForBool("Are the primary keys (PKs) Guids?"),
     IsGenerateZip = PromptInputForBool("Do you want to generate a ZIP file?"),
-    Models = PromptInputForModel()
+    Models = PromptInputForModel(),
+    RequestType = RequestTypeEnum.Console
 };
 #endregion
 

@@ -11,7 +11,7 @@ namespace CodeGenerator.Console.Utils.Fixtures;
 
 public static class Generate
 {
-    public static string GenerateDefaultDirectories(string solutionName, bool isGenerateZip, Guid guid)
+    public static string GenerateDefaultDirectories(string solutionName, bool isGenerateZip, Guid guid, RequestTypeEnum requestType)
     {
         #region Create main folder
         string rootPath = string.Empty;
@@ -19,7 +19,7 @@ public static class Generate
 
         if (isGenerateZip)
         {
-            string projectDirectory = GetProjectDirectory();
+            string projectDirectory = GetProjectDirectory(requestType);
             string pathTemp = $"{projectDirectory}/{Misc.FolderTemp}";
 
             if (!Directory.Exists(pathTemp))
