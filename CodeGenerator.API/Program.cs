@@ -41,7 +41,7 @@ app.MapPost("/GenerateCode", (GenerateCodeRequest request) =>
 
 app.MapGet("/Teste", () =>
 {
-    return "aweonao";
+    return "XD";
 });
 
 app.Run();
