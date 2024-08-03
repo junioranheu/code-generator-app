@@ -41,7 +41,7 @@ app.MapPost("/GenerateCode", (GenerateCodeRequest request) =>
 
 app.MapGet("/Teste", () =>
 {
-    return "XD";
+    return DateTime.Now;
 });
 
 app.Run();
