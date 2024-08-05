@@ -9,7 +9,7 @@ on:
 env:
   DOTNET_VERSION: '8.x'  # .NET SDK version to use
   BUILD_CONFIGURATION: 'Release'  # Build configuration
-  AZURE_WEBAPP_NAME: 'anheu-code-generator '  # Your Azure Web App name
+  AZURE_WEBAPP_NAME: 'anheu-code-generator'  # Your Azure Web App name
   AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}  # Azure publish profile secret
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
-          name: .net-api
+          name: dotnet-api
           path: ${{ github.workspace }}/publish
 
   deploy:
@@ -53,14 +53,14 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
-          name: .net-api
+          name: dotnet-api
 
       - name: List files in artifact
-        run: ls -R ${{ github.workspace }}
+        run: ls -R ${{ github.workspace }}/dotnet-api
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ github.workspace }}/publish
+          package: ${{ github.workspace }}/dotnet-api
