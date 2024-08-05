@@ -1,23 +1,42 @@
-﻿using CodeGenerator.Console.Enums;
+﻿using System.IO.Compression;
+using CodeGenerator.Console.Enums;
 using CodeGenerator.Console.Models;
+using Microsoft.AspNetCore.ResponseCompression;
 using Main = CodeGenerator.Console.Main;
 
-#region Program
+#region Builder
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        builder.AllowAnyHeader().AllowAnyMethod().SetIsOriginAllowed((host) => true).AllowCredentials();
     });
 });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddResponseCompression(x =>
+{
+    x.EnableForHttps = true;
+    x.Providers.Add<BrotliCompressionProvider>();
+    x.Providers.Add<GzipCompressionProvider>();
+});
+
+builder.Services.Configure<BrotliCompressionProviderOptions>(x =>
+{
+    x.Level = CompressionLevel.Optimal;
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(x =>
+{
+    x.Level = CompressionLevel.Optimal;
+});
+#endregion
+
+#region App
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -32,11 +51,18 @@ app.UseCors("AllowAll");
 
 app.MapPost("/GenerateCode", (GenerateCodeRequest request) =>
 {
-    request.IsGenerateZip = true;
-    request.RequestType = RequestTypeEnum.API;
-    (byte[] bytes, Guid guid) = Main.Execute(request);
+    try
+    {
+        request.IsGenerateZip = true;
+        request.RequestType = RequestTypeEnum.API;
+        (byte[] bytes, Guid guid) = Main.Execute(request);
 
-    return Results.File(bytes, "application/zip", $"{request.SolutionName}{guid}.zip");
+        return Results.File(bytes, "application/zip", $"{request.SolutionName}{guid}.zip");
+    }
+    catch (Exception ex)
+    {
+        throw new Exception(ex.Message);
+    }
 });
 
 app.MapGet("/Teste", () =>
