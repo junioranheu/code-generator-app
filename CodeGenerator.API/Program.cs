@@ -70,4 +70,16 @@ app.MapGet("/Teste", () =>
     return DateTime.Now;
 });
 
+app.MapGet("/Erro", () =>
+{
+    try
+    {
+        throw new Exception("XD");
+    }
+    catch (Exception ex)
+    {
+        throw new Exception(ex.Message);
+    }
+});
+
 app.Run();
