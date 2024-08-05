@@ -11,48 +11,55 @@ public class Main
 {
     public static (byte[] bytes, Guid guid) Execute(GenerateCodeRequest request)
     {
-        (string solutionName, string contextName, bool isPKGuid, List<Model> models, bool? isGenerateZip, RequestTypeEnum? requestType) = request;
-
-        CheckVariables(solutionName, contextName, models);
-        Guid guid = Guid.NewGuid();
-        string rootPath = GenerateDefaultDirectories(solutionName, isGenerateZip.GetValueOrDefault(), guid, requestType.GetValueOrDefault());
-
-        foreach (var model in models)
+        try
         {
-            List<string> props = GetEntityPropsSplitted(classDefinition: model.Props, rootPath);
+            (string solutionName, string contextName, bool isPKGuid, List<Model> models, bool? isGenerateZip, RequestTypeEnum? requestType) = request;
 
-            #region Entity
-            List<Content> entityContent = EntityRepository.GenerateEntity(solutionName, rootPath, className: model.Name, props, isPKGuid);
-            GenerateFiles(contents: entityContent, isGenerateZip.GetValueOrDefault());
-            #endregion
+            CheckVariables(solutionName, contextName, models);
+            Guid guid = Guid.NewGuid();
+            string rootPath = GenerateDefaultDirectories(solutionName, isGenerateZip.GetValueOrDefault(), guid, requestType.GetValueOrDefault());
 
-            #region UseCase
-            List<Content> useCaseContent = UseCaseRepository.GenerateUseCaseAndAllItsDependencies(solutionName, contextName, rootPath, useCaseName: model.Name, props, isPKGuid);
-            GenerateFiles(contents: useCaseContent, isGenerateZip.GetValueOrDefault());
-            #endregion
-
-            #region Controller
-            List<Content> controllerContent = ControllerRepository.GenerateController(solutionName, rootPath, className: model.Name, props, isPKGuid);
-            GenerateFiles(contents: controllerContent, isGenerateZip.GetValueOrDefault());
-            #endregion
-        }
-
-        #region Zip
-        if (isGenerateZip.GetValueOrDefault())
-        {
-            string rootPathZipFile = GenerateZipFromFolder(solutionName, pathToZip: rootPath);
-            byte[] bytes = GetArrayOfBytesFromPath(rootPathZipFile);
-
-            if (request.RequestType == RequestTypeEnum.API)
+            foreach (var model in models)
             {
-                DeleteFile(rootPathZipFile);
+                List<string> props = GetEntityPropsSplitted(classDefinition: model.Props, rootPath);
+
+                #region Entity
+                List<Content> entityContent = EntityRepository.GenerateEntity(solutionName, rootPath, className: model.Name, props, isPKGuid);
+                GenerateFiles(contents: entityContent, isGenerateZip.GetValueOrDefault());
+                #endregion
+
+                #region UseCase
+                List<Content> useCaseContent = UseCaseRepository.GenerateUseCaseAndAllItsDependencies(solutionName, contextName, rootPath, useCaseName: model.Name, props, isPKGuid);
+                GenerateFiles(contents: useCaseContent, isGenerateZip.GetValueOrDefault());
+                #endregion
+
+                #region Controller
+                List<Content> controllerContent = ControllerRepository.GenerateController(solutionName, rootPath, className: model.Name, props, isPKGuid);
+                GenerateFiles(contents: controllerContent, isGenerateZip.GetValueOrDefault());
+                #endregion
             }
 
-            return (bytes, guid);
-        }
-        #endregion
+            #region Zip
+            if (isGenerateZip.GetValueOrDefault())
+            {
+                string rootPathZipFile = GenerateZipFromFolder(solutionName, pathToZip: rootPath);
+                byte[] bytes = GetArrayOfBytesFromPath(rootPathZipFile);
 
-        return (Array.Empty<byte>(), guid);
+                if (request.RequestType == RequestTypeEnum.API)
+                {
+                    DeleteFile(rootPathZipFile);
+                }
+
+                return (bytes, guid);
+            }
+            #endregion
+
+            return (Array.Empty<byte>(), guid);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
     }
     
     #region Misc
