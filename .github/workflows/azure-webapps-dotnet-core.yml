@@ -44,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dotnet-api
-          path: ${{ github.workspace }}/publish
+          path: publish/
 
   deploy:
     runs-on: ubuntu-latest
@@ -54,13 +54,14 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dotnet-api
+          path: download/
 
       - name: List files in artifact
-        run: ls -R ${{ github.workspace }}/dotnet-api
+        run: ls -R download/
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ github.workspace }}/dotnet-api
+          package: download/
