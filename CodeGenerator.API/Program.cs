@@ -62,7 +62,11 @@ app.MapGet("/GenerateCode", ([FromBody] GenerateCodeRequest request) =>
     }
     catch (Exception ex)
     {
-        throw new Exception(ex.Message);
+        return Results.Problem(
+           detail: ex.Message,
+           statusCode: StatusCodes.Status500InternalServerError,
+           title: "An error occurred while generating the code."
+       );
     }
 });
 
@@ -79,7 +83,11 @@ app.MapGet("/Erro", () =>
     }
     catch (Exception ex)
     {
-        throw new Exception(ex.Message);
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: StatusCodes.Status500InternalServerError,
+            title: "An error occurred while generating the code."
+        );
     }
 });
 
