@@ -8,14 +8,36 @@
 
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CodeGenerator\CodeGenerator.Console.csproj">
-      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
-    </ProjectReference>
+    <None Remove="Zips\" />
+    <None Remove="Zips\Temp\" />
   </ItemGroup>
+
+    <ItemGroup>
+		<None Update="Zips\**">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+    <ItemGroup>
+		<None Update="Zips\Temp\**">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Zips\" />
+      <Folder Include="Zips\Temp\" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\CodeGenerator\CodeGenerator.Console.csproj">
+        <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+      </ProjectReference>
+    </ItemGroup>
 </Project>

@@ -403,7 +403,7 @@ public static class Get
             return "Zips/";
         }
 
-        return "/";
+        return "Zips/";
     }
 
     public static bool GetIsCommonTypeName(string input)
