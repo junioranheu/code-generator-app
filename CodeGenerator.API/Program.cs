@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using CodeGenerator.Console.Enums;
 using CodeGenerator.Console.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Main = CodeGenerator.Console.Main;
 
@@ -49,7 +50,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 #endregion
 
-app.MapGet("/GenerateCode", (GenerateCodeRequest request) =>
+app.MapGet("/GenerateCode", ([FromBody] GenerateCodeRequest request) =>
 {
     try
     {
