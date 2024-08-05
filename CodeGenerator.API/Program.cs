@@ -50,7 +50,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 #endregion
 
-app.MapGet("/GenerateCode", ([FromBody] GenerateCodeRequest request) =>
+app.MapPost("/GenerateCode", (GenerateCodeRequest request) =>
 {
     try
     {
