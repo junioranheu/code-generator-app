@@ -420,7 +420,8 @@ public static class Get
 
         if (directory is null)
         {
-            throw new InvalidOperationException("Project root directory not found.");
+            // throw new InvalidOperationException("Project root directory not found.");
+            return string.Empty;
         }
 
         return $"{directory.FullName}/{projectName}";
