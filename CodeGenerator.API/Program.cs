@@ -1,7 +1,6 @@
 ﻿using System.IO.Compression;
 using CodeGenerator.Console.Enums;
 using CodeGenerator.Console.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Main = CodeGenerator.Console.Main;
 

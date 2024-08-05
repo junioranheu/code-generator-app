@@ -398,33 +398,12 @@ public static class Get
 
     public static string GetProjectDirectory(RequestTypeEnum requestType)
     {
-        DirectoryInfo directory;
-
         if (requestType == RequestTypeEnum.API)
         {
-            string basePath = AppContext.BaseDirectory;
-            directory = new(basePath ?? string.Empty);
-        }
-        else
-        {
-            string assemblyPath = Assembly.GetExecutingAssembly().Location;
-            directory = new(Path.GetDirectoryName(assemblyPath) ?? string.Empty);
+            return "Zips/";
         }
 
-        string projectName = GetSolutionName();
-
-        while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, ".git")) && !File.Exists(Path.Combine(directory.FullName, $"{projectName}.sln")))
-        {
-            directory = directory.Parent!;
-        }
-
-        if (directory is null)
-        {
-            // throw new InvalidOperationException("Project root directory not found.");
-            return string.Empty;
-        }
-
-        return $"{directory.FullName}/{projectName}";
+        return "/";
     }
 
     public static bool GetIsCommonTypeName(string input)
