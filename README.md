@@ -2,7 +2,7 @@
 
 Este projeto é um gerador de código automático desenvolvido em .NET 8. Ele facilita e acelera a criação de APIs, gerando a estrutura inicial do projeto, incluindo as camadas necessárias (API, Domain, Application) e os usings apropriados. Ideal para desenvolvedores que desejam evitar a configuração manual e repetitiva dessas estruturas.
 
-## 🚀 Funcionalidades
+## 🚀 Funcionalidades **[BETA]**
 
 - **Geração de Estrutura de API**: Cria a estrutura inicial da API com todos os arquivos e pastas necessários, incluindo todos os casos de usos típicos (GET, GETALL, POST, INSERT, DELETE, etc).
 - **Configuração de Contexto**: Permite definir o nome do contexto e suas respectivas classes e atributos.
