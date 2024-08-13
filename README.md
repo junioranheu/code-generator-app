@@ -1,4 +1,4 @@
-# Gerador de Código Automático (API) .NET 8
+# Gerador de Código Automático (API) .NET 8 **[BETA]**
 
 Este projeto é um gerador de código automático desenvolvido em .NET 8. Ele facilita e acelera a criação de APIs, gerando a estrutura inicial do projeto, incluindo as camadas necessárias (API, Domain, Application) e os usings apropriados. Ideal para desenvolvedores que desejam evitar a configuração manual e repetitiva dessas estruturas.
 
