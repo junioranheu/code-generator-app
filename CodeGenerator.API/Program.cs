@@ -69,25 +69,4 @@ app.MapPost("/GenerateCode", (GenerateCodeRequest request) =>
     }
 });
 
-app.MapGet("/Teste", () =>
-{
-    return DateTime.Now;
-});
-
-app.MapGet("/Erro", () =>
-{
-    try
-    {
-        throw new Exception("XD");
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(
-            detail: ex.Message,
-            statusCode: StatusCodes.Status500InternalServerError,
-            title: "An error occurred while generating the code."
-        );
-    }
-});
-
 app.Run();
