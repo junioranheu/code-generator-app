@@ -172,7 +172,7 @@ public static class Get
     public static List<string> GetEntityPropsSplitted(string classDefinition, string rootPath)
     {
         List<string> props = [];
-        string[] parts = classDefinition.Split(' ');
+        string[] parts = classDefinition.Trim().Split(' ');
 
         if (parts.Length % 2 != 0)
         {
