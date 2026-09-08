@@ -27,12 +27,19 @@ public sealed class ControllerRepository
         return content;
     }
 
-    public static List<Content> GenerateBaseController(string solutionName, string rootPath)
+    public static List<Content> GenerateControllerBaseAndAllDependencies(string solutionName, string rootPath)
     {
         List<Content> content =
         [
             new(
-                value: GenerateBaseControllerContent(),
+                value: GenerateUserRoleEnumContent(solutionName),
+                contentDirectory: ContentDirectoryEnum.Enum,
+                extension: ExtensionsEnum.CS,
+                solutionName: solutionName,
+                fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName: "UserRoleEnum", contentDirectory: ContentDirectoryEnum.Enum, extension: ExtensionsEnum.CS)
+            ),
+            new(
+                value: GenerateBaseControllerContent(solutionName),
                 contentDirectory: ContentDirectoryEnum.Controller,
                 extension: ExtensionsEnum.CS,
                 solutionName: solutionName,
@@ -43,6 +50,7 @@ public sealed class ControllerRepository
         return content;
     }
 
+    #region extras
     private static string GenerateContent(string solutionName, string className, List<string> props, bool isPKGuid)
     {
         StringBuilder content = new();
@@ -135,8 +143,129 @@ public class {className}Controller(");
         return GetIndentedCode(content.ToString());
     }
 
-    private static string GenerateBaseControllerContent()
+    private static string GenerateUserRoleEnumContent(string solutionName)
     {
-        return "aea";
+        StringBuilder content = new();
+
+        content.AppendLine("using System.ComponentModel;");
+        content.AppendLine();
+        content.AppendLine($"namespace {solutionName}.Domain.Enums;");
+        content.AppendLine();
+        content.AppendLine("public enum UserRoleEnum");
+        content.AppendLine("{");
+        content.AppendLine("    [Description(\"Usuário do sistema\")]\r");
+        content.AppendLine("    Common = 1,\r");
+        content.AppendLine();
+        content.AppendLine("    [Description(\"Suporte do sistema\")]\r");
+        content.AppendLine("    Maintainer = 999,\r");
+        content.AppendLine();
+        content.AppendLine("    [Description(\"Administrador do sistema\")]\r");
+        content.AppendLine("    Administrator = 1000");
+        content.AppendLine("}");
+
+        return GetIndentedCode(content.ToString());
     }
+
+    private static string GenerateBaseControllerContent(string solutionName)
+    {
+        StringBuilder content = new();
+
+        content.AppendLine($"using {solutionName}.Domain.Enums;");
+        content.AppendLine("using Microsoft.AspNetCore.Mvc;");
+        content.AppendLine("using System.ComponentModel;");
+        content.AppendLine("using System.Reflection;");
+        content.AppendLine("using System.Runtime.CompilerServices;");
+        content.AppendLine("using System.Security.Claims;");
+        content.AppendLine();
+        content.AppendLine($"namespace {solutionName}.API.Controllers;");
+        content.AppendLine();
+        content.AppendLine("public abstract class BaseController<T> : Controller");
+        content.AppendLine("{");
+        content.AppendLine("    [MethodImpl(MethodImplOptions.AggressiveInlining)]");
+        content.AppendLine("    protected bool IsUserAuth()");
+        content.AppendLine("    {");
+        content.AppendLine("        if (User is null || User.Identity is null)");
+        content.AppendLine("        {");
+        content.AppendLine("            return false;");
+        content.AppendLine("        }");
+        content.AppendLine();
+        content.AppendLine("        return User.Identity.IsAuthenticated;");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    [MethodImpl(MethodImplOptions.AggressiveInlining)]");
+        content.AppendLine("    protected Guid GetUserIdAuth(bool throwExceptionIfNotAuth = false)");
+        content.AppendLine("    {");
+        content.AppendLine("        string? id = User?.FindFirstValue(ClaimTypes.NameIdentifier);");
+        content.AppendLine();
+        content.AppendLine("        if (string.IsNullOrEmpty(id) || !Guid.TryParse(id.AsSpan(), out Guid guid))");
+        content.AppendLine("        {");
+        content.AppendLine("            if (throwExceptionIfNotAuth)");
+        content.AppendLine("            {");
+        content.AppendLine("                throw new UnauthorizedAccessException(\"Usuário não autenticado.\");");
+        content.AppendLine("            }");
+        content.AppendLine();
+        content.AppendLine("            return Guid.Empty;");
+        content.AppendLine("        }");
+        content.AppendLine();
+        content.AppendLine("        return guid;");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    protected string GetUserNameAuth()");
+        content.AppendLine("    {");
+        content.AppendLine("        if (!IsUserAuth())");
+        content.AppendLine("        {");
+        content.AppendLine("            return string.Empty;");
+        content.AppendLine("        }");
+        content.AppendLine();
+        content.AppendLine("        string name = User.FindFirstValue(ClaimTypes.Name) ?? string.Empty;");
+        content.AppendLine();
+        content.AppendLine("        return name;");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    protected string GetUserEmailAuth()");
+        content.AppendLine("    {");
+        content.AppendLine("        if (!IsUserAuth())");
+        content.AppendLine("        {");
+        content.AppendLine("            return string.Empty;");
+        content.AppendLine("        }");
+        content.AppendLine();
+        content.AppendLine("        string email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;");
+        content.AppendLine();
+        content.AppendLine("        return email;");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    protected (UserRoleEnum[] userRolesEnum, string[] userRolesStr) GetUserRolesAuth()");
+        content.AppendLine("    {");
+        content.AppendLine("        if (!IsUserAuth())");
+        content.AppendLine("        {");
+        content.AppendLine("            return (Array.Empty<UserRoleEnum>(), Array.Empty<string>());");
+        content.AppendLine("        }");
+        content.AppendLine();
+        content.AppendLine("        List<UserRoleEnum> enums = [];");
+        content.AppendLine("        List<string> names = [];");
+        content.AppendLine();
+        content.AppendLine("        foreach (var claim in User.FindAll(ClaimTypes.Role))");
+        content.AppendLine("        {");
+        content.AppendLine("            if (Enum.TryParse(claim.Value, true, out UserRoleEnum userRole))");
+        content.AppendLine("            {");
+        content.AppendLine("                enums.Add(userRole);");
+        content.AppendLine("                names.Add(GetEnumDesc(userRole));");
+        content.AppendLine("            }");
+        content.AppendLine("        }");
+        content.AppendLine();
+        content.AppendLine("        return (enums.ToArray(), names.ToArray());");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static string GetEnumDesc(UserRoleEnum value)");
+        content.AppendLine("    {");
+        content.AppendLine("        MemberInfo? member = typeof(UserRoleEnum).GetMember(value.ToString()).FirstOrDefault();");
+        content.AppendLine("        DescriptionAttribute? attribute = member?.GetCustomAttribute<DescriptionAttribute>();");
+        content.AppendLine();
+        content.AppendLine("        return attribute?.Description ?? value.ToString();");
+        content.AppendLine("    }");
+        content.AppendLine("}");
+
+        return GetIndentedCode(content.ToString());
+    }
+    #endregion
 }

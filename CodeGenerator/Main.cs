@@ -19,7 +19,7 @@ public class Main
         SolutionRepository.Generate(solutionName, rootPath, contextName, models);
 
         CreateEntityAudit(solutionName, rootPath);
-        CreateControllerBase(solutionName, rootPath);
+        CreateControllerBaseAndAllDependencies(solutionName, rootPath);
 
         foreach (var model in models)
         {
@@ -99,10 +99,10 @@ public class Main
         GenerateFiles(contents: entityContent);
     }
 
-    private static void CreateControllerBase(string solutionName, string rootPath)
+    private static void CreateControllerBaseAndAllDependencies(string solutionName, string rootPath)
     {
-        List<Content> entityContent = ControllerRepository.GenerateBaseController(solutionName, rootPath);
-        GenerateFiles(contents: entityContent);
+        List<Content> baseControllerContent = ControllerRepository.GenerateControllerBaseAndAllDependencies(solutionName, rootPath);
+        GenerateFiles(contents: baseControllerContent);
     }
     #endregion
 }

@@ -14,5 +14,5 @@ public enum ContentDirectoryEnum
     Entity,
 
     [Description("Domain/Enums")]
-    Enum,
+    Enum
 }
