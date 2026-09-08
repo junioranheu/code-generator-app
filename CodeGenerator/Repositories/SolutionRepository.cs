@@ -1,6 +1,6 @@
-﻿using System.Text;
-using CodeGenerator.Console.Consts;
+﻿using CodeGenerator.Console.Consts;
 using CodeGenerator.Console.Models;
+using System.Text;
 using static CodeGenerator.Console.Utils.Fixtures.Generate;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
 
@@ -26,10 +26,15 @@ public static class SolutionRepository
         Write(rootPath, Path.Combine(domainProject, $"{domainProject}.csproj"), GenerateLibraryProject());
         Write(rootPath, Path.Combine(infrastructureProject, $"{infrastructureProject}.csproj"), GenerateInfrastructureProject(domainProject));
 
-        Write(rootPath, Path.Combine(apiProject, "Program.cs"), GenerateApiProgram(solutionName, models));
-        Write(rootPath, Path.Combine(apiProject, "appsettings.json"), "{\n  \"ConnectionStrings\": {\n    \"DefaultConnection\": \"Data Source=generated.db\"\n  },\n  \"Logging\": {\n    \"LogLevel\": {\n      \"Default\": \"Information\",\n      \"Microsoft.AspNetCore\": \"Warning\"\n    }\n  }\n}\n// made by @junioranheu");
+        Write(rootPath, Path.Combine(apiProject, "Program.cs"), GenerateApiProgram(solutionName));
+        Write(rootPath, Path.Combine(apiProject, "appsettings.json"), GenerateAppSettingsJson());
+        Write(rootPath, Path.Combine(apiProject, "DependencyInjection.cs"), GenerateAPIDependencyInjection(solutionName));
+        Write(rootPath, Path.Combine(apiProject, "DependencyAppConfiguration.cs"), GenerateAPIAppConfigurationDependencyInjection(solutionName, contextName));
+
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PaginationInput.cs"), GeneratePaginationInput(solutionName));
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PagedQuery.cs"), GeneratePagedQuery(solutionName));
+        Write(rootPath, Path.Combine(applicationProject, "DependencyInjection.cs"), GenerateApplicationDependencyInjection(solutionName, contextName));
+
         Write(rootPath, Path.Combine(infrastructureProject, "Data", $"{contextName}.cs"), GenerateDbContext(solutionName, contextName, models));
         Write(rootPath, Path.Combine(infrastructureProject, "DependencyInjection.cs"), GenerateInfrastructureDependencyInjection(solutionName, contextName));
     }
@@ -147,42 +152,49 @@ public static class SolutionRepository
         return solution.ToString();
     }
 
-    private static string GenerateApiProgram(string solutionName, List<Model> models)
+    private static string GenerateApiProgram(string solutionName)
     {
-        StringBuilder useCaseUsings = new();
-        StringBuilder registrations = new();
+        StringBuilder content = new();
 
-        foreach (Model model in models)
-        {
-            useCaseUsings.AppendLine($"using {solutionName}.Application.UseCases.{model.Name};");
-        }
+        content.AppendLine($"using {solutionName}.Infrastructure;");
+        content.AppendLine($"using {solutionName}.Application;");
+        content.AppendLine($"using {solutionName}.Domain;");
+        content.AppendLine();
+        content.AppendLine($"Console.Title = \"{solutionName}\";");
+        content.AppendLine();
+        content.AppendLine("WebApplicationBuilder builder = WebApplication.CreateBuilder(args);");
+        content.AppendLine("{");
+        content.AppendLine("    builder.Services.AddDependencyInjectionAPI(builder);");
+        content.AppendLine("    builder.Services.AddDependencyInjectionApplication(builder);");
+        content.AppendLine("    builder.Services.AddDependencyInjectionInfrastructure(builder);");
+        content.AppendLine("}");
+        content.AppendLine();
+        content.AppendLine("WebApplication app = builder.Build();");
+        content.AppendLine("{");
+        content.AppendLine("    await app.UseAppConfiguration(builder);");
+        content.AppendLine("    app.Run();");
+        content.AppendLine("}");
 
-        foreach (Model model in models)
-        {
-            registrations.AppendLine($"builder.Services.Add{GetStrPlural(model.Name)}Application();");
-        }
+        return content.ToString();
+    }
 
-        return string.Join(Environment.NewLine, [
-            $"using {solutionName}.Infrastructure;",
-            useCaseUsings.ToString(),
-            "",
-            "var builder = WebApplication.CreateBuilder(args);",
-            "builder.Services.AddControllers();",
-            "builder.Services.AddEndpointsApiExplorer();",
-            "builder.Services.AddSwaggerGen();",
-            "builder.Services.AddInfrastructure(builder.Configuration);",
-            registrations.ToString(),
-            "var app = builder.Build();",
-            "if (app.Environment.IsDevelopment())",
-            "{",
-            "    app.UseSwagger();",
-            "    app.UseSwaggerUI();",
-            "}",
+    private static string GenerateAppSettingsJson()
+    {
+        StringBuilder sb = new();
 
-            "app.UseHttpsRedirection();",
-            "app.MapControllers();",
-            "app.Run();"
-        ]);
+        sb.AppendLine("{");
+        sb.AppendLine("  \"ConnectionStrings\": {");
+        sb.AppendLine("    \"DefaultConnection\": \"Data Source=generated.db\"");
+        sb.AppendLine("  },");
+        sb.AppendLine("  \"Logging\": {");
+        sb.AppendLine("    \"LogLevel\": {");
+        sb.AppendLine("      \"Default\": \"Information\",");
+        sb.AppendLine("      \"Microsoft.AspNetCore\": \"Warning\"");
+        sb.AppendLine("    }");
+        sb.AppendLine("  }");
+        sb.AppendLine("} // made by @junioranheu");
+
+        return sb.ToString();
     }
 
     private static string GeneratePaginationInput(string solutionName) => string.Join(Environment.NewLine, [
@@ -337,26 +349,68 @@ public static class SolutionRepository
         return content.ToString();
     }
 
+    private static string GenerateAPIDependencyInjection(string solutionName)
+    {
+        StringBuilder content = new();
+
+        content.AppendLine("using Microsoft.AspNetCore.Builder;");
+        content.AppendLine("using Microsoft.Extensions.Configuration;");
+        content.AppendLine("using Microsoft.Extensions.DependencyInjection;");
+        content.AppendLine($"using {solutionName}.Application;");
+        content.AppendLine($"using {solutionName}.Infrastructure;");
+        content.AppendLine();
+        content.AppendLine($"namespace {solutionName}.API;");
+        content.AppendLine();
+        content.AppendLine("public static class DependencyInjection");
+        content.AppendLine("{");
+        content.AppendLine("    public static IServiceCollection AddDependencyInjectionAPI(this IServiceCollection services, WebApplicationBuilder builder)");
+        content.AppendLine("    {");
+        content.AppendLine("        services.AddControllers();");
+        content.AppendLine("        services.AddEndpointsApiExplorer();");
+        content.AppendLine("        services.AddSwaggerGen();");
+
+        content.AppendLine("        return services;");
+        content.AppendLine("    }");
+        content.AppendLine("}");
+
+        return content.ToString();
+    }
+
+    private static string GenerateAPIAppConfigurationDependencyInjection(string solutionName, string contextName)
+    {
+        StringBuilder content = new();
+
+        return content.ToString();
+    }
+
+    private static string GenerateApplicationDependencyInjection(string solutionName, string contextName)
+    {
+        StringBuilder content = new();
+
+        return content.ToString();
+    }
+
     private static string GenerateInfrastructureDependencyInjection(string solutionName, string contextName)
     {
-        return string.Join(Environment.NewLine, new[]
-        {
-            "using Microsoft.EntityFrameworkCore;",
-            "using Microsoft.Extensions.Configuration;",
-            "using Microsoft.Extensions.DependencyInjection;",
-            $"using {solutionName}.Infrastructure.Data;",
-            "",
-            $"namespace {solutionName}.Infrastructure;",
-            "",
-            "public static class DependencyInjection",
-            "{",
-            "    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)",
-            "    {",
-            $"       services.AddDbContext<{contextName}>(options => options.UseSqlite(configuration.GetConnectionString(\"DefaultConnection\")));",
-            "        return services;",
-            "    }",
-            "}"
-        });
+        StringBuilder content = new();
+
+        content.AppendLine("using Microsoft.EntityFrameworkCore;");
+        content.AppendLine("using Microsoft.Extensions.Configuration;");
+        content.AppendLine("using Microsoft.Extensions.DependencyInjection;");
+        content.AppendLine($"using {solutionName}.Infrastructure.Data;");
+        content.AppendLine();
+        content.AppendLine($"namespace {solutionName}.Infrastructure;");
+        content.AppendLine();
+        content.AppendLine("public static class DependencyInjection");
+        content.AppendLine("{");
+        content.AppendLine("    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)");
+        content.AppendLine("    {");
+        content.AppendLine($"       services.AddDbContext<{contextName}>(options => options.UseSqlite(configuration.GetConnectionString(\"DefaultConnection\"))); ");
+        content.AppendLine("        return services;");
+        content.AppendLine("    }");
+        content.AppendLine("}");
+
+        return content.ToString();
     }
 
     private static void Write(string rootPath, string relativePath, string content)
