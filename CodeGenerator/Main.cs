@@ -18,6 +18,8 @@ public class Main
         string rootPath = GenerateDefaultDirectories(solutionName, isGenerateZip.GetValueOrDefault(), guid, requestType.GetValueOrDefault());
         SolutionRepository.Generate(solutionName, rootPath, contextName, models);
 
+        CreateEntityAudit(solutionName, rootPath, isGenerateZip.GetValueOrDefault());
+
         foreach (var model in models)
         {
             List<string> props = GetEntityPropsSplitted(classDefinition: model.Props, rootPath);
@@ -78,6 +80,22 @@ public class Main
         {
             throw new ArgumentException("Models can not be empty");
         }
+    }
+
+    private static void CreateEntityAudit(string solutionName, string rootPath, bool isGenerateZip)
+    {
+        string className = "Audit";
+
+        List<string> props = [
+            "DateTime? CreatedDate",
+            "Guid? CreatedBy",
+            "DateTime? LastModificationDate",
+            "Guid? LastModificationBy",
+            "bool Status"
+        ];
+
+        List<Content> entityContent = EntityRepository.GenerateEntity(solutionName, rootPath, className, props, isPKGuid: true);
+        GenerateFiles(contents: entityContent, isGenerateZip);
     }
     #endregion
 }

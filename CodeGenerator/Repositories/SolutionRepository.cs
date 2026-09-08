@@ -174,7 +174,7 @@ public static class SolutionRepository
 
         return content.ToString();
     }
-
+     
     private static string GenerateInfrastructureDependencyInjection(string solutionName, string contextName) => string.Join(Environment.NewLine, [
         "using Microsoft.EntityFrameworkCore;",
         "using Microsoft.Extensions.Configuration;",

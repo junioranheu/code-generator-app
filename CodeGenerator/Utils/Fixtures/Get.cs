@@ -214,12 +214,14 @@ public static class Get
 
             if (parts.Length == 2)
             {
-                string attrName = parts[0];
+                string attrName = parts[0]; // Esses dois caras às vezes se invertem... obrigado, junioranheu, por ter cagado em algum lugar e permitido isso >:(
                 string attrType = parts[1];
 
                 string formattedText = string.Empty;
 
-                if (!GetIsCommonTypeName(attrType))
+                bool isCommonType = GetIsCommonTypeName(attrName) || GetIsCommonTypeName(attrType);
+
+                if (!isCommonType)
                 {
                     stringBuilder.AppendLine($"[ForeignKey(nameof({attrName}))]");
                     stringBuilder.AppendLine($"public int {attrName}Id {{ get; set; }}");
@@ -490,7 +492,8 @@ public static class Get
             "uint",
             "ulong",
             "ushort",
-            "sbyte"
+            "sbyte",
+            "Guid"
         ];
 
         if (string.IsNullOrWhiteSpace(input))
