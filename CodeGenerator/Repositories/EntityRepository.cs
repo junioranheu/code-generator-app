@@ -1,12 +1,12 @@
-﻿using System.Text;
-using CodeGenerator.Console.Consts;
+﻿using CodeGenerator.Console.Consts;
 using CodeGenerator.Console.Enums;
 using CodeGenerator.Console.Models;
+using System.Text;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Console.Repositories;
 
-public sealed class EntityRepository
+public sealed partial class EntityRepository
 {
     public static List<Content> GenerateEntity(string solutionName, string rootPath, string className, List<string> props, bool isPKGuid)
     {
@@ -35,8 +35,15 @@ public sealed class EntityRepository
 
         if (isNormalEntity)
         {
+            bool hasForeignKey = CheckHasForeignKey(props);
+
             content.AppendLine("using System.ComponentModel.DataAnnotations;");
-            content.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
+
+            if (hasForeignKey)
+            {
+                content.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
+            }
+
             content.AppendLine();
             content.AppendLine($"namespace {solutionName}.Domain.Entities;");
             content.AppendLine();
@@ -57,13 +64,13 @@ public sealed class EntityRepository
             content.AppendLine($"public {paramId} {{ get; set; }}");
             content.AppendLine();
 
-            if (!HasProperty(props, "Status"))
+            if (!ContainsProperty(props, "Status"))
             {
                 content.AppendLine("public bool Status { get; set; }");
                 content.AppendLine();
             }
         }
-         
+
         GenerateCustomTextStringBuilderByProps(stringBuilder: content, props, $"{Misc.Tab}public REPLACE_VAR_TYPE REPLACE_VAR_NAME {{ get; set; }}", isInputOrOutput: isInput || isOutput);
 
         content.AppendLine("}");
@@ -71,12 +78,27 @@ public sealed class EntityRepository
         return GetIndentedCode(content.ToString());
     }
 
-    private static bool HasProperty(List<string> props, string propertyName)
+    private static bool CheckHasForeignKey(List<string> props)
     {
-        return props.Any(prop =>
+        bool hasForeignKey = false;
+
+        if (props is not null && props.Count > 0)
         {
-            string[] parts = prop.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            return parts.Length > 0 && parts[0].Equals(propertyName, StringComparison.OrdinalIgnoreCase);
-        });
+            hasForeignKey = props.Any(prop =>
+            {
+                string[] parts = prop.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length != 2)
+                {
+                    return false;
+                }
+
+                string attrType = parts[1].TrimEnd('?');
+
+                return !GetIsCommonTypeName(attrType);
+            });
+        }
+
+        return hasForeignKey;
     }
 }

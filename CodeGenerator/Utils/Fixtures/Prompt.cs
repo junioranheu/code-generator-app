@@ -31,7 +31,7 @@ public static class Prompt
         bool keepWhile = true;
 
         AnsiConsole.MarkupLine("\nClass name example: [cyan]Person[/]");
-        AnsiConsole.MarkupLine("Class properties example: [cyan]Name string LastName? string Age int Height double IsUnder18 bool Country Country[/]\n");
+        AnsiConsole.MarkupLine("Class properties example: [cyan]Name string LastName string Age int Height double IsUnder18 bool Country Country[/]\n");
 
         while (keepWhile)
         {

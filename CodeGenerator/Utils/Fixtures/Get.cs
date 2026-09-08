@@ -277,7 +277,7 @@ public static class Get
                 }
 
                 string valueName = hasInputPrefix ? $"input.{attrName}" : GetStringLowerCaseFirstLetter(attrName);
-                
+
                 string condition = IsStringType(attrType)
                     ? $"string.IsNullOrEmpty({valueName}) || x.{attrName} == {valueName}"
                     : IsNumericType(attrType)
@@ -493,7 +493,27 @@ public static class Get
             "sbyte"
         ];
 
-        return CommonTypeNames.Contains(input);
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return false;
+        }
+
+        string typeName = input.Trim();
+
+        // Verifica primeiro o nome exato (ex.: "int");
+        if (CommonTypeNames.Contains(typeName))
+        {
+            return true;
+        }
+
+        // Se terminar com '?', verificar somente o caso em que o tipo base é comum (ex.: "int?");
+        if (typeName.EndsWith('?'))
+        {
+            string baseType = typeName[..^1].Trim();
+            return CommonTypeNames.Contains(baseType);
+        }
+
+        return false;
     }
 
     public static byte[] GetArrayOfBytesFromPath(string path)
@@ -519,5 +539,22 @@ public static class Get
         }
 
         return $"{char.ToUpper(input[0])}{input[1..]}";
+    }
+
+    /// <summary>
+    /// Verifica se a lista de propriedades contém uma propriedade com o nome informado.
+    /// Espera-se que cada item em <paramref name="props"/> esteja no formato "Name Type".
+    /// A comparação é case-insensitive e analisa apenas o primeiro token (nome) de cada definição.
+    /// </summary>
+    /// <param name="props">Lista de propriedades (ex.: "Name string").</param>
+    /// <param name="propertyName">Nome da propriedade a procurar.</param>
+    /// <returns>True se existir uma propriedade com o nome informado; caso contrário, false.</returns>
+    public static bool ContainsProperty(List<string> props, string propertyName)
+    {
+        return props.Any(prop =>
+        {
+            string[] parts = prop.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length > 0 && parts[0].Equals(propertyName, StringComparison.OrdinalIgnoreCase);
+        });
     }
 }
