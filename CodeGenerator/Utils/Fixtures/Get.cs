@@ -322,12 +322,10 @@ public static class Get
 
     private const string getIndentedCode_Bracket = "}";
     private const string getIndentedCode_Bracket2 = "{";
-    private static readonly char[] getIndentedCode_Lines = new[] { '\r', '\n' };
-
     public static string GetIndentedCode(string code, int spacesPerIndent = 4)
     {
         StringBuilder indentedCode = new();
-        string[] lines = code.Split(getIndentedCode_Lines, StringSplitOptions.None);
+        string[] lines = code.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
         int indentLevel = 0;
         string indentString = new(' ', spacesPerIndent);
 
@@ -374,6 +372,11 @@ public static class Get
     public static string GetClassId(string className, bool isPKGuid, bool isLowerCaseFirstLetter)
     {
         return $"{(isPKGuid ? "Guid" : "int")} {(isLowerCaseFirstLetter ? GetStringLowerCaseFirstLetter(className) : className)}Id";
+    }
+
+    public static string GetClassIdWithoutType(string className, bool isLowerCaseFirstLetter)
+    {
+        return $"{(isLowerCaseFirstLetter ? GetStringLowerCaseFirstLetter(className) : className)}Id";
     }
 
     public static string GetSolutionName()

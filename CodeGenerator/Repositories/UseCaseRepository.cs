@@ -59,7 +59,7 @@ public sealed class UseCaseRepository
 
             // Interface;
             finalContent.Add(new(
-                value: GenerateInterface(item, solutionName, useCaseName, props, parameters),
+                value: GenerateInterface(item, solutionName, useCaseName, parameters),
                 contentDirectory,
                 extension,
                 solutionName,
@@ -178,10 +178,12 @@ public sealed class Create{useCaseName}({context} context) : ICreate{useCaseName
 {{
     private readonly {context} _context = context;
 
-    public async Task Execute({parameters})
+    public async Task<{useCaseName}?> Execute({parameters})
     {{
         await _context.AddAsync(input);
         await _context.SaveChangesAsync();
+
+        return input;
     }}
 }}");
 
@@ -280,6 +282,7 @@ public sealed class Update{useCaseName}({context} context) : IUpdate{useCaseName
     {
         StringBuilder content = new();
         string parameters = GetClassId(useCaseName, isPKGuid, isLowerCaseFirstLetter: true);
+        string id = GetClassIdWithoutType(useCaseName, isLowerCaseFirstLetter: true);
 
         content.AppendLine($@"using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
@@ -292,7 +295,7 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
 
     public async Task Execute({parameters})
     {{
-        var entity = await _context.{GetStrPlural(useCaseName)}.FindAsync({useCaseName}Id);
+        var entity = await _context.{GetStrPlural(useCaseName)}.FindAsync({id});
 
         if (entity is null) {{
             return;
@@ -339,29 +342,42 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
         else if (useCaseType == GetEnumDesc(UseCaseEnum.Delete))
         {
             return GenerateUseCase_Delete(solutionName, context, useCaseName, isPKGuid);
-        } 
+        }
 
         throw new NotImplementedException();
     }
 
-    private static string GenerateInterface(string useCaseType, string solutionName, string useCaseName, List<string> props, string parameters)
+    private static string GenerateInterface(string useCaseType, string solutionName, string useCaseName, string parameters)
     {
+        string useCaseNamespace = $"{solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.{useCaseType}";
+        string interfaceName = $"I{useCaseType}{useCaseName}";
+        string executeMethod = GetInterfaceExecuteMethod(useCaseType, useCaseName, parameters);
+
         StringBuilder content = new();
+        content.AppendLine($"using {solutionName}.Domain.Entities;");
+        content.AppendLine();
+        content.AppendLine($"namespace {useCaseNamespace};");
+        content.AppendLine();
+        content.AppendLine($"public interface {interfaceName}");
+        content.AppendLine("{");
+        content.AppendLine($"    {executeMethod}");
+        content.AppendLine("}");
+
+        return GetIndentedCode(content.ToString());
+    }
+
+    private static string GetInterfaceExecuteMethod(string useCaseType, string useCaseName, string parameters)
+    {
+        if (useCaseType == GetEnumDesc(UseCaseEnum.Delete))
+        {
+            return $"Task Execute({parameters});";
+        }
 
         string returnType = useCaseType == GetEnumDesc(UseCaseEnum.GetAll)
             ? $"(IEnumerable<{useCaseName}> linq, int count)"
             : $"{useCaseName}?";
 
-        content.AppendLine(@$"using {solutionName}.Domain.Entities;
-
-namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.{useCaseType};
-
-public interface I{useCaseType}{useCaseName}
-{{
-    Task<{returnType}> Execute({parameters});
-}}");
-
-        return GetIndentedCode(content.ToString());
+        return $"Task<{returnType}> Execute({parameters});";
     }
 
     private static string GenerateDependencyInjection(string solutionName, string useCaseName, List<string> contentPathEnums)

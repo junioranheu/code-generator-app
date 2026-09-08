@@ -20,9 +20,9 @@ public static class Prompt
         return input;
     }
 
-    public static bool PromptInputForBool(string msg)
+    public static bool PromptInputForBool(string msg, bool defaultValue)
     {
-        return AnsiConsole.Confirm(Markup.Escape(msg), defaultValue: false);
+        return AnsiConsole.Confirm(Markup.Escape(msg), defaultValue);
     }
 
     public static List<Model> PromptInputForModel()
@@ -39,7 +39,7 @@ public static class Prompt
             string props = PromptInput("Props:");
             models.Add(new() { Name = className, Props = props });
 
-            keepWhile = PromptInputForBool("\nDo you want to add one more item? (Answer y or n)");
+            keepWhile = PromptInputForBool("\nDo you want to add one more item? (Answer y or n)", false);
         }
 
         return models;
