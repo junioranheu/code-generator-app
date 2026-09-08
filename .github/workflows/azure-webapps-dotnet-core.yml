@@ -3,14 +3,14 @@ name: Build and deploy .NET API app to Azure Web App
 on:
   push:
     branches:
-      - main  # Trigger on commits to the main branch
+      - main
   workflow_dispatch:
 
 env:
-  DOTNET_VERSION: '10.x'  # .NET SDK version to use
-  BUILD_CONFIGURATION: 'Release'  # Build configuration
-  AZURE_WEBAPP_NAME: 'anheu-code-generator'  # Your Azure Web App name
-  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}  # Azure publish profile secret
+  DOTNET_VERSION: '10.x'
+  BUILD_CONFIGURATION: 'Release'
+  AZURE_WEBAPP_NAME: 'anheu-code-generator'
+  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
 
 jobs:
   build:
@@ -41,7 +41,7 @@ jobs:
         run: ls -R ${{ github.workspace }}/publish
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dotnet-api
           path: publish/
@@ -49,9 +49,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dotnet-api
           path: download/
