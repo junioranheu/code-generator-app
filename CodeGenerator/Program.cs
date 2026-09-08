@@ -6,10 +6,12 @@ using static CodeGenerator.Console.Utils.Fixtures.Prompt;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
 
 #region Input
+Console.Title = AppDomain.CurrentDomain.FriendlyName;
+
 GenerateCodeRequest request = new()
 {
-    SolutionName = GetStrCapitalizedFirstLetter(PromptInput("Solution name?")),
-    ContextName = GetStrCapitalizedFirstLetter(PromptInput("Context name?")),
+    SolutionName = GetStrCapitalizedFirstLetter(PromptInput("Solution name:")),
+    ContextName = GetStrCapitalizedFirstLetter(PromptInput("Context name:")),
     IsPKGuid = PromptInputForBool("Are the primary keys (PKs) Guids?"),
     IsGenerateZip = PromptInputForBool("Do you want to generate a ZIP file?"),
     Models = PromptInputForModel(),
