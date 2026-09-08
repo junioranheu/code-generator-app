@@ -10,7 +10,7 @@ namespace CodeGenerator.Console.Utils.Fixtures;
 
 public static class Prompt
 {
-    public static string PromptInput(string msg)
+    public static string PromptInput(string msg, bool allowSpaces, bool allowQuestionMark)
     {
         string? input = AnsiConsole.Ask<string>(Markup.Escape(msg));
 
@@ -19,7 +19,7 @@ public static class Prompt
             throw new ArgumentException("User input can not be empty");
         }
 
-        string output = NormalizeInput(input);
+        string output = NormalizeInput(input, allowSpaces, allowQuestionMark);
 
         return output;
     }
@@ -34,14 +34,52 @@ public static class Prompt
         List<Model> models = [];
         bool keepWhile = true;
 
-        AnsiConsole.MarkupLine("\nClass name example: [cyan]Person[/]");
-        AnsiConsole.MarkupLine("Class properties example: [cyan]Name string LastName string? Age int Height double IsUnder18 bool Country Country[/]\n");
+        AnsiConsole.MarkupLine("\nClass name example: [cyan]User[/]");
+        AnsiConsole.MarkupLine("Class properties example: [cyan]Name string Password string Height double? IsUnder18 bool Country Country[/]\n");
 
         while (keepWhile)
         {
-            string className = PromptInput("Class name:");
-            string props = PromptInput("Props:");
-            models.Add(new() { Name = className, Props = props });
+            string className = PromptInput("Class name:", allowSpaces: false, allowQuestionMark: false);
+
+            // Ler as propriedades até que correspondam ao padrão esperado (pares: nome tipo);
+            string propsInput;
+
+            while (true)
+            {
+                propsInput = PromptInput("Props:", allowSpaces: true, allowQuestionMark: true);
+
+                // Normalizar os separadores e dividir a string em partes;
+                string normalized = propsInput.Replace(',', ' ').Replace(';', ' ').Replace('\n', ' ').Replace('\r', ' ').Replace('\t', ' ');
+                string[] parts = normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length == 0)
+                {
+                    AnsiConsole.MarkupLine("[red]You must provide at least one property pair.[/]");
+                    continue;
+                }
+
+                if (parts.Length % 2 != 0)
+                {
+                    AnsiConsole.MarkupLine("[yellow]Properties must be provided as pairs (Name type). Please try again.[/]");
+                    continue;
+                }
+
+                // Construir as propriedades formatadas: capitalizar cada nome de propriedade (cada índice par) e manter os tipos como estão;
+                StringBuilder sb = new();
+
+                for (int i = 0; i < parts.Length; i += 2)
+                {
+                    string propName = GetStrCapitalizedFirstLetter(parts[i]);
+                    string propType = parts[i + 1];
+
+                    sb.Append(propName).Append(' ').Append(propType).Append(' ');
+                }
+
+                propsInput = sb.ToString().Trim();
+                break;
+            }
+
+            models.Add(new() { Name = GetStrCapitalizedFirstLetter(className), Props = propsInput });
 
             keepWhile = PromptInputForBool("\nDo you want to add one more item? (Answer y or n)", false);
         }
@@ -65,7 +103,7 @@ public static class Prompt
         return final;
     }
 
-    private static string NormalizeInput(string input)
+    private static string NormalizeInput(string input, bool allowSpaces, bool allowQuestionMark)
     {
         string normalized = input.Normalize(NormalizationForm.FormD);
 
@@ -75,7 +113,12 @@ public static class Prompt
         {
             UnicodeCategory category = CharUnicodeInfo.GetUnicodeCategory(c);
 
-            if (category != UnicodeCategory.NonSpacingMark && (char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)))
+            if (category == UnicodeCategory.NonSpacingMark)
+            {
+                continue;
+            }
+
+            if (char.IsLetterOrDigit(c) || (allowSpaces && char.IsWhiteSpace(c)) || (allowQuestionMark && c == '?'))
             {
                 builder.Append(c);
             }

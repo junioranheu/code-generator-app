@@ -74,12 +74,6 @@ public sealed partial class EntityRepository
             content.AppendLine("[Key]");
             content.AppendLine($"public {paramId} {{ get; set; }}");
             content.AppendLine();
-
-            //if (!ContainsProperty(props, "Status"))
-            //{
-            //    content.AppendLine("public bool Status { get; set; }");
-            //    content.AppendLine();
-            //}
         }
 
         GenerateCustomTextStringBuilderByProps(stringBuilder: content, props, $"{Misc.Tab}public REPLACE_VAR_TYPE REPLACE_VAR_NAME {{ get; set; }}", isInputOrOutput: isInput || isOutput);

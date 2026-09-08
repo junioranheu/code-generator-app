@@ -10,8 +10,8 @@ Console.Title = AppDomain.CurrentDomain.FriendlyName;
 
 GenerateCodeRequest request = new()
 {
-    SolutionName = GetStrCapitalizedFirstLetter(PromptInput("Solution name:")),
-    ContextName = GetStrCapitalizedFirstLetter(PromptInput("Context name:")),
+    SolutionName = GetStrCapitalizedFirstLetter(PromptInput("Solution name:", allowSpaces: false, allowQuestionMark: false)),
+    ContextName = GetStrCapitalizedFirstLetter(PromptInput("Context name:", allowSpaces: false, allowQuestionMark: false)),
     IsPKGuid = PromptInputForBool("Are the primary keys (PKs) Guids?", defaultValue: true),
     IsGenerateZip = PromptInputForBool("Do you want to generate a ZIP file?", defaultValue: false),
     Models = PromptInputForModel(),

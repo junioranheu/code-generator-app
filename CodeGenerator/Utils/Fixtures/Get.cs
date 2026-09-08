@@ -236,7 +236,8 @@ public static class Get
                     }
                     else
                     {
-                        formattedText = customText.Replace("REPLACE_VAR_NAME", attrName).Replace("REPLACE_VAR_TYPE", $"{attrType}?");
+                        string nullableType = attrType.EndsWith('?') ? attrType : $"{attrType}?";
+                        formattedText = customText.Replace("REPLACE_VAR_NAME", attrName).Replace("REPLACE_VAR_TYPE", nullableType);
                     }
                 }
 
