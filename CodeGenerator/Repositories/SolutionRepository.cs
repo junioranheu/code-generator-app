@@ -14,6 +14,7 @@ public static class SolutionRepository
         string applicationProject = $"{solutionName}.Application";
         string domainProject = $"{solutionName}.Domain";
         string infrastructureProject = $"{solutionName}.Infrastructure";
+        string apiName = $"{solutionName}.API";
 
         GenerateFolder(solutionName, Path.Combine(rootPath, apiProject));
         GenerateFolder(solutionName, Path.Combine(rootPath, applicationProject));
@@ -26,9 +27,9 @@ public static class SolutionRepository
         Write(rootPath, Path.Combine(domainProject, $"{domainProject}.csproj"), GenerateLibraryProject());
         Write(rootPath, Path.Combine(infrastructureProject, $"{infrastructureProject}.csproj"), GenerateInfrastructureProject(domainProject));
 
-        Write(rootPath, Path.Combine(apiProject, "Program.cs"), GenerateApiProgram(solutionName));
+        Write(rootPath, Path.Combine(apiProject, "Program.cs"), GenerateApiProgram(solutionName, apiName));
         Write(rootPath, Path.Combine(apiProject, "appsettings.json"), GenerateAppSettingsJson());
-        Write(rootPath, Path.Combine(apiProject, "DependencyInjection.cs"), GenerateAPIDependencyInjection(solutionName));
+        Write(rootPath, Path.Combine(apiProject, "DependencyInjection.cs"), GenerateAPIDependencyInjection(solutionName, apiName));
         Write(rootPath, Path.Combine(apiProject, "DependencyAppConfiguration.cs"), GenerateAPIAppConfigurationDependencyInjection(solutionName, contextName));
 
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PaginationInput.cs"), GeneratePaginationInput(solutionName));
@@ -152,7 +153,7 @@ public static class SolutionRepository
         return solution.ToString();
     }
 
-    private static string GenerateApiProgram(string solutionName)
+    private static string GenerateApiProgram(string solutionName, string apiName)
     {
         StringBuilder content = new();
 
@@ -160,7 +161,7 @@ public static class SolutionRepository
         content.AppendLine($"using {solutionName}.Application;");
         content.AppendLine($"using {solutionName}.Domain;");
         content.AppendLine();
-        content.AppendLine($"Console.Title = \"{solutionName}\";");
+        content.AppendLine($"Console.Title = \"{apiName}\";");
         content.AppendLine();
         content.AppendLine("WebApplicationBuilder builder = WebApplication.CreateBuilder(args);");
         content.AppendLine("{");
@@ -191,8 +192,20 @@ public static class SolutionRepository
         sb.AppendLine("      \"Default\": \"Information\",");
         sb.AppendLine("      \"Microsoft.AspNetCore\": \"Warning\"");
         sb.AppendLine("    }");
+        sb.AppendLine("  },");
+        sb.AppendLine("  \"CORSSettings\": {");
+        sb.AppendLine("     \"Cors\": \"xxx\",");
+        sb.AppendLine("  },");
+        sb.AppendLine("  \"URLs\": {");
+        sb.AppendLine("    \"Development\": {");
+        sb.AppendLine("      \"Frontend\": \"xxx\"");
+        sb.AppendLine("    },");
+        sb.AppendLine("    \"Production\": {");
+        sb.AppendLine("      \"Frontend\": \"xxx\"");
+        sb.AppendLine("    }");
         sb.AppendLine("  }");
         sb.AppendLine("} // made by @junioranheu");
+
 
         return sb.ToString();
     }
@@ -349,15 +362,13 @@ public static class SolutionRepository
         return content.ToString();
     }
 
-    private static string GenerateAPIDependencyInjection(string solutionName)
+    private static string GenerateAPIDependencyInjection(string solutionName, string apiName)
     {
         StringBuilder content = new();
 
-        content.AppendLine("using Microsoft.AspNetCore.Builder;");
-        content.AppendLine("using Microsoft.Extensions.Configuration;");
-        content.AppendLine("using Microsoft.Extensions.DependencyInjection;");
-        content.AppendLine($"using {solutionName}.Application;");
-        content.AppendLine($"using {solutionName}.Infrastructure;");
+        content.AppendLine("using Microsoft.AspNetCore.ResponseCompression;");
+        content.AppendLine("using System.IO.Compression;");
+        content.AppendLine("using System.Text.Json.Serialization;");
         content.AppendLine();
         content.AppendLine($"namespace {solutionName}.API;");
         content.AppendLine();
@@ -365,11 +376,82 @@ public static class SolutionRepository
         content.AppendLine("{");
         content.AppendLine("    public static IServiceCollection AddDependencyInjectionAPI(this IServiceCollection services, WebApplicationBuilder builder)");
         content.AppendLine("    {");
-        content.AppendLine("        services.AddControllers();");
-        content.AppendLine("        services.AddEndpointsApiExplorer();");
-        content.AppendLine("        services.AddSwaggerGen();");
-
+        content.AppendLine("        IWebHostEnvironment env = builder.Environment;");
+        content.AppendLine();
+        content.AppendLine("        AddSwagger(services);");
+        content.AppendLine("        AddCors(services, builder);");
+        content.AppendLine("        AddCompression(services);");
+        content.AppendLine("        AddControllers(services, env);");
+        content.AppendLine("        AddCaching(services);");
+        content.AppendLine("        AddHttpContextAccessor(services);");
+        content.AppendLine();
         content.AppendLine("        return services;");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddSwagger(IServiceCollection services)");
+        content.AppendLine("    {");
+        content.AppendLine("        services.AddSwaggerGen(c =>");
+        content.AppendLine("        {");
+        content.AppendLine($"            c.SwaggerDoc(\"v1\", new() {{ Title = \"{apiName}\", Version = \"v1\" }});");
+        content.AppendLine("        });");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddCors(IServiceCollection services, WebApplicationBuilder builder)");
+        content.AppendLine("    {");
+        content.AppendLine("        string[] frontendUrls =");
+        content.AppendLine("        [");
+        content.AppendLine("            builder.Configuration[\"Urls:Development:Frontend\"] ?? string.Empty,");
+        content.AppendLine("            builder.Configuration[\"Urls:Production:Frontend\"] ?? string.Empty");
+        content.AppendLine("        ];");
+        content.AppendLine();
+        content.AppendLine("        if (frontendUrls == null || frontendUrls.Any(x => string.IsNullOrEmpty(x)))");
+        content.AppendLine("        {");
+        content.AppendLine("            throw new InvalidOperationException(\"Critical internal error: one or more Frontend URLs are not configured in appsettings.json.\");");
+        content.AppendLine("        }");
+        content.AppendLine();
+        content.AppendLine("        services.AddCors(x =>");
+        content.AppendLine("            x.AddPolicy(name: builder.Configuration[\"CORSSettings:Cors\"] ?? string.Empty, policyBuilder =>");
+        content.AppendLine("            {");
+        content.AppendLine("                policyBuilder.WithOrigins(frontendUrls).AllowAnyHeader().AllowAnyMethod().AllowCredentials();");
+        content.AppendLine("            })");
+        content.AppendLine("        );");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddCompression(IServiceCollection services)");
+        content.AppendLine("    {");
+        content.AppendLine("        services.AddResponseCompression(options =>");
+        content.AppendLine("        {");
+        content.AppendLine("            options.EnableForHttps = true;");
+        content.AppendLine("            options.Providers.Add<BrotliCompressionProvider>();");
+        content.AppendLine("            options.Providers.Add<GzipCompressionProvider>();");
+        content.AppendLine("        });");
+        content.AppendLine();
+        content.AppendLine("        services.Configure<BrotliCompressionProviderOptions>(x => x.Level = CompressionLevel.Optimal);");
+        content.AppendLine("        services.Configure<GzipCompressionProviderOptions>(x => x.Level = CompressionLevel.Optimal);");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddControllers(IServiceCollection services, IWebHostEnvironment env)");
+        content.AppendLine("    {");
+        content.AppendLine("        services.AddControllers(options =>");
+        content.AppendLine("        {");
+        content.AppendLine("            //");
+        content.AppendLine("        })");
+        content.AppendLine("        .AddJsonOptions(x =>");
+        content.AppendLine("        {");
+        content.AppendLine("            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;");
+        content.AppendLine("            x.JsonSerializerOptions.WriteIndented = env.IsDevelopment();");
+        content.AppendLine("        });");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddCaching(IServiceCollection services)");
+        content.AppendLine("    {");
+        content.AppendLine("        services.AddMemoryCache();");
+        content.AppendLine("        services.AddResponseCaching();");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddHttpContextAccessor(IServiceCollection services)");
+        content.AppendLine("    {");
+        content.AppendLine("        services.AddHttpContextAccessor();");
         content.AppendLine("    }");
         content.AppendLine("}");
 
