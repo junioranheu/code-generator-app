@@ -10,6 +10,8 @@ public static class Misc
     public const string AutoMapperVersion = "12.0.1";
     public const string SwaggerVersion = "6.6.2";
     public const string AspNetCoreHttpAbstractionsVersion = "10.0.0";
+    public const string IdentityModelVersion = "8.0.1";
+    public const string JwtBearerVersion = "10.0.0";
     public const string SolutionFormatVersion = "12.00";
     public const string VisualStudioVersion = "17.0.31903.59";
     public const string MinimumVisualStudioVersion = "10.0.40219.1";
