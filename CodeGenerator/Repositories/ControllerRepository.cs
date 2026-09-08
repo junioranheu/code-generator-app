@@ -1,7 +1,6 @@
 ﻿using CodeGenerator.Console.Consts;
 using CodeGenerator.Console.Enums;
 using CodeGenerator.Console.Models;
-using System.Reflection.Metadata;
 using System.Text;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
 
@@ -80,9 +79,9 @@ public class {className}Controller(");
 
         content.AppendLine($@"[AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult> Get({parametersWithQuestionMark})
+    public async Task<ActionResult> Get({className}Input input)
     {{
-        var result = await _get.Execute({parameterNamesOnly}) ?? throw new InvalidOperationException(""{Misc.WarningEmpty}"");
+        var result = await _get.Execute(input) ?? throw new InvalidOperationException(""{Misc.WarningEmpty}"");
         return Ok(_mapper.Map<{className}Output>(result));
     }}
 

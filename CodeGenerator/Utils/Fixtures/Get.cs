@@ -221,6 +221,11 @@ public static class Get
 
                 bool isCommonType = GetIsCommonTypeName(attrType);
 
+                if (!isCommonType && isInputOrOutput)
+                {
+                    return;
+                }
+
                 if (!isCommonType)
                 {
                     stringBuilder.AppendLine($"[ForeignKey(nameof({attrName}))]");

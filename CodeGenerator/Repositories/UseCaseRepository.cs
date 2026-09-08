@@ -98,9 +98,10 @@ public sealed class UseCaseRepository
     private static (string content, string parameters) GenerateUseCase_Get(string solutionName, string context, string useCaseName, List<string> props)
     {
         StringBuilder content = new();
-        string parameters = GenerateParametersStringByProps(props);
+        string parameters = $"{useCaseName}Input input";
 
         content.AppendLine($@"using {solutionName}.Domain.Entities;
+using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Shared;
 using {solutionName}.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -117,7 +118,7 @@ public sealed class Get{useCaseName}({context} context) : IGet{useCaseName}
         x.Status == true &&"
     );
 
-        GenerateWhereQueriesByProps(content, props);
+        GenerateWhereQueriesByProps(content, props, hasInputPrefix: true);
 
         content.AppendLine($@").AsNoTracking().FirstOrDefaultAsync();
 
@@ -352,6 +353,11 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
 
         StringBuilder content = new();
 
+        if (useCaseType == GetEnumDesc(UseCaseEnum.Get))
+        {
+            content.AppendLine($"using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Shared;");
+        }
+
         if (useCaseType == GetEnumDesc(UseCaseEnum.GetAll))
         {
             content.AppendLine($"using {solutionName}.Application.UseCases.Shared;");
@@ -381,9 +387,7 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
             return $"Task Execute({parameters});";
         }
 
-        string returnType = useCaseType == GetEnumDesc(UseCaseEnum.GetAll)
-            ? $"(IEnumerable<{useCaseName}> linq, int count)"
-            : $"{useCaseName}?";
+        string returnType = useCaseType == GetEnumDesc(UseCaseEnum.GetAll) ? $"(IEnumerable<{useCaseName}> linq, int count)" : $"{useCaseName}?";
 
         return $"Task<{returnType}> Execute({parameters});";
     }
