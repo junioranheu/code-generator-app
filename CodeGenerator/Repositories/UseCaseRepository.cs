@@ -282,8 +282,7 @@ public sealed class Update{useCaseName}({context} context) : IUpdate{useCaseName
         string parameters = GetClassId(useCaseName, isPKGuid, isLowerCaseFirstLetter: true);
         string id = GetClassIdWithoutType(useCaseName, isLowerCaseFirstLetter: true);
 
-        content.AppendLine($@"using {solutionName}.Domain.Entities;
-using {solutionName}.Infrastructure.Data;
+        content.AppendLine($@"using {solutionName}.Infrastructure.Data;
 
 namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Delete;
 
@@ -356,10 +355,13 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
         if (useCaseType == GetEnumDesc(UseCaseEnum.GetAll))
         {
             content.AppendLine($"using {solutionName}.Application.UseCases.Shared;");
-            content.AppendLine();
         }
 
-        content.AppendLine($"using {solutionName}.Domain.Entities;");
+        if (useCaseType != GetEnumDesc(UseCaseEnum.Delete))
+        {
+            content.AppendLine($"using {solutionName}.Domain.Entities;");
+        }
+
         content.AppendLine();
         content.AppendLine($"namespace {useCaseNamespace};");
         content.AppendLine();
@@ -373,7 +375,7 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
 
     private static string GetInterfaceExecuteMethod(string useCaseType, string useCaseName, string parameters)
     {
-        if (useCaseType == GetEnumDesc(UseCaseEnum.Delete) || useCaseType == GetEnumDesc(UseCaseEnum.CreateRange))
+        if (useCaseType == GetEnumDesc(UseCaseEnum.Delete) || useCaseType == GetEnumDesc(UseCaseEnum.CreateRange) || useCaseType == GetEnumDesc(UseCaseEnum.Update))
         {
             return $"Task Execute({parameters});";
         }

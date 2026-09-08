@@ -36,12 +36,14 @@ public sealed class EntityRepository
         if (isNormalEntity)
         {
             content.AppendLine("using System.ComponentModel.DataAnnotations;");
-            content.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
             content.AppendLine();
         }
 
-        content.AppendLine($"namespace {solutionName}.Domain.Entities;");
-        content.AppendLine();
+        if (!isNormalEntity)
+        {
+            content.AppendLine($"namespace {solutionName}.Application.UseCases.{GetStrPlural(className)}.Shared;");
+            content.AppendLine();
+        }
 
         content.AppendLine($"public sealed class {className}{(isInput ? "Input" : string.Empty)}{(isOutput ? "Output" : string.Empty)}");
         content.AppendLine("{");
@@ -58,8 +60,8 @@ public sealed class EntityRepository
                 content.AppendLine();
             }
         }
-
-        GenerateCustomTextStringBuilderByProps(stringBuilder: content, props, $"{Misc.Tab}public REPLACE_VAR_TYPE REPLACE_VAR_NAME {{ get; set; }}");
+         
+        GenerateCustomTextStringBuilderByProps(stringBuilder: content, props, $"{Misc.Tab}public REPLACE_VAR_TYPE REPLACE_VAR_NAME {{ get; set; }}", isInputOrOutput: isInput || isOutput);
 
         content.AppendLine("}");
 

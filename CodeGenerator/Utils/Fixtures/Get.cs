@@ -203,7 +203,7 @@ public static class Get
     /// string[] props = { "Name string", "Age int", "Email string" };
     /// GenerateCustomTextStringBuilderByProps(stringBuilder, props, $"This is a attrName property named attrType.");
     /// </summary>
-    public static void GenerateCustomTextStringBuilderByProps(StringBuilder stringBuilder, List<string> props, string customText, bool isLowAttrName = false)
+    public static void GenerateCustomTextStringBuilderByProps(StringBuilder stringBuilder, List<string> props, string customText, bool isInputOrOutput)
     {
         int max = props.Count;
         int i = 1;
@@ -228,7 +228,14 @@ public static class Get
                 }
                 else
                 {
-                    formattedText = customText.Replace("REPLACE_VAR_NAME", attrName).Replace("REPLACE_VAR_TYPE", attrType);
+                    if (!isInputOrOutput)
+                    {
+                        formattedText = customText.Replace("REPLACE_VAR_NAME", attrName).Replace("REPLACE_VAR_TYPE", attrType);
+                    }
+                    else
+                    {
+                        formattedText = customText.Replace("REPLACE_VAR_NAME", attrName).Replace("REPLACE_VAR_TYPE", $"{attrType}?");
+                    }
                 }
 
                 stringBuilder.AppendLine(formattedText);
@@ -332,6 +339,7 @@ public static class Get
         StringBuilder indentedCode = new();
         string[] lines = code.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
         int indentLevel = 0;
+        int continuationIndent = 0;
         string indentString = new(' ', spacesPerIndent);
 
         foreach (string line in lines)
@@ -343,13 +351,33 @@ public static class Get
                 indentLevel--;
             }
 
+            if (trimmedLine.StartsWith(')'))
+            {
+                continuationIndent = 0;
+            }
+
+            if (trimmedLine.StartsWith(getIndentedCode_Bracket))
+            {
+                continuationIndent = 0;
+            }
+
             if (!string.IsNullOrWhiteSpace(trimmedLine))
             {
-                indentedCode.AppendLine(new string(' ', indentLevel * indentString.Length) + trimmedLine);
+                int totalIndent = Math.Max(0, indentLevel + continuationIndent) * indentString.Length;
+                indentedCode.AppendLine(new string(' ', totalIndent) + trimmedLine);
             }
             else
             {
                 indentedCode.AppendLine();
+            }
+
+            if (trimmedLine.EndsWith('.'))
+            {
+                continuationIndent = Math.Max(continuationIndent, 1);
+            }
+            else if (trimmedLine.EndsWith("=>") || trimmedLine.EndsWith("&&"))
+            {
+                continuationIndent++;
             }
 
             if (trimmedLine.EndsWith(getIndentedCode_Bracket2))
