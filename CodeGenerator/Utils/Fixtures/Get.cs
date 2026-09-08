@@ -285,9 +285,14 @@ public static class Get
                     ? $"string.IsNullOrEmpty({valueName}) || x.{attrName} == {valueName}"
                     : IsNumericType(attrType)
                         ? $"{valueName} <= 0 || x.{attrName} == {valueName}"
-                        : $"x.{attrName} == {valueName}";
+                        : IsBooleanType(attrType)
+                            ? $"x.{attrName} == {valueName}"
+                                : string.Empty;
 
-                conditions.Add(condition);
+                if (!string.IsNullOrEmpty(condition))
+                {
+                    conditions.Add(condition);
+                }
             }
         }
 
@@ -310,6 +315,11 @@ public static class Get
         return type is "byte" or "short" or "int" or "long" or "float" or "double" or "decimal";
     }
 
+    private static bool IsBooleanType(string type)
+    {
+        return type.Equals("bool", StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>
     /// string[] props = { "Name string", "Age int", "Email string" };
     /// string params = GenerateParametersStringByProps(props, customText);
@@ -329,7 +339,8 @@ public static class Get
 
                 if (getBothNameAndType)
                 {
-                    content.Append($"{attrType}{(addQuestionMark ? "?" : string.Empty)} {GetStringLowerCaseFirstLetter(attrName)}, ");
+                    string nullableMark = addQuestionMark && !attrType.EndsWith("?") ? "?" : string.Empty;
+                    content.Append($"{attrType}{nullableMark} {GetStringLowerCaseFirstLetter(attrName)}, ");
                 }
                 else
                 {

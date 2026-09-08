@@ -1,7 +1,8 @@
-﻿using System.Text;
-using CodeGenerator.Console.Consts;
+﻿using CodeGenerator.Console.Consts;
 using CodeGenerator.Console.Enums;
 using CodeGenerator.Console.Models;
+using System.Reflection.Metadata;
+using System.Text;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
 
 namespace CodeGenerator.Console.Repositories;
@@ -27,6 +28,22 @@ public sealed class ControllerRepository
         return content;
     }
 
+    public static List<Content> GenerateBaseController(string solutionName, string rootPath)
+    {
+        List<Content> content =
+        [
+            new(
+                value: GenerateBaseControllerContent(),
+                contentDirectory: ContentDirectoryEnum.Controller,
+                extension: ExtensionsEnum.CS,
+                solutionName: solutionName,
+                fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName: "BaseController", contentDirectory: ContentDirectoryEnum.Controller, extension: ExtensionsEnum.CS)
+            )
+        ];
+
+        return content;
+    }
+
     private static string GenerateContent(string solutionName, string className, List<string> props, bool isPKGuid)
     {
         StringBuilder content = new();
@@ -34,14 +51,16 @@ public sealed class ControllerRepository
         string parameterNamesOnly = GenerateParametersStringByProps(props, getBothNameAndType: false);
         string parametersWithQuestionMark = GenerateParametersStringByProps(props, addQuestionMark: true);
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<UseCaseEnum>();
-        List<string> contentPathEnums_LowerCase = contentPathEnums.Select(x => GetStringLowerCaseFirstLetter(x)).ToList();
-        string paramId = GetClassId(className, isPKGuid, isLowerCaseFirstLetter: true); 
+        List<string> contentPathEnums_LowerCase = [.. contentPathEnums.Select(GetStringLowerCaseFirstLetter)];
+        string paramId = GetClassId(className, isPKGuid, isLowerCaseFirstLetter: true);
 
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;");
 
         content.AppendLine($@"using {solutionName}.Application.UseCases.Shared;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using {solutionName}.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace {solutionName}.API.Controllers;
@@ -69,9 +88,9 @@ public class {className}Controller(");
 
     [AllowAnonymous]
     [HttpGet(""GetAll"")]
-    public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, {parameters})
+    public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, {className}Input input)
     {{
-        var result = await _getAll.Execute(pagination, {parameterNamesOnly});
+        var result = await _getAll.Execute(pagination, input);
         return Ok(_mapper.Map<IEnumerable<{className}Output>>(result.linq));
     }}
 
@@ -115,5 +134,10 @@ public class {className}Controller(");
 }}");
 
         return GetIndentedCode(content.ToString());
+    }
+
+    private static string GenerateBaseControllerContent()
+    {
+        return "aea";
     }
 }

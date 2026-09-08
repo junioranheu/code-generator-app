@@ -98,7 +98,7 @@ public static class Generate
         PromptLog($"Folder {GetStringAfterText(folderPath, $"{solutionName}.")} has been successfully generated");
     }
 
-    public static void GenerateFiles(List<Content> contents, bool isGenerateZip)
+    public static void GenerateFiles(List<Content> contents)
     {
         foreach (var content in contents)
         {

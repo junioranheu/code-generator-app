@@ -18,7 +18,8 @@ public class Main
         string rootPath = GenerateDefaultDirectories(solutionName, isGenerateZip.GetValueOrDefault(), guid, requestType.GetValueOrDefault());
         SolutionRepository.Generate(solutionName, rootPath, contextName, models);
 
-        CreateEntityAudit(solutionName, rootPath, isGenerateZip.GetValueOrDefault());
+        CreateEntityAudit(solutionName, rootPath);
+        CreateControllerBase(solutionName, rootPath);
 
         foreach (var model in models)
         {
@@ -26,17 +27,17 @@ public class Main
 
             #region Entity
             List<Content> entityContent = EntityRepository.GenerateEntity(solutionName, rootPath, className: model.Name, props, isPKGuid);
-            GenerateFiles(contents: entityContent, isGenerateZip.GetValueOrDefault());
+            GenerateFiles(contents: entityContent);
             #endregion
 
             #region UseCase
             List<Content> useCaseContent = UseCaseRepository.GenerateUseCaseAndAllItsDependencies(solutionName, contextName, rootPath, useCaseName: model.Name, props, isPKGuid);
-            GenerateFiles(contents: useCaseContent, isGenerateZip.GetValueOrDefault());
+            GenerateFiles(contents: useCaseContent);
             #endregion
 
             #region Controller
             List<Content> controllerContent = ControllerRepository.GenerateController(solutionName, rootPath, className: model.Name, props, isPKGuid);
-            GenerateFiles(contents: controllerContent, isGenerateZip.GetValueOrDefault());
+            GenerateFiles(contents: controllerContent);
             #endregion
         }
 
@@ -82,7 +83,7 @@ public class Main
         }
     }
 
-    private static void CreateEntityAudit(string solutionName, string rootPath, bool isGenerateZip)
+    private static void CreateEntityAudit(string solutionName, string rootPath)
     {
         string className = "Audit";
 
@@ -95,7 +96,13 @@ public class Main
         ];
 
         List<Content> entityContent = EntityRepository.GenerateEntity(solutionName, rootPath, className, props, isPKGuid: true, isSystematicEntity: true);
-        GenerateFiles(contents: entityContent, isGenerateZip);
+        GenerateFiles(contents: entityContent);
+    }
+
+    private static void CreateControllerBase(string solutionName, string rootPath)
+    {
+        List<Content> entityContent = ControllerRepository.GenerateBaseController(solutionName, rootPath);
+        GenerateFiles(contents: entityContent);
     }
     #endregion
 }
