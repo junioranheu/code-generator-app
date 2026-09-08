@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using CodeGenerator.Console.Consts;
 using CodeGenerator.Console.Models;
 using static CodeGenerator.Console.Utils.Fixtures.Generate;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
@@ -19,53 +20,53 @@ public static class SolutionRepository
         GenerateFolder(solutionName, Path.Combine(rootPath, domainProject));
         GenerateFolder(solutionName, Path.Combine(rootPath, infrastructureProject));
 
-        Write(rootPath, $"{solutionName}.sln", GenerateSolutionFile(solutionName, apiProject, applicationProject, domainProject, infrastructureProject));
-        Write(rootPath, Path.Combine(apiProject, $"{apiProject}.csproj"), GenerateApiProject(apiProject, applicationProject, infrastructureProject));
-        Write(rootPath, Path.Combine(applicationProject, $"{applicationProject}.csproj"), GenerateApplicationProject(applicationProject, domainProject, infrastructureProject));
-        Write(rootPath, Path.Combine(domainProject, $"{domainProject}.csproj"), GenerateLibraryProject(domainProject));
-        Write(rootPath, Path.Combine(infrastructureProject, $"{infrastructureProject}.csproj"), GenerateInfrastructureProject(infrastructureProject, domainProject));
+        Write(rootPath, $"{solutionName}.sln", GenerateSolutionFile(apiProject, applicationProject, domainProject, infrastructureProject));
+        Write(rootPath, Path.Combine(apiProject, $"{apiProject}.csproj"), GenerateApiProject(applicationProject, infrastructureProject));
+        Write(rootPath, Path.Combine(applicationProject, $"{applicationProject}.csproj"), GenerateApplicationProject(domainProject, infrastructureProject));
+        Write(rootPath, Path.Combine(domainProject, $"{domainProject}.csproj"), GenerateLibraryProject());
+        Write(rootPath, Path.Combine(infrastructureProject, $"{infrastructureProject}.csproj"), GenerateInfrastructureProject(domainProject));
 
         Write(rootPath, Path.Combine(apiProject, "Program.cs"), GenerateApiProgram(solutionName, models));
         Write(rootPath, Path.Combine(apiProject, "appsettings.json"), "{\n  \"ConnectionStrings\": {\n    \"DefaultConnection\": \"Data Source=generated.db\"\n  },\n  \"Logging\": {\n    \"LogLevel\": {\n      \"Default\": \"Information\",\n      \"Microsoft.AspNetCore\": \"Warning\"\n    }\n  }\n}\n");
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PaginationInput.cs"), GeneratePaginationInput(solutionName));
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PagedQuery.cs"), GeneratePagedQuery(solutionName));
         Write(rootPath, Path.Combine(infrastructureProject, "Data", $"{contextName}.cs"), GenerateDbContext(solutionName, contextName, models));
-        Write(rootPath, Path.Combine(infrastructureProject, "DependencyInjection.cs"), GenerateInfrastructureDependencyInjection(solutionName, infrastructureProject, contextName));
+        Write(rootPath, Path.Combine(infrastructureProject, "DependencyInjection.cs"), GenerateInfrastructureDependencyInjection(solutionName, contextName));
     }
 
-    private static string GenerateApiProject(string apiProject, string applicationProject, string infrastructureProject) => $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+    private static string GenerateApiProject(string applicationProject, string infrastructureProject) => $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>{Misc.TargetFramework}</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include=""..\\{applicationProject}\\{applicationProject}.csproj"" />
     <ProjectReference Include=""..\\{infrastructureProject}\\{infrastructureProject}.csproj"" />
-    <PackageReference Include=""AutoMapper.Extensions.Microsoft.DependencyInjection"" Version=""12.0.1"" />
-    <PackageReference Include=""Swashbuckle.AspNetCore"" Version=""6.6.2"" />
+    <PackageReference Include=""AutoMapper.Extensions.Microsoft.DependencyInjection"" Version=""{Misc.AutoMapperVersion}"" />
+    <PackageReference Include=""Swashbuckle.AspNetCore"" Version=""{Misc.SwaggerVersion}"" />
   </ItemGroup>
 </Project>";
 
-    private static string GenerateApplicationProject(string applicationProject, string domainProject, string infrastructureProject) => $@"<Project Sdk=""Microsoft.NET.Sdk""><PropertyGroup><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup><ItemGroup><ProjectReference Include=""..\\{domainProject}\\{domainProject}.csproj"" /><ProjectReference Include=""..\\{infrastructureProject}\\{infrastructureProject}.csproj"" /></ItemGroup></Project>";
+    private static string GenerateApplicationProject(string domainProject, string infrastructureProject) => $@"<Project Sdk=""Microsoft.NET.Sdk""><PropertyGroup><TargetFramework>{Misc.TargetFramework}</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup><ItemGroup><ProjectReference Include=""..\\{domainProject}\\{domainProject}.csproj"" /><ProjectReference Include=""..\\{infrastructureProject}\\{infrastructureProject}.csproj"" /></ItemGroup></Project>";
 
-    private static string GenerateLibraryProject(string projectName) => $@"<Project Sdk=""Microsoft.NET.Sdk""><PropertyGroup><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup></Project>";
+    private static string GenerateLibraryProject() => $@"<Project Sdk=""Microsoft.NET.Sdk""><PropertyGroup><TargetFramework>{Misc.TargetFramework}</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup></Project>";
 
-    private static string GenerateInfrastructureProject(string infrastructureProject, string domainProject) => $@"<Project Sdk=""Microsoft.NET.Sdk""><PropertyGroup><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup><ItemGroup><ProjectReference Include=""..\\{domainProject}\\{domainProject}.csproj"" /><PackageReference Include=""Microsoft.EntityFrameworkCore.Sqlite"" Version=""10.0.0"" /><PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""10.0.0""><PrivateAssets>all</PrivateAssets></PackageReference></ItemGroup></Project>";
+    private static string GenerateInfrastructureProject(string domainProject) => $@"<Project Sdk=""Microsoft.NET.Sdk""><PropertyGroup><TargetFramework>{Misc.TargetFramework}</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup><ItemGroup><ProjectReference Include=""..\\{domainProject}\\{domainProject}.csproj"" /><PackageReference Include=""Microsoft.EntityFrameworkCore.Sqlite"" Version=""{Misc.EntityFrameworkVersion}"" /><PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""{Misc.EntityFrameworkVersion}""><PrivateAssets>all</PrivateAssets></PackageReference></ItemGroup></Project>";
 
-    private static string GenerateSolutionFile(string solutionName, params string[] projects)
+    private static string GenerateSolutionFile(params string[] projects)
     {
         StringBuilder solution = new();
-        solution.AppendLine("Microsoft Visual Studio Solution File, Format Version 12.00");
+        solution.AppendLine($"Microsoft Visual Studio Solution File, Format Version {Misc.SolutionFormatVersion}");
         solution.AppendLine("# Visual Studio Version 17");
-        solution.AppendLine("VisualStudioVersion = 17.0.31903.59");
-        solution.AppendLine("MinimumVisualStudioVersion = 10.0.40219.1");
+        solution.AppendLine($"VisualStudioVersion = {Misc.VisualStudioVersion}");
+        solution.AppendLine($"MinimumVisualStudioVersion = {Misc.MinimumVisualStudioVersion}");
 
         Dictionary<string, string> projectGuids = projects.ToDictionary(x => x, _ => Guid.NewGuid().ToString("B").ToUpperInvariant());
+
         foreach (string project in projects)
         {
-            string projectType = project.EndsWith(".API", StringComparison.Ordinal) ? "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}" : "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}";
-            solution.AppendLine($"Project(\"{projectType}\") = \"{project}\", \"{project}\\{project}.csproj\", \"{projectGuids[project]}\"");
+            solution.AppendLine($"Project(\"{Misc.CSharpProjectTypeGuid}\") = \"{project}\", \"{project}\\{project}.csproj\", \"{projectGuids[project]}\"");
             solution.AppendLine("EndProject");
         }
 
@@ -75,6 +76,7 @@ public static class SolutionRepository
         solution.AppendLine("\t\tRelease|Any CPU = Release|Any CPU");
         solution.AppendLine("\tEndGlobalSection");
         solution.AppendLine("\tGlobalSection(ProjectConfigurationPlatforms) = postSolution");
+
         foreach (string guid in projectGuids.Values)
         {
             solution.AppendLine($"\t\t{guid}.Debug|Any CPU.ActiveCfg = Debug|Any CPU");
@@ -82,8 +84,10 @@ public static class SolutionRepository
             solution.AppendLine($"\t\t{guid}.Release|Any CPU.ActiveCfg = Release|Any CPU");
             solution.AppendLine($"\t\t{guid}.Release|Any CPU.Build.0 = Release|Any CPU");
         }
+
         solution.AppendLine("\tEndGlobalSection");
         solution.AppendLine("EndGlobal");
+
         return solution.ToString();
     }
 
@@ -91,10 +95,12 @@ public static class SolutionRepository
     {
         StringBuilder useCaseUsings = new();
         StringBuilder registrations = new();
+
         foreach (Model model in models)
         {
             useCaseUsings.AppendLine($"using {solutionName}.Application.UseCases.{model.Name};");
         }
+
         foreach (Model model in models)
         {
             registrations.AppendLine($"builder.Services.Add{GetStrPlural(model.Name)}Application();");
@@ -159,15 +165,17 @@ public static class SolutionRepository
         content.AppendLine();
         content.AppendLine($"public sealed class {contextName}(DbContextOptions<{contextName}> options) : DbContext(options)");
         content.AppendLine("{");
+
         foreach (Model model in models)
         {
             content.AppendLine($"    public DbSet<{model.Name}> {GetStrPlural(model.Name)} => Set<{model.Name}>();");
         }
         content.AppendLine("}");
+
         return content.ToString();
     }
 
-    private static string GenerateInfrastructureDependencyInjection(string solutionName, string infrastructureProject, string contextName) => string.Join(Environment.NewLine, [
+    private static string GenerateInfrastructureDependencyInjection(string solutionName, string contextName) => string.Join(Environment.NewLine, [
         "using Microsoft.EntityFrameworkCore;",
         "using Microsoft.Extensions.Configuration;",
         "using Microsoft.Extensions.DependencyInjection;",

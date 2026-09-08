@@ -55,7 +55,7 @@ public class Main
 
         return (Array.Empty<byte>(), guid);
     }
-    
+
     #region Misc
     private static void CheckVariables(string solutionName, string contextName, List<Model> models)
     {
@@ -67,6 +67,11 @@ public class Main
         if (string.IsNullOrEmpty(contextName))
         {
             throw new ArgumentException("The context name can not be null or empty");
+        }
+
+        if (solutionName == contextName)
+        {
+            throw new ArgumentException("The solution and context name can not be the same");
         }
 
         if (models.Count < 1)
