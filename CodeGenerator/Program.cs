@@ -1,6 +1,7 @@
 ﻿using CodeGenerator.Console;
 using CodeGenerator.Console.Enums;
 using CodeGenerator.Console.Models;
+using Spectre.Console;
 using static CodeGenerator.Console.Utils.Fixtures.Prompt;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
 
@@ -19,4 +20,4 @@ GenerateCodeRequest request = new()
 Main.Execute(request);
 
 PromptLog("Press any key to exit the program", type: LogEnum.Info);
-Console.ReadKey();
+AnsiConsole.Console.Input.ReadKey(intercept: true);

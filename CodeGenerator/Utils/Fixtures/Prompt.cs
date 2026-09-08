@@ -1,8 +1,8 @@
 ﻿using CodeGenerator.Console.Enums;
 using CodeGenerator.Console.Models;
+using Spectre.Console;
 using static CodeGenerator.Console.Utils.Fixtures.Format;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
-using Sys = System;
 
 namespace CodeGenerator.Console.Utils.Fixtures;
 
@@ -10,8 +10,7 @@ public static class Prompt
 {
     public static string PromptInput(string msg)
     {
-        Sys.Console.WriteLine(msg);
-        string? input = Sys.Console.ReadLine();
+        string? input = AnsiConsole.Ask<string>(Markup.Escape(msg));
 
         if (string.IsNullOrEmpty(input))
         {
@@ -23,24 +22,16 @@ public static class Prompt
 
     public static bool PromptInputForBool(string msg)
     {
-        Sys.Console.WriteLine($"{msg} (Answer y or n)");
-        string? input = Sys.Console.ReadLine();
-
-        if (string.IsNullOrEmpty(input))
-        {
-            throw new ArgumentException("User input can not be empty");
-        }
-
-        return input.Equals("y", StringComparison.CurrentCultureIgnoreCase);
+        return AnsiConsole.Confirm(Markup.Escape(msg), defaultValue: false);
     }
 
     public static List<Model> PromptInputForModel()
     {
-        List<Model> models = new();
+        List<Model> models = [];
         bool keepWhile = true;
 
-        Sys.Console.WriteLine("\nClass name example: Person");
-        Sys.Console.WriteLine("Class properties example: Name string LastName? string Age int Height double IsUnder18 bool Country Country\n");
+        AnsiConsole.MarkupLine("\nClass name example: [cyan]Person[/]");
+        AnsiConsole.MarkupLine("Class properties example: [cyan]Name string LastName? string Age int Height double IsUnder18 bool Country Country[/]\n");
 
         while (keepWhile)
         {
@@ -56,20 +47,16 @@ public static class Prompt
 
     public static string PromptLog(string msg, LogEnum? type = LogEnum.Success)
     {
-        ConsoleColor originalColor = ConsoleColor.Gray;
-
-        Sys.Console.ForegroundColor = type switch
+        string style = type switch
         {
-            LogEnum.Success => ConsoleColor.Cyan,
-            LogEnum.Fail => ConsoleColor.Red,
-            LogEnum.Warning => ConsoleColor.Yellow,
-            LogEnum.Info => originalColor,
-            _ => originalColor,
+            LogEnum.Success => "cyan",
+            LogEnum.Fail => "red",
+            LogEnum.Warning => "yellow",
+            _ => "grey",
         };
 
         string final = $"{FormatDateTime(GetDateTime(), DateTimeFormat.CompleteDateTime)} | {msg}";
-        Sys.Console.WriteLine(final);
-        Sys.Console.ForegroundColor = originalColor;
+        AnsiConsole.MarkupLine($"[{style}]{Markup.Escape(final)}[/]");
 
         return final;
     }
