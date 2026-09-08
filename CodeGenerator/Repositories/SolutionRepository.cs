@@ -40,7 +40,7 @@ public static class SolutionRepository
 
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PaginationInput.cs"), GeneratePaginationInput(solutionName));
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PagedQuery.cs"), GeneratePagedQuery(solutionName));
-        Write(rootPath, Path.Combine(applicationProject, "DependencyInjection.cs"), GenerateApplicationDependencyInjection(solutionName, contextName));
+        Write(rootPath, Path.Combine(applicationProject, "DependencyInjection.cs"), GenerateApplicationDependencyInjection(solutionName, models));
 
         Write(rootPath, Path.Combine(infrastructureProject, "Data", $"{contextName}.cs"), GenerateDbContext(solutionName, contextName, models));
         Write(rootPath, Path.Combine(infrastructureProject, "DependencyInjection.cs"), GenerateInfrastructureDependencyInjection(solutionName, contextName));
@@ -491,10 +491,10 @@ public static class SolutionRepository
     {
         StringBuilder content = new();
 
+        content.AppendLine($"using {solutionName}.API;");
         content.AppendLine($"using {solutionName}.Domain.Consts;");
-        content.AppendLine($"using {solutionName}.Infrastructure;");
         content.AppendLine($"using {solutionName}.Application;");
-        content.AppendLine($"using {solutionName}.Domain;");
+        content.AppendLine($"using {solutionName}.Infrastructure;");
         content.AppendLine();
         content.AppendLine($"Console.Title = SystemConsts.App.NameApi;");
         content.AppendLine();
@@ -960,9 +960,50 @@ public static class SolutionRepository
     /// Gera o arquivo DependencyInjection.cs do projeto Application para registrar use-cases
     /// e serviços da camada de aplicação (atualmente inicia vazio para customização posterior).
     /// </summary>
-    private static string GenerateApplicationDependencyInjection(string solutionName, string contextName)
+    private static string GenerateApplicationDependencyInjection(string solutionName, List<Model> models)
     {
         StringBuilder content = new();
+
+        content.AppendLine("using Microsoft.AspNetCore.Builder;");
+        content.AppendLine("using Microsoft.Extensions.DependencyInjection;");
+        content.AppendLine("using Microsoft.Extensions.Logging;");
+
+        // Usings dinâmicos para cada use-case;
+        foreach (Model model in models)
+        {
+            content.AppendLine($"using {solutionName}.Application.UseCases.{GetStrPlural(model.Name)};");
+        }
+
+        content.AppendLine();
+        content.AppendLine($"namespace {solutionName}.Application;");
+        content.AppendLine();
+        content.AppendLine("public static class DependencyInjection");
+        content.AppendLine("{");
+        content.AppendLine("    public static IServiceCollection AddDependencyInjectionApplication(this IServiceCollection services, WebApplicationBuilder builder)");
+        content.AppendLine("    {");
+        content.AppendLine("        AddLogger(builder);");
+        content.AppendLine("        AddUseCases(services);");
+        content.AppendLine();
+        content.AppendLine("        return services;");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddLogger(WebApplicationBuilder builder)");
+        content.AppendLine("    {");
+        content.AppendLine("        builder.Logging.ClearProviders();");
+        content.AppendLine("        builder.Logging.AddConsole();");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddUseCases(IServiceCollection services)");
+        content.AppendLine("    {");
+
+        // Registros dinâmicos para cada model;
+        foreach (Model model in models)
+        {
+            content.AppendLine($"        services.Add{GetStrPlural(model.Name)}Application();");
+        }
+
+        content.AppendLine("    }");
+        content.AppendLine("}");
 
         return content.ToString();
     }
