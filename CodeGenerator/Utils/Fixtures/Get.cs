@@ -276,8 +276,8 @@ public static class Get
                     continue;
                 }
 
-                string inputPrefix = hasInputPrefix ? "input." : string.Empty;
-                string valueName = $"{inputPrefix}{GetStringLowerCaseFirstLetter(attrName)}";
+                string valueName = hasInputPrefix ? $"input.{attrName}" : GetStringLowerCaseFirstLetter(attrName);
+                
                 string condition = IsStringType(attrType)
                     ? $"string.IsNullOrEmpty({valueName}) || x.{attrName} == {valueName}"
                     : IsNumericType(attrType)

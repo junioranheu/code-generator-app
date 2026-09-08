@@ -148,7 +148,7 @@ public sealed class GetAll{useCaseName}({context} context) : IGetAll{useCaseName
     public async Task<(IEnumerable<{useCaseName}> linq, int count)> Execute({parameters})
     {{
         var query = _context.{GetStrPlural(useCaseName)}.
-        OrderBy(x => x.{FirstCharToUpper(GetClassIdWithoutType(useCaseName, isLowerCaseFirstLetter: true))}).
+        OrderBy(x => x.{FirstCharToUpper(GetClassIdWithoutType(useCaseName, isLowerCaseFirstLetter: false))}).
         Where(x =>
         x.Status == true &&"
         );
@@ -309,7 +309,6 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
     #endregion
 
     #region Etc
-
     private static string GetFileName(string useCaseName, string item, bool isInterface)
     {
         return Path.Combine(GetStrPlural(useCaseName), item, $"{(isInterface ? "I" : string.Empty)}{item}{useCaseName}");
