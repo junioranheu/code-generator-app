@@ -36,6 +36,9 @@ public sealed class EntityRepository
         if (isNormalEntity)
         {
             content.AppendLine("using System.ComponentModel.DataAnnotations;");
+            content.AppendLine("using System.ComponentModel.DataAnnotations.Schema;");
+            content.AppendLine();
+            content.AppendLine($"namespace {solutionName}.Domain.Entities;");
             content.AppendLine();
         }
 
