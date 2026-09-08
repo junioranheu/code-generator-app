@@ -133,6 +133,7 @@ public static class SolutionRepository
 
         #region JwtSettings em Infrastructure/Auth/Models;
         StringBuilder jwt = new();
+
         jwt.AppendLine($"namespace {solutionName}.Infrastructure.Auth.Models;");
         jwt.AppendLine();
         jwt.AppendLine("public sealed class JwtSettings");
@@ -144,6 +145,62 @@ public static class SolutionRepository
         jwt.AppendLine("}");
 
         Write(rootPath, Path.Combine($"{solutionName}.Infrastructure", "Auth", "Models", "JwtSettings.cs"), jwt.ToString());
+        #endregion
+
+        #region Interface IDataBaseConnection em Infrastructure/Factory/Database
+        StringBuilder dbConnInterface = new();
+
+        dbConnInterface.AppendLine("using Npgsql;");
+        dbConnInterface.AppendLine();
+        dbConnInterface.AppendLine($"namespace {solutionName}.Infrastructure.Factory.DataBase;");
+        dbConnInterface.AppendLine();
+        dbConnInterface.AppendLine("public interface IDataBaseConnection");
+        dbConnInterface.AppendLine("{");
+        dbConnInterface.AppendLine("    string GetConnectionString();");
+        dbConnInterface.AppendLine("    NpgsqlConnection GetConnection();");
+        dbConnInterface.AppendLine("    string GetConnectionTypeName();");
+        dbConnInterface.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.Infrastructure", "Factory", "DataBase", "IDataBaseConnection.cs"), dbConnInterface.ToString());
+        #endregion
+
+        #region DataBaseConnection em Infrastructure/Factory/DataBase
+        StringBuilder dbConn = new();
+
+        dbConn.AppendLine("using Microsoft.Extensions.Configuration;");
+        dbConn.AppendLine("using Npgsql;");
+        dbConn.AppendLine();
+        dbConn.AppendLine($"namespace {solutionName}.Infrastructure.Factory.DataBase;");
+        dbConn.AppendLine();
+        dbConn.AppendLine($"public class DataBaseConnection(IConfiguration configuration) : IDataBaseConnection");
+        dbConn.AppendLine("{");
+        dbConn.AppendLine("    private readonly IConfiguration _configuration = configuration;");
+        dbConn.AppendLine();
+        dbConn.AppendLine("    public string GetConnectionString()");
+        dbConn.AppendLine("    {");
+        dbConn.AppendLine("        string connectionStringName = _configuration[\"SystemSettings:ConnectionStringName\"] ?? string.Empty;");
+        dbConn.AppendLine("        string connectionString = _configuration.GetConnectionString(connectionStringName) ?? string.Empty;");
+        dbConn.AppendLine();
+        dbConn.AppendLine("        if (string.IsNullOrEmpty(connectionString))");
+        dbConn.AppendLine("        {");
+        dbConn.AppendLine("            throw new InvalidOperationException(\"A connection string está nula.\");");
+        dbConn.AppendLine("        }");
+        dbConn.AppendLine();
+        dbConn.AppendLine("        return connectionString;");
+        dbConn.AppendLine("    }");
+        dbConn.AppendLine();
+        dbConn.AppendLine("    public NpgsqlConnection GetConnection()");
+        dbConn.AppendLine("    {");
+        dbConn.AppendLine("        return new NpgsqlConnection(GetConnectionString());");
+        dbConn.AppendLine("    }");
+        dbConn.AppendLine();
+        dbConn.AppendLine("    public string GetConnectionTypeName()");
+        dbConn.AppendLine("    {");
+        dbConn.AppendLine("        return nameof(NpgsqlConnection);");
+        dbConn.AppendLine("    }");
+        dbConn.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.Infrastructure", "Factory", "DataBase", "DataBaseConnection.cs"), dbConn.ToString());
         #endregion
     }
 
@@ -203,6 +260,7 @@ public static class SolutionRepository
         sb.AppendLine("  <ItemGroup>");
         sb.AppendLine($"    <ProjectReference Include=\"..\\{domainProject}\\{domainProject}.csproj\" />");
         sb.AppendLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Sqlite\" Version=\"{Misc.EntityFrameworkVersion}\" />");
+        sb.AppendLine($"    <PackageReference Include=\"Npgsql.EntityFrameworkCore.PostgreSQL\" Version=\"{Misc.EntityFrameworkVersion}\" />");
         sb.AppendLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Design\" Version=\"{Misc.EntityFrameworkVersion}\">\n      <PrivateAssets>all</PrivateAssets></PackageReference>");
         sb.AppendLine($"    <PackageReference Include=\"System.IdentityModel.Tokens.Jwt\" Version=\"{Misc.IdentityModelVersion}\" />");
         sb.AppendLine($"    <PackageReference Include=\"Microsoft.AspNetCore.Authentication.JwtBearer\" Version=\"{Misc.JwtBearerVersion}\" />");
@@ -488,7 +546,7 @@ public static class SolutionRepository
     private static string GenerateAPIDependencyInjection(string solutionName)
     {
         StringBuilder content = new();
-     
+
         content.AppendLine($"using {solutionName}.Domain.Consts;");
         content.AppendLine("using Microsoft.AspNetCore.ResponseCompression;");
         content.AppendLine("using System.IO.Compression;");
@@ -589,7 +647,7 @@ public static class SolutionRepository
     private static string GenerateAPIAppConfigurationDependencyInjection(string solutionName)
     {
         StringBuilder content = new();
-     
+
         content.AppendLine($"using {solutionName}.Domain.Consts;");
         content.AppendLine("using Microsoft.AspNetCore.Mvc.Controllers;");
         content.AppendLine("using Swashbuckle.AspNetCore.SwaggerUI;");
@@ -749,11 +807,9 @@ public static class SolutionRepository
         content.AppendLine($"using {solutionName}.Infrastructure.Data;");
         content.AppendLine($"using {solutionName}.Infrastructure.Factory;");
         content.AppendLine($"using {solutionName}.Infrastructure.Factory.DataBase;");
-        content.AppendLine($"using {solutionName}.Infrastructure.Interceptors;");
-        content.AppendLine($"using {solutionName}.Infrastructure.Services.Env;");
         content.AppendLine("using System.Text;");
         content.AppendLine("using System.Text.Json;");
-        content.AppendLine($"using {solutionName}.Domain.Consts;");     
+        content.AppendLine($"using {solutionName}.Domain.Consts;");
         content.AppendLine();
         content.AppendLine($"namespace {solutionName}.Infrastructure;");
         content.AppendLine();
@@ -775,15 +831,6 @@ public static class SolutionRepository
         content.AppendLine("        // JWT;");
         content.AppendLine("        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();");
         content.AppendLine("        services.Configure<JwtSettings>(builder.Configuration.GetSection(\"JwtSettings\"));");
-        content.AppendLine();
-        content.AppendLine("        // Env;");
-        content.AppendLine("        services.AddSingleton<IEnvService>(x =>");
-        content.AppendLine("        {");
-        content.AppendLine("            IWebHostEnvironment env = builder.Environment;");
-        content.AppendLine("            IConfiguration config = builder.Configuration;");
-        content.AppendLine();
-        content.AppendLine("            return new EnvService(env, config);");
-        content.AppendLine("        });");
         content.AppendLine("    }");
         content.AppendLine();
         content.AppendLine("    private static readonly string[] OnAuthenticationFailed = [\"Sua sessão expirou. Por favor, realize o login novamente para continuar.\"]; ");
@@ -881,8 +928,7 @@ public static class SolutionRepository
         content.AppendLine();
         content.AppendLine($"        services.AddDbContextPool<{contextName}>((serviceProvider, options) =>");
         content.AppendLine("        {");
-        content.AppendLine("            // Npgsql;");
-        content.AppendLine("            options.UseNpgsql(con).AddInterceptors(slowQueryDebugInterceptor, changeLogInterceptor);");
+        content.AppendLine("            options.UseNpgsql(con);");
         content.AppendLine("        });");
         content.AppendLine("    }");
         content.AppendLine();
