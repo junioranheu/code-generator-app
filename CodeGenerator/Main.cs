@@ -16,6 +16,7 @@ public class Main
         CheckVariables(solutionName, contextName, models);
         Guid guid = Guid.NewGuid();
         string rootPath = GenerateDefaultDirectories(solutionName, isGenerateZip.GetValueOrDefault(), guid, requestType.GetValueOrDefault());
+        SolutionRepository.Generate(solutionName, rootPath, contextName, models);
 
         foreach (var model in models)
         {

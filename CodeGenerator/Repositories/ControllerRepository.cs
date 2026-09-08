@@ -41,6 +41,7 @@ public sealed class ControllerRepository
 
         content.AppendLine($@"using {solutionName}.Application.UseCases.Shared;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace {solutionName}.API.Controllers;
@@ -71,7 +72,7 @@ public class {className}Controller(");
     public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, {parameters})
     {{
         var result = await _getAll.Execute(pagination, {parameterNamesOnly});
-        return Ok(_mapper.Map<IEnumerable<{className}Output>>(result));
+        return Ok(_mapper.Map<IEnumerable<{className}Output>>(result.linq));
     }}
 
     [AllowAnonymous]

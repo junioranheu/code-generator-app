@@ -104,7 +104,7 @@ public sealed class UseCaseRepository
 using {solutionName}.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace {solutionName}.Application.UseCases.{useCaseName}.Get;
+namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Get;
 
 public sealed class Get{useCaseName}({context} context) : IGet{useCaseName}
 {{
@@ -139,7 +139,7 @@ using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace {solutionName}.Application.UseCases.{useCaseName}.GetAll;
+namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.GetAll;
 
 public sealed class GetAll{useCaseName}({context} context) : IGetAll{useCaseName}
 {{
@@ -147,8 +147,8 @@ public sealed class GetAll{useCaseName}({context} context) : IGetAll{useCaseName
 
     public async Task<(IEnumerable<{useCaseName}> linq, int count)> Execute({parameters})
     {{
-        var linq = await _context.{GetStrPlural(useCaseName)}.
-        OrderBy(x => x.xxx).
+        var query = _context.{GetStrPlural(useCaseName)}.
+        OrderBy(x => x.{GetClassId(useCaseName, isPKGuid: false, isLowerCaseFirstLetter: true)}).
         Where(x =>
         x.Status == true &&"
         );
@@ -172,7 +172,7 @@ public sealed class GetAll{useCaseName}({context} context) : IGetAll{useCaseName
         content.AppendLine($@"using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
 
-namespace {solutionName}.Application.UseCases.{useCaseName}.Create;
+namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Create;
 
 public sealed class Create{useCaseName}({context} context) : ICreate{useCaseName}
 {{
@@ -196,7 +196,7 @@ public sealed class Create{useCaseName}({context} context) : ICreate{useCaseName
         content.AppendLine($@"using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
 
-namespace {solutionName}.Application.UseCases.{useCaseName}.CreateRange;
+namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.CreateRange;
 
 public sealed class CreateRange{useCaseName}({context} context) : ICreateRange{useCaseName}
 {{
@@ -254,7 +254,7 @@ public sealed class CreateRange{useCaseName}({context} context) : ICreateRange{u
         content.AppendLine($@"using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
 
-namespace {solutionName}.Application.UseCases.{useCaseName}.Update;
+namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Update;
 
 public sealed class Update{useCaseName}({context} context) : IUpdate{useCaseName}
 {{
@@ -284,7 +284,7 @@ public sealed class Update{useCaseName}({context} context) : IUpdate{useCaseName
         content.AppendLine($@"using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
 
-namespace {solutionName}.Application.UseCases.{useCaseName}.Delete;
+namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Delete;
 
 public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName}
 {{
@@ -298,7 +298,7 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
             return;
         }}
 
-        _context.Remove(input);
+        _context.Remove(entity);
         await _context.SaveChangesAsync();
     }}
 }}");
@@ -348,13 +348,17 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
     {
         StringBuilder content = new();
 
+        string returnType = useCaseType == GetEnumDesc(UseCaseEnum.GetAll)
+            ? $"(IEnumerable<{useCaseName}> linq, int count)"
+            : $"{useCaseName}?";
+
         content.AppendLine(@$"using {solutionName}.Domain.Entities;
 
-namespace {solutionName}.Application.UseCases.{useCaseName}.{useCaseType};
+namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.{useCaseType};
 
 public interface I{useCaseType}{useCaseName}
 {{
-    Task<{useCaseName}?> Execute({parameters});
+    Task<{returnType}> Execute({parameters});
 }}");
 
         return GetIndentedCode(content.ToString());
@@ -368,7 +372,7 @@ public interface I{useCaseType}{useCaseName}
 
         content.AppendLine(@$"using Microsoft.Extensions.DependencyInjection;
 
-namespace {solutionName}.Application.UseCases.{useCaseName};
+namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)};
 
 public static class DependencyInjection
 {{
