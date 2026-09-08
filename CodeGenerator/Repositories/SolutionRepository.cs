@@ -27,7 +27,7 @@ public static class SolutionRepository
         Write(rootPath, Path.Combine(infrastructureProject, $"{infrastructureProject}.csproj"), GenerateInfrastructureProject(domainProject));
 
         Write(rootPath, Path.Combine(apiProject, "Program.cs"), GenerateApiProgram(solutionName, models));
-        Write(rootPath, Path.Combine(apiProject, "appsettings.json"), "{\n  \"ConnectionStrings\": {\n    \"DefaultConnection\": \"Data Source=generated.db\"\n  },\n  \"Logging\": {\n    \"LogLevel\": {\n      \"Default\": \"Information\",\n      \"Microsoft.AspNetCore\": \"Warning\"\n    }\n  }\n}\n");
+        Write(rootPath, Path.Combine(apiProject, "appsettings.json"), "{\n  \"ConnectionStrings\": {\n    \"DefaultConnection\": \"Data Source=generated.db\"\n  },\n  \"Logging\": {\n    \"LogLevel\": {\n      \"Default\": \"Information\",\n      \"Microsoft.AspNetCore\": \"Warning\"\n    }\n  }\n}\n// made by @junioranheu");
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PaginationInput.cs"), GeneratePaginationInput(solutionName));
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PagedQuery.cs"), GeneratePagedQuery(solutionName));
         Write(rootPath, Path.Combine(infrastructureProject, "Data", $"{contextName}.cs"), GenerateDbContext(solutionName, contextName, models));

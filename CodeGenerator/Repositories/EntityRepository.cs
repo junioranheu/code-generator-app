@@ -8,7 +8,8 @@ namespace CodeGenerator.Console.Repositories;
 
 public sealed partial class EntityRepository
 {
-    public static List<Content> GenerateEntity(string solutionName, string rootPath, string className, List<string> props, bool isPKGuid)
+    // isSystematicEntity verificar se a entidade é sistemática, ou seja, se ela é uma entidade que faz parte do sistema e não é uma entidade de negócio. Exemplo: Audit, User, Role, etc.
+    public static List<Content> GenerateEntity(string solutionName, string rootPath, string className, List<string> props, bool isPKGuid, bool isSystematicEntity = false)
     {
         ExtensionsEnum extension = ExtensionsEnum.CS;
         ContentDirectoryEnum contentDirectory = ContentDirectoryEnum.Entity;
@@ -16,7 +17,7 @@ public sealed partial class EntityRepository
         List<Content> content =
         [
             new (
-                value: GenerateContent(solutionName, className, props, isPKGuid),
+                value: GenerateContent(solutionName, className, props, isPKGuid, isSystematicEntity: isSystematicEntity),
                 contentDirectory,
                 extension,
                 solutionName,
@@ -27,7 +28,7 @@ public sealed partial class EntityRepository
         return content;
     }
 
-    public static string GenerateContent(string solutionName, string className, List<string> props, bool isPKGuid, bool isInput = false, bool isOutput = false)
+    public static string GenerateContent(string solutionName, string className, List<string> props, bool isPKGuid, bool isInput = false, bool isOutput = false, bool isSystematicEntity = false)
     {
         StringBuilder content = new();
         string paramId = GetClassId(className, isPKGuid, isLowerCaseFirstLetter: false);
@@ -47,16 +48,26 @@ public sealed partial class EntityRepository
             content.AppendLine();
             content.AppendLine($"namespace {solutionName}.Domain.Entities;");
             content.AppendLine();
+
+            if (!isSystematicEntity)
+            {
+                content.AppendLine($"public sealed class {className} : Audit");
+            }
+            else
+            {
+                content.AppendLine($"public class {className}");
+            }
+
+            content.AppendLine("{");
         }
 
         if (!isNormalEntity)
         {
             content.AppendLine($"namespace {solutionName}.Application.UseCases.{GetStrPlural(className)}.Shared;");
             content.AppendLine();
+            content.AppendLine($"public sealed class {className}{(isInput ? "Input" : string.Empty)}{(isOutput ? "Output" : string.Empty)}");
+            content.AppendLine("{");
         }
-
-        content.AppendLine($"public sealed class {className}{(isInput ? "Input" : string.Empty)}{(isOutput ? "Output" : string.Empty)}");
-        content.AppendLine("{");
 
         if (isNormalEntity)
         {
@@ -64,11 +75,11 @@ public sealed partial class EntityRepository
             content.AppendLine($"public {paramId} {{ get; set; }}");
             content.AppendLine();
 
-            if (!ContainsProperty(props, "Status"))
-            {
-                content.AppendLine("public bool Status { get; set; }");
-                content.AppendLine();
-            }
+            //if (!ContainsProperty(props, "Status"))
+            //{
+            //    content.AppendLine("public bool Status { get; set; }");
+            //    content.AppendLine();
+            //}
         }
 
         GenerateCustomTextStringBuilderByProps(stringBuilder: content, props, $"{Misc.Tab}public REPLACE_VAR_TYPE REPLACE_VAR_NAME {{ get; set; }}", isInputOrOutput: isInput || isOutput);

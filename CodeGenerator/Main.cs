@@ -87,14 +87,14 @@ public class Main
         string className = "Audit";
 
         List<string> props = [
-            "DateTime? CreatedDate",
-            "Guid? CreatedBy",
-            "DateTime? LastModificationDate",
-            "Guid? LastModificationBy",
-            "bool Status"
+            "CreatedDate DateTime?",
+            "CreatedBy Guid?",
+            "LastModificationDate DateTime?",
+            "LastModificationBy Guid?",
+            "Status bool"
         ];
 
-        List<Content> entityContent = EntityRepository.GenerateEntity(solutionName, rootPath, className, props, isPKGuid: true);
+        List<Content> entityContent = EntityRepository.GenerateEntity(solutionName, rootPath, className, props, isPKGuid: true, isSystematicEntity: true);
         GenerateFiles(contents: entityContent, isGenerateZip);
     }
     #endregion

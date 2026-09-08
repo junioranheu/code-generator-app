@@ -214,12 +214,12 @@ public static class Get
 
             if (parts.Length == 2)
             {
-                string attrName = parts[0]; // Esses dois caras às vezes se invertem... obrigado, junioranheu, por ter cagado em algum lugar e permitido isso >:(
+                string attrName = parts[0];
                 string attrType = parts[1];
 
                 string formattedText = string.Empty;
 
-                bool isCommonType = GetIsCommonTypeName(attrName) || GetIsCommonTypeName(attrType);
+                bool isCommonType = GetIsCommonTypeName(attrType);
 
                 if (!isCommonType)
                 {
