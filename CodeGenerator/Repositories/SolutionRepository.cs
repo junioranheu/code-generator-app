@@ -1,6 +1,5 @@
 ﻿using CodeGenerator.Console.Consts;
 using CodeGenerator.Console.Models;
-using System.Reflection.Metadata;
 using System.Text;
 using static CodeGenerator.Console.Utils.Fixtures.Generate;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
@@ -349,7 +348,6 @@ public static class SolutionRepository
         StringBuilder utilsGet = new();
 
         utilsGet.AppendLine("using System.Security.Cryptography;");
-        utilsGet.AppendLine($"using static {solutionName}.Infrastructure.Utils.Get;");
         utilsGet.AppendLine();
         utilsGet.AppendLine($"namespace {solutionName}.Infrastructure.Utils;");
         utilsGet.AppendLine();
@@ -614,6 +612,9 @@ public static class SolutionRepository
         {
             content.AppendLine($"    public DbSet<{model.Name}> {GetStrPlural(model.Name)} {{ get; set; }}");
         }
+
+        // Props sistêmaticas que devem existir no DbContext;
+        content.AppendLine($"    public DbSet<RefreshToken> {GetStrPlural("RefreshToken")} {{ get; set; }}");
 
         content.AppendLine();
         content.AppendLine("    #region extras");

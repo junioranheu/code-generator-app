@@ -1,0 +1,10 @@
+- deixar tudo perfeito compilando
+- Authorize (?)
+- output
+- mapper
+- ver se roda com banco de vdd
+- ver questão de pacotes padrões (banco e Swagger?)
+- arrumar README para ser algo open source
+- colocar no GitHub como principal
+- colocar no portfólio
+- log

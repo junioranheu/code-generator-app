@@ -18,7 +18,9 @@ public class Main
         string rootPath = GenerateDefaultDirectories(solutionName, isGenerateZip.GetValueOrDefault(), guid, requestType.GetValueOrDefault());
         SolutionRepository.Generate(solutionName, rootPath, contextName, models);
 
+        // Criar entidades sistemáticas e ControllerBase com todas as dependências;
         CreateEntityAudit(solutionName, rootPath);
+        CreateEntityRefreshToken(solutionName, rootPath);
         CreateControllerBaseAndAllDependencies(solutionName, rootPath);
 
         foreach (var model in models)
@@ -93,6 +95,22 @@ public class Main
             "LastModificationDate DateTime?",
             "LastModificationBy Guid?",
             "Status bool"
+        ];
+
+        List<Content> entityContent = EntityRepository.GenerateEntity(solutionName, rootPath, className, props, isPKGuid: true, isSystematicEntity: true);
+        GenerateFiles(contents: entityContent);
+    }
+
+    private static void CreateEntityRefreshToken(string solutionName, string rootPath)
+    {
+        string className = "RefreshToken";
+
+        List<string> props = [
+            "Token string?",
+            "UserId Guid",
+            "CreatedDate DateTime",
+            "ExpiredDate DateTime?",
+            "RevokedDate DateTime?"
         ];
 
         List<Content> entityContent = EntityRepository.GenerateEntity(solutionName, rootPath, className, props, isPKGuid: true, isSystematicEntity: true);
