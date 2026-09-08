@@ -1,5 +1,6 @@
 ﻿using CodeGenerator.Console.Consts;
 using CodeGenerator.Console.Models;
+using System.Reflection.Metadata;
 using System.Text;
 using static CodeGenerator.Console.Utils.Fixtures.Generate;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
@@ -202,6 +203,179 @@ public static class SolutionRepository
 
         Write(rootPath, Path.Combine($"{solutionName}.Infrastructure", "Factory", "DataBase", "DataBaseConnection.cs"), dbConn.ToString());
         #endregion
+
+        #region Interface IJwtTokenGenerator em Infrastructure/Auth/Token
+        StringBuilder jwtGenInterface = new();
+
+        jwtGenInterface.AppendLine("using Microsoft.AspNetCore.Http;");
+        jwtGenInterface.AppendLine($"using {solutionName}.Domain.Entities;");
+        jwtGenInterface.AppendLine($"using {solutionName}.Domain.Enums;");
+        jwtGenInterface.AppendLine("using System.IdentityModel.Tokens.Jwt;");
+        jwtGenInterface.AppendLine();
+        jwtGenInterface.AppendLine($"namespace {solutionName}.Infrastructure.Auth.Token;");
+        jwtGenInterface.AppendLine();
+        jwtGenInterface.AppendLine("public interface IJwtTokenGenerator");
+        jwtGenInterface.AppendLine("{");
+        jwtGenInterface.AppendLine("    (string token, RefreshToken refreshToken, CookieOptions cookieOptions) GenerateToken(Guid userIdAuth, string name, string email, UserRoleEnum? role);");
+        jwtGenInterface.AppendLine("    (bool isTokenExpiringSoonOrHasAlreadyExpired, double differenceInSeconds, DateTime validTo) IsTokenExpiringSoonOrHasAlreadyExpired(JwtSecurityToken token, int thresholdInMinutes = 0);");
+        jwtGenInterface.AppendLine("    CookieOptions GetCookieOptions();");
+        jwtGenInterface.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.Infrastructure", "Auth", "Token", "IJwtTokenGenerator.cs"), jwtGenInterface.ToString());
+        #endregion
+
+        #region JwtTokenGenerator em Infrastructure/Auth/Token
+        StringBuilder jwtGen = new();
+
+        jwtGen.AppendLine("using Microsoft.AspNetCore.Http;");
+        jwtGen.AppendLine("using Microsoft.Extensions.Configuration;");
+        jwtGen.AppendLine("using Microsoft.Extensions.Options;");
+        jwtGen.AppendLine("using Microsoft.IdentityModel.Tokens;");
+        jwtGen.AppendLine($"using {solutionName}.Domain.Entities;");
+        jwtGen.AppendLine($"using {solutionName}.Domain.Enums;");
+        jwtGen.AppendLine($"using {solutionName}.Infrastructure.Auth.Models;");
+        jwtGen.AppendLine("using System.IdentityModel.Tokens.Jwt;");
+        jwtGen.AppendLine("using System.Security.Claims;");
+        jwtGen.AppendLine("using System.Text;");
+        jwtGen.AppendLine($"using static {solutionName}.Infrastructure.Utils.Get;");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine($"namespace {solutionName}.Infrastructure.Auth.Token;");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine($"public sealed class JwtTokenGenerator(IOptions<JwtSettings> jwtOptions, IConfiguration config) : IJwtTokenGenerator");
+        jwtGen.AppendLine("{");
+        jwtGen.AppendLine("    private readonly JwtSettings _jwtSettings = jwtOptions.Value;");
+        jwtGen.AppendLine("    private readonly string _secret = config[\"JwtSettings:Secret\"] ?? throw new InvalidOperationException(\"JWT Secret não foi configurada no servidor!\");");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("    public (string token, RefreshToken refreshToken, CookieOptions cookieOptions) GenerateToken(Guid userIdAuth, string name, string email, UserRoleEnum? role)");
+        jwtGen.AppendLine("    {");
+        jwtGen.AppendLine("        JwtSecurityTokenHandler tokenHandler = new();");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        SigningCredentials signingCredentials = new(");
+        jwtGen.AppendLine("            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret ?? string.Empty)),");
+        jwtGen.AppendLine("            algorithm: SecurityAlgorithms.HmacSha256Signature");
+        jwtGen.AppendLine("        );");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        List<Claim> claimList =");
+        jwtGen.AppendLine("        [");
+        jwtGen.AppendLine("            new Claim(ClaimTypes.NameIdentifier, userIdAuth.ToString()),");
+        jwtGen.AppendLine("            new Claim(ClaimTypes.Name, name),");
+        jwtGen.AppendLine("            new Claim(ClaimTypes.Email, email)");
+        jwtGen.AppendLine("        ]; ");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        if (role is not null && role.HasValue)");
+        jwtGen.AppendLine("        {");
+        jwtGen.AppendLine("            Claim roleClaim = new(ClaimTypes.Role, role.Value.ToString());");
+        jwtGen.AppendLine("            claimList.Add(roleClaim);");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("            bool alreadyHasCommon = role == UserRoleEnum.Common;");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("            if (!alreadyHasCommon)");
+        jwtGen.AppendLine("            {");
+        jwtGen.AppendLine("                Claim roleComum = new(ClaimTypes.Role, UserRoleEnum.Common.ToString());");
+        jwtGen.AppendLine("                claimList.Add(roleComum);");
+        jwtGen.AppendLine("            }");
+        jwtGen.AppendLine("        }");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        ClaimsIdentity claims = new(claimList);");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        DateTime date = GetDate();");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        SecurityTokenDescriptor tokenDescriptor = new()");
+        jwtGen.AppendLine("        {");
+        jwtGen.AppendLine("            Issuer = _jwtSettings.Issuer,");
+        jwtGen.AppendLine("            IssuedAt = date,");
+        jwtGen.AppendLine("            Audience = _jwtSettings.Audience,");
+        jwtGen.AppendLine("            NotBefore = date,");
+        jwtGen.AppendLine("            Expires = date.AddMinutes(_jwtSettings.TokenExpiryMinutes),");
+        jwtGen.AppendLine("            Subject = claims,");
+        jwtGen.AppendLine("            SigningCredentials = signingCredentials");
+        jwtGen.AppendLine("        }; ");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);");
+        jwtGen.AppendLine("        string jwt = tokenHandler.WriteToken(token);");
+        jwtGen.AppendLine("        RefreshToken refreshToken = GenerateRefreshToken(userIdAuth);");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        CookieOptions cookieOptions = GetCookieOptions();");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        return (jwt, refreshToken, cookieOptions);");
+        jwtGen.AppendLine("    }");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("    #region extras");
+        jwtGen.AppendLine("    private RefreshToken GenerateRefreshToken(Guid userIdAuth)");
+        jwtGen.AppendLine("    {");
+        jwtGen.AppendLine("        string token = GenerateSafeToken32Bytes(urlSafe: false);");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        RefreshToken refreshToken = new()");
+        jwtGen.AppendLine("        {");
+        jwtGen.AppendLine("            Token = token,");
+        jwtGen.AppendLine("            UserId = userIdAuth,");
+        jwtGen.AppendLine("            CreatedDate = GetDate(),");
+        jwtGen.AppendLine("            ExpiredDate = GetDate().AddMinutes(_jwtSettings.RefreshTokenExpiryMinutes),");
+        jwtGen.AppendLine("            RevokedDate = null");
+        jwtGen.AppendLine("        }; ");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        return refreshToken;");
+        jwtGen.AppendLine("    }");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("    public CookieOptions GetCookieOptions()");
+        jwtGen.AppendLine("    {");
+        jwtGen.AppendLine("        return new CookieOptions");
+        jwtGen.AppendLine("        {");
+        jwtGen.AppendLine("            HttpOnly = true,");
+        jwtGen.AppendLine("            Secure = true,");
+        jwtGen.AppendLine("            SameSite = SameSiteMode.None, ");
+        jwtGen.AppendLine("            Expires = GetDate().AddMinutes(_jwtSettings.RefreshTokenExpiryMinutes),");
+        jwtGen.AppendLine("            Path = \"/\"");
+        jwtGen.AppendLine("        }; ");
+        jwtGen.AppendLine("    }");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("    public (bool isTokenExpiringSoonOrHasAlreadyExpired, double differenceInSeconds, DateTime validTo) IsTokenExpiringSoonOrHasAlreadyExpired(JwtSecurityToken token, int thresholdInMinutes = 0)");
+        jwtGen.AppendLine("    {");
+        jwtGen.AppendLine("        DateTime date = GetDate();");
+        jwtGen.AppendLine("        DateTime dateThreshold = date.AddMinutes(thresholdInMinutes);");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        double differenceInSeconds = (token.ValidTo - dateThreshold).TotalSeconds;");
+        jwtGen.AppendLine("        bool isTokenExpiringSoonOrHasAlreadyExpired = differenceInSeconds <= 0;");
+        jwtGen.AppendLine();
+        jwtGen.AppendLine("        return (isTokenExpiringSoonOrHasAlreadyExpired, differenceInSeconds, token.ValidTo);");
+        jwtGen.AppendLine("    }");
+        jwtGen.AppendLine("    #endregion");
+        jwtGen.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.Infrastructure", "Auth", "Token", "JwtTokenGenerator.cs"), jwtGen.ToString());
+        #endregion
+
+        #region Helpers em Infrastructure/Utils/Get.cs
+        StringBuilder utilsGet = new();
+
+        utilsGet.AppendLine("using System.Security.Cryptography;");
+        utilsGet.AppendLine($"using static {solutionName}.Infrastructure.Utils.Get;");
+        utilsGet.AppendLine();
+        utilsGet.AppendLine($"namespace {solutionName}.Infrastructure.Utils;");
+        utilsGet.AppendLine();
+        utilsGet.AppendLine("public static class Get");
+        utilsGet.AppendLine("{");
+        utilsGet.AppendLine("    public static DateTime GetDate() => DateTime.UtcNow;");
+        utilsGet.AppendLine();
+        utilsGet.AppendLine("    public static string GenerateSafeToken32Bytes(bool urlSafe)");
+        utilsGet.AppendLine("    {");
+        utilsGet.AppendLine("        byte[] random = new byte[32];");
+        utilsGet.AppendLine("        using var rng = RandomNumberGenerator.Create();");
+        utilsGet.AppendLine("        rng.GetBytes(random);");
+        utilsGet.AppendLine();
+        utilsGet.AppendLine("        string token = Convert.ToBase64String(random);");
+        utilsGet.AppendLine();
+        utilsGet.AppendLine("        if (urlSafe)");
+        utilsGet.AppendLine("        {");
+        utilsGet.AppendLine("            token = token.Replace('+', '-').Replace('/', '_').TrimEnd('=');");
+        utilsGet.AppendLine("        }");
+        utilsGet.AppendLine();
+        utilsGet.AppendLine("        return token;");
+        utilsGet.AppendLine("    }");
+        utilsGet.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.Infrastructure", "Utils", "Get.cs"), utilsGet.ToString());
+        #endregion
     }
 
     /// <summary>
@@ -353,6 +527,12 @@ public static class SolutionRepository
         sb.AppendLine("  \"ConnectionStrings\": {");
         sb.AppendLine("    \"DefaultConnection\": \"Data Source=generated.db\"");
         sb.AppendLine("  },");
+        sb.AppendLine("  \"JwtSettings\": {");
+        sb.AppendLine("     \"TokenExpiryMinutes\": \"30\",");
+        sb.AppendLine("     \"RefreshTokenExpiryMinutes\": \"20160\",");
+        sb.AppendLine("     \"Issuer\": \"xxx\",");
+        sb.AppendLine("     \"Audience\": \"xxx\"");
+        sb.AppendLine("  },");
         sb.AppendLine("  \"Logging\": {");
         sb.AppendLine("    \"LogLevel\": {");
         sb.AppendLine("      \"Default\": \"Information\",");
@@ -360,7 +540,7 @@ public static class SolutionRepository
         sb.AppendLine("    }");
         sb.AppendLine("  },");
         sb.AppendLine("  \"CORSSettings\": {");
-        sb.AppendLine("     \"Cors\": \"xxx\",");
+        sb.AppendLine("     \"Cors\": \"xxx\"");
         sb.AppendLine("  },");
         sb.AppendLine("  \"URLs\": {");
         sb.AppendLine("    \"Development\": {");
@@ -422,6 +602,7 @@ public static class SolutionRepository
         content.AppendLine("using Microsoft.EntityFrameworkCore;");
         content.AppendLine("using Microsoft.EntityFrameworkCore.Storage.ValueConversion;");
         content.AppendLine($"using {solutionName}.Domain.Entities;");
+        content.AppendLine($"using static {solutionName}.Infrastructure.Utils.Get;");
         content.AppendLine();
         content.AppendLine($"namespace {solutionName}.Infrastructure.Data;");
         content.AppendLine();
@@ -504,7 +685,7 @@ public static class SolutionRepository
         content.AppendLine("                    case EntityState.Added:");
         content.AppendLine("                        if (audit.CreatedDate is null)");
         content.AppendLine("                        {");
-        content.AppendLine("                            audit.CreatedDate = DateTime.UtcNow;");
+        content.AppendLine("                            audit.CreatedDate = GetDate();");
         content.AppendLine("                            audit.CreatedBy = UserIdAuth;");
         content.AppendLine("                            audit.Status = true;");
         content.AppendLine("                        }");
@@ -512,7 +693,7 @@ public static class SolutionRepository
         content.AppendLine("                        break;");
         content.AppendLine();
         content.AppendLine("                    case EntityState.Modified:");
-        content.AppendLine("                        audit.LastModificationDate = DateTime.UtcNow;");
+        content.AppendLine("                        audit.LastModificationDate = GetDate();");
         content.AppendLine("                        audit.LastModificationBy = UserIdAuth;");
         content.AppendLine();
         content.AppendLine("                        break;");
@@ -793,23 +974,22 @@ public static class SolutionRepository
     {
         StringBuilder content = new();
 
+        content.AppendLine($"using {solutionName}.Domain.Consts;");
+        content.AppendLine($"using {solutionName}.Infrastructure.Auth.Models;");
+        content.AppendLine($"using {solutionName}.Infrastructure.Auth.Token;");
+        content.AppendLine($"using {solutionName}.Infrastructure.Data;");
+        content.AppendLine($"using {solutionName}.Infrastructure.Factory.DataBase;");
         content.AppendLine("using Microsoft.AspNetCore.Authentication.JwtBearer;");
         content.AppendLine("using Microsoft.AspNetCore.Builder;");
         content.AppendLine("using Microsoft.AspNetCore.Hosting;");
         content.AppendLine("using Microsoft.AspNetCore.Http;");
         content.AppendLine("using Microsoft.EntityFrameworkCore;");
-        content.AppendLine("using Microsoft.Extensions.Configuration;");
         content.AppendLine("using Microsoft.Extensions.DependencyInjection;");
         content.AppendLine("using Microsoft.Extensions.Hosting;");
         content.AppendLine("using Microsoft.IdentityModel.Tokens;");
-        content.AppendLine($"using {solutionName}.Infrastructure.Auth.Models;");
-        content.AppendLine($"using {solutionName}.Infrastructure.Auth.Token;");
-        content.AppendLine($"using {solutionName}.Infrastructure.Data;");
-        content.AppendLine($"using {solutionName}.Infrastructure.Factory;");
-        content.AppendLine($"using {solutionName}.Infrastructure.Factory.DataBase;");
         content.AppendLine("using System.Text;");
         content.AppendLine("using System.Text.Json;");
-        content.AppendLine($"using {solutionName}.Domain.Consts;");
+        content.AppendLine($"using static {solutionName}.Infrastructure.Utils.Get;");
         content.AppendLine();
         content.AppendLine($"namespace {solutionName}.Infrastructure;");
         content.AppendLine();
@@ -819,7 +999,7 @@ public static class SolutionRepository
         content.AppendLine("    {");
         content.AppendLine("        AddServices(services, builder);");
         content.AppendLine("        AddAuth(services, builder);");
-        content.AppendLine("        AddFactory(services, builder);");
+        content.AppendLine("        AddFactory(services);");
         content.AppendLine("        AddContext(services, builder);");
         content.AppendLine("        AddJobs(services);");
         content.AppendLine();
@@ -905,7 +1085,7 @@ public static class SolutionRepository
         content.AppendLine("                         string result = JsonSerializer.Serialize(new");
         content.AppendLine("                         {");
         content.AppendLine("                             Code = statusCode,");
-        content.AppendLine("                             Date = $\"{DateTime.UtcNow:dd/MM/yyyy} às {DateTime.UtcNow:HH:mm:ss}\",");
+        content.AppendLine("                             Date = $\"{GetDate():dd/MM/yyyy} às {GetDate():HH:mm:ss}\",");
         content.AppendLine("                             context.HttpContext.Request.Path,");
         content.AppendLine("                             Messages = message,");
         content.AppendLine("                             HasError = true");
@@ -917,7 +1097,7 @@ public static class SolutionRepository
         content.AppendLine("             });");
         content.AppendLine("    }");
         content.AppendLine();
-        content.AppendLine("    private static void AddFactory(IServiceCollection services, WebApplicationBuilder builder)");
+        content.AppendLine("    private static void AddFactory(IServiceCollection services)");
         content.AppendLine("    {");
         content.AppendLine("        services.AddSingleton<IDataBaseConnection, DataBaseConnection>();");
         content.AppendLine("    }");
