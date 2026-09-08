@@ -61,13 +61,12 @@ public sealed class ControllerRepository
         List<string> contentPathEnums_LowerCase = [.. contentPathEnums.Select(GetStringLowerCaseFirstLetter)];
         string paramId = GetClassId(className, isPKGuid, isLowerCaseFirstLetter: true);
 
-        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;");
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;", shouldIncludeSharedFolder: true);
 
         content.AppendLine($@"using {solutionName}.Application.UseCases.Shared;
+using {solutionName}.Domain.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using {solutionName}.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace {solutionName}.API.Controllers;
@@ -76,13 +75,13 @@ namespace {solutionName}.API.Controllers;
 [Route(""api/[controller]"")]
 public class {className}Controller(");
 
-        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} REPLACE_VAR,");
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} REPLACE_VAR,", shouldIncludeSharedFolder: false);
 
         content.AppendLine($@"IMapper mapper) : BaseController<{className}Controller>
 {{
     private readonly IMapper _mapper = mapper;");
 
-        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"private readonly IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} _REPLACE_VAR = REPLACE_VAR;");
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"private readonly IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} _REPLACE_VAR = REPLACE_VAR;", shouldIncludeSharedFolder: false);
         content.AppendLine();
 
         content.AppendLine($@"[AllowAnonymous]
@@ -98,7 +97,9 @@ public class {className}Controller(");
     public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, {className}Input input)
     {{
         var result = await _getAll.Execute(pagination, input);
-        return Ok(_mapper.Map<IEnumerable<{className}Output>>(result.linq));
+        var output = _mapper.Map<IEnumerable<{className}Output>>(result.linq);
+
+        return Ok(new {{ output, result.count }});
     }}
 
     [AllowAnonymous]
@@ -108,7 +109,7 @@ public class {className}Controller(");
         var item = _mapper.Map<{className}>(input);
         await _create.Execute(item);
 
-        return NoContent();
+        return Ok(true);
     }}
 
     [AllowAnonymous]
@@ -118,7 +119,7 @@ public class {className}Controller(");
         var list = _mapper.Map<List<{className}>>(input);
         await _createRange.Execute(list);
 
-        return NoContent();
+        return Ok(true);
     }}
 
     [AllowAnonymous]
@@ -128,7 +129,7 @@ public class {className}Controller(");
         var item = _mapper.Map<{className}>(input);
         await _update.Execute(item);
 
-        return NoContent();
+        return Ok(true);
     }}
 
     [AllowAnonymous]
@@ -136,7 +137,8 @@ public class {className}Controller(");
     public async Task<ActionResult> Delete({paramId})
     {{
         await _delete.Execute({GetStringLowerCaseFirstLetter(className)}Id);
-        return NoContent();
+
+        return Ok(true);
     }}
 }}");
 

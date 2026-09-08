@@ -396,7 +396,7 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
     {
         StringBuilder content = new();
 
-        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.REPLACE_VAR;");
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.REPLACE_VAR;", shouldIncludeSharedFolder: false);
 
         content.AppendLine(@$"using Microsoft.Extensions.DependencyInjection;
 
@@ -407,7 +407,7 @@ public static class DependencyInjection
     public static IServiceCollection Add{GetStrPlural(useCaseName)}Application(this IServiceCollection services)
     {{");
 
-        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"services.AddScoped<IREPLACE_VAR{useCaseName}, REPLACE_VAR{useCaseName}>();");
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"services.AddScoped<IREPLACE_VAR{useCaseName}, REPLACE_VAR{useCaseName}>();", shouldIncludeSharedFolder: false);
 
         content.AppendLine($@"
         return services;

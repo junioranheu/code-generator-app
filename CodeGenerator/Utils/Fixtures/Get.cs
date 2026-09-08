@@ -442,8 +442,13 @@ public static class Get
     /// string[] props = { "Name", "Age", "Email" };
     /// GenerateCustomTextStringBuilderByListOfStrings(stringBuilder, props, $"There you go: REPLACE_VAR.");
     /// </summary>
-    public static void GenerateCustomTextStringBuilderByListOfStrings(StringBuilder stringBuilder, List<string> props, string customText)
+    public static void GenerateCustomTextStringBuilderByListOfStrings(StringBuilder stringBuilder, List<string> props, string customText, bool shouldIncludeSharedFolder)
     {
+        if (shouldIncludeSharedFolder)
+        {
+            props.Add("Shared"); // Forçar a inclusão de "Shared" na lista de propriedades;
+        }
+
         foreach (var prop in props)
         {
             string formattedText = customText.Replace("REPLACE_VAR_CAPITALIZEDFIRSTLETTER", GetStrCapitalizedFirstLetter(prop)).Replace("REPLACE_VAR", prop);
