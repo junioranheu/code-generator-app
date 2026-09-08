@@ -260,28 +260,51 @@ public static class Get
     /// </summary>
     public static StringBuilder GenerateWhereQueriesByProps(StringBuilder stringBuilder, List<string> props, bool hasInputPrefix = false)
     {
-        int i = 0;
-        int max = props.Count;
+        List<string> conditions = [];
 
         foreach (var prop in props)
         {
-            i++;
-            string[] parts = prop.Split(' ');
+            string[] parts = prop.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length == 2)
             {
                 string attrName = parts[0];
+                string attrType = parts[1].TrimEnd('?');
+
+                if (attrType.Equals("bool", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
 
                 string inputPrefix = hasInputPrefix ? "input." : string.Empty;
-                string valueName = $"{inputPrefix}{attrName}";
-                string condition = $"string.IsNullOrEmpty({valueName}) || x.{attrName} == {valueName}";
-                string operatorSuffix = i < max ? "&&" : string.Empty;
+                string valueName = $"{inputPrefix}{GetStringLowerCaseFirstLetter(attrName)}";
+                string condition = IsStringType(attrType)
+                    ? $"string.IsNullOrEmpty({valueName}) || x.{attrName} == {valueName}"
+                    : IsNumericType(attrType)
+                        ? $"{valueName} <= 0 || x.{attrName} == {valueName}"
+                        : $"x.{attrName} == {valueName}";
 
-                stringBuilder.AppendLine($"{condition} {operatorSuffix}");
+                conditions.Add(condition);
             }
         }
 
+        for (int i = 0; i < conditions.Count; i++)
+        {
+            string suffix = i < conditions.Count - 1 ? " &&" : string.Empty;
+            stringBuilder.AppendLine($"{conditions[i]}{suffix}");
+        }
+
         return stringBuilder;
+    }
+
+    private static bool IsStringType(string type)
+    {
+        return type.Equals("string", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsNumericType(string type)
+    {
+        return type is "byte" or "short" or "int" or "long" or "float" or "double" or "decimal";
     }
 
     /// <summary>
@@ -351,9 +374,11 @@ public static class Get
                 indentLevel--;
             }
 
-            if (trimmedLine.StartsWith(')'))
+            bool closesContinuation = trimmedLine.StartsWith(')');
+
+            if (closesContinuation)
             {
-                continuationIndent = 0;
+                continuationIndent = 1;
             }
 
             if (trimmedLine.StartsWith(getIndentedCode_Bracket))
@@ -375,9 +400,14 @@ public static class Get
             {
                 continuationIndent = Math.Max(continuationIndent, 1);
             }
-            else if (trimmedLine.EndsWith("=>") || trimmedLine.EndsWith("&&"))
+            else if (trimmedLine.EndsWith("=>"))
             {
                 continuationIndent++;
+            }
+
+            if (closesContinuation && !trimmedLine.EndsWith('.'))
+            {
+                continuationIndent = 0;
             }
 
             if (trimmedLine.EndsWith(getIndentedCode_Bracket2))
@@ -444,8 +474,8 @@ public static class Get
 
     public static bool GetIsCommonTypeName(string input)
     {
-        HashSet<string> CommonTypeNames = new()
-        {
+        HashSet<string> CommonTypeNames =
+        [
             "string",
             "bool",
             "int",
@@ -461,7 +491,7 @@ public static class Get
             "ulong",
             "ushort",
             "sbyte"
-        };
+        ];
 
         return CommonTypeNames.Contains(input);
     }
