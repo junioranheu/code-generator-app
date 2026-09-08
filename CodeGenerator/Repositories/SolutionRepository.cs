@@ -8,6 +8,10 @@ namespace CodeGenerator.Console.Repositories;
 
 public static class SolutionRepository
 {
+    /// <summary>
+    /// Gera a estrutura completa da solução e dos projetos (API, Application, Domain, Infrastructure)
+    /// a partir do nome da solução, diretório raiz, nome do DbContext e modelos fornecidos.
+    /// </summary>
     public static void Generate(string solutionName, string rootPath, string contextName, List<Model> models)
     {
         string apiProject = $"{solutionName}.API";
@@ -15,6 +19,8 @@ public static class SolutionRepository
         string domainProject = $"{solutionName}.Domain";
         string infrastructureProject = $"{solutionName}.Infrastructure";
         string apiName = $"{solutionName}.API";
+
+        GenerateMiscFiles(solutionName, rootPath, apiName);
 
         GenerateFolder(solutionName, Path.Combine(rootPath, apiProject));
         GenerateFolder(solutionName, Path.Combine(rootPath, applicationProject));
@@ -27,10 +33,10 @@ public static class SolutionRepository
         Write(rootPath, Path.Combine(domainProject, $"{domainProject}.csproj"), GenerateLibraryProject());
         Write(rootPath, Path.Combine(infrastructureProject, $"{infrastructureProject}.csproj"), GenerateInfrastructureProject(domainProject));
 
-        Write(rootPath, Path.Combine(apiProject, "Program.cs"), GenerateApiProgram(solutionName, apiName));
+        Write(rootPath, Path.Combine(apiProject, "Program.cs"), GenerateApiProgram(solutionName));
         Write(rootPath, Path.Combine(apiProject, "appsettings.json"), GenerateAppSettingsJson());
-        Write(rootPath, Path.Combine(apiProject, "DependencyInjection.cs"), GenerateAPIDependencyInjection(solutionName, apiName));
-        Write(rootPath, Path.Combine(apiProject, "DependencyAppConfiguration.cs"), GenerateAPIAppConfigurationDependencyInjection(solutionName, apiName));
+        Write(rootPath, Path.Combine(apiProject, "DependencyInjection.cs"), GenerateAPIDependencyInjection(solutionName));
+        Write(rootPath, Path.Combine(apiProject, "DependencyAppConfiguration.cs"), GenerateAPIAppConfigurationDependencyInjection(solutionName));
 
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PaginationInput.cs"), GeneratePaginationInput(solutionName));
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PagedQuery.cs"), GeneratePagedQuery(solutionName));
@@ -40,6 +46,9 @@ public static class SolutionRepository
         Write(rootPath, Path.Combine(infrastructureProject, "DependencyInjection.cs"), GenerateInfrastructureDependencyInjection(solutionName, contextName));
     }
 
+    /// <summary>
+    /// Gera o conteúdo do arquivo .csproj para o projeto API, incluindo referências a Application e Infrastructure.
+    /// </summary>
     private static string GenerateApiProject(string applicationProject, string infrastructureProject)
     {
         StringBuilder sb = new();
@@ -62,6 +71,85 @@ public static class SolutionRepository
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Gera arquivos "misc" essenciais (constantes e settings) usados pelos projetos gerados,
+    /// como Domain/Consts/SystemConsts.cs e Infrastructure/Auth/Models/JwtSettings.cs.
+    /// </summary>
+    private static void GenerateMiscFiles(string solutionName, string rootPath, string apiName)
+    {
+        #region SystemConsts em Domain/Consts;
+        StringBuilder systemConsts = new();
+
+        systemConsts.AppendLine($"namespace {solutionName}.Domain.Consts;");
+        systemConsts.AppendLine();
+        systemConsts.AppendLine("public static class SystemConsts");
+        systemConsts.AppendLine("{");
+        systemConsts.AppendLine("    public static class App");
+        systemConsts.AppendLine("    {");
+        systemConsts.AppendLine($"        public const string NameApi = \"{apiName}\";");
+        systemConsts.AppendLine($"        public const string NameApp = \"{solutionName}\";");
+        systemConsts.AppendLine("        public const string Email = \"xxx@gmail.com\";");
+        systemConsts.AppendLine("        public const string Author = \"@junioranheu\";");
+        systemConsts.AppendLine("        public const string Slogan = \"xxx\";");
+        systemConsts.AppendLine("        public const string MainColor = \"#f9fff6\";");
+        systemConsts.AppendLine("    }");
+        systemConsts.AppendLine();
+        systemConsts.AppendLine("    public static class Time");
+        systemConsts.AppendLine("    {");
+        systemConsts.AppendLine("        public const int OneSecond = 1;");
+        systemConsts.AppendLine("        public const int OneMinute = 60;");
+        systemConsts.AppendLine("        public const int TenMinutes = 600;");
+        systemConsts.AppendLine("        public const int OneHour = 3600;");
+        systemConsts.AppendLine("        public const int HalfDay = 43200;");
+        systemConsts.AppendLine("        public const int OneDay = 86400;");
+        systemConsts.AppendLine("        public const int OneWeek = 604800;");
+        systemConsts.AppendLine("        public const int OneMonth = 2629800;");
+        systemConsts.AppendLine("        public const int OneYear = 31536000;");
+        systemConsts.AppendLine("    }");
+        systemConsts.AppendLine();
+        systemConsts.AppendLine("    public static class Cookies");
+        systemConsts.AppendLine("    {");
+        systemConsts.AppendLine("        public const string Auth = \"COOKIE_AUTH_BACK\";");
+        systemConsts.AppendLine("        public const string Refresh = \"auth_refreshedToken\";");
+        systemConsts.AppendLine("    }");
+        systemConsts.AppendLine();
+        systemConsts.AppendLine("    public static class Cache");
+        systemConsts.AppendLine("    {");
+        systemConsts.AppendLine("        public const string CacheKey_FiltersExample = \"CacheKey_FiltersExemple_exampleId_\";");
+        systemConsts.AppendLine("    }");
+        systemConsts.AppendLine();
+        systemConsts.AppendLine("    public static class Warnings");
+        systemConsts.AppendLine("    {");
+        systemConsts.AppendLine("        public const string NotAuthSimpleUser = \"Usuário não autenticado.\";");
+        systemConsts.AppendLine("        public const string NeedToVerifyUser = \"A sua conta ainda não foi verificada ou está desativada. Verifique-a e tente novamente.\";");
+        systemConsts.AppendLine("        public const string VerifyTokenInvalid = \"Código de verificação inválido ou inexistente.\";");
+        systemConsts.AppendLine("        public const string NotFoundData = \"A informação não foi encontrada na base de dados.\";");
+        systemConsts.AppendLine("        public const string AlreadyAuth = \"Você já está autenticado no sistema, portanto não pode prosseguir com esta requisição.\";");
+        systemConsts.AppendLine("    }");
+        systemConsts.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.Domain", "Consts", "SystemConsts.cs"), systemConsts.ToString());
+        #endregion
+
+        #region JwtSettings em Infrastructure/Auth/Models;
+        StringBuilder jwt = new();
+        jwt.AppendLine($"namespace {solutionName}.Infrastructure.Auth.Models;");
+        jwt.AppendLine();
+        jwt.AppendLine("public sealed class JwtSettings");
+        jwt.AppendLine("{");
+        jwt.AppendLine("    public int TokenExpiryMinutes { get; init; }");
+        jwt.AppendLine("    public int RefreshTokenExpiryMinutes { get; init; }");
+        jwt.AppendLine("    public string? Issuer { get; init; } = null;");
+        jwt.AppendLine("    public string? Audience { get; init; } = null;");
+        jwt.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.Infrastructure", "Auth", "Models", "JwtSettings.cs"), jwt.ToString());
+        #endregion
+    }
+
+    /// <summary>
+    /// Gera o conteúdo do arquivo .csproj para o projeto Application com referências necessárias.
+    /// </summary>
     private static string GenerateApplicationProject(string domainProject, string infrastructureProject)
     {
         StringBuilder sb = new();
@@ -81,6 +169,9 @@ public static class SolutionRepository
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Gera um .csproj simples para projetos de biblioteca (Domain).
+    /// </summary>
     private static string GenerateLibraryProject()
     {
         StringBuilder sb = new();
@@ -96,6 +187,9 @@ public static class SolutionRepository
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Gera o .csproj do projeto Infrastructure com referências a Entity Framework, autenticação e framework ASP.NET.
+    /// </summary>
     private static string GenerateInfrastructureProject(string domainProject)
     {
         StringBuilder sb = new();
@@ -119,6 +213,9 @@ public static class SolutionRepository
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Gera o conteúdo do arquivo de solução (.sln) incluindo configurações e guids para os projetos fornecidos.
+    /// </summary>
     private static string GenerateSolutionFile(params string[] projects)
     {
         StringBuilder solution = new();
@@ -156,15 +253,20 @@ public static class SolutionRepository
         return solution.ToString();
     }
 
-    private static string GenerateApiProgram(string solutionName, string apiName)
+    /// <summary>
+    /// Gera o arquivo Program.cs para a API com a configuração inicial do WebApplication,
+    /// registrando os módulos de Dependency Injection e invocando a configuração do app.
+    /// </summary>
+    private static string GenerateApiProgram(string solutionName)
     {
         StringBuilder content = new();
 
+        content.AppendLine($"using {solutionName}.Domain.Consts;");
         content.AppendLine($"using {solutionName}.Infrastructure;");
         content.AppendLine($"using {solutionName}.Application;");
         content.AppendLine($"using {solutionName}.Domain;");
         content.AppendLine();
-        content.AppendLine($"Console.Title = \"{apiName}\";");
+        content.AppendLine($"Console.Title = SystemConsts.App.NameApi;");
         content.AppendLine();
         content.AppendLine("WebApplicationBuilder builder = WebApplication.CreateBuilder(args);");
         content.AppendLine("{");
@@ -182,6 +284,9 @@ public static class SolutionRepository
         return content.ToString();
     }
 
+    /// <summary>
+    /// Gera um appsettings.json mínimo com connection string e exemplos de URLs/ CORS.
+    /// </summary>
     private static string GenerateAppSettingsJson()
     {
         StringBuilder sb = new();
@@ -213,6 +318,9 @@ public static class SolutionRepository
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Gera a classe PaginationInput usada por use-cases para representar parâmetros de paginação.
+    /// </summary>
     private static string GeneratePaginationInput(string solutionName) => string.Join(Environment.NewLine, [
         $"namespace {solutionName}.Application.UseCases.Shared;",
         "",
@@ -223,6 +331,9 @@ public static class SolutionRepository
         "}"
     ]);
 
+    /// <summary>
+    /// Gera a classe utilitária PagedQuery que executa consultas EF Core com paginação.
+    /// </summary>
     private static string GeneratePagedQuery(string solutionName) => string.Join(Environment.NewLine, [
         "using Microsoft.EntityFrameworkCore;",
         "",
@@ -234,11 +345,16 @@ public static class SolutionRepository
         "    {",
         "        int count = await query.CountAsync();",
         "        IEnumerable<T> linq = await query.Skip((pagination.Page - 1) * pagination.PageSize).Take(pagination.PageSize).ToListAsync();",
+        "",
         "        return (linq, count);",
         "    }",
         "}"
     ]);
 
+    /// <summary>
+    /// Gera a implementação do DbContext com DbSet para cada entidade informada,
+    /// além de regras de OnModelCreating e lógica de auditoria/SaveChanges.
+    /// </summary>
     private static string GenerateDbContext(string solutionName, string contextName, List<Model> models)
     {
         StringBuilder content = new();
@@ -365,10 +481,15 @@ public static class SolutionRepository
         return content.ToString();
     }
 
-    private static string GenerateAPIDependencyInjection(string solutionName, string apiName)
+    /// <summary>
+    /// Gera o arquivo DependencyInjection.cs do projeto API contendo registros de serviços
+    /// relacionados à API (controllers, swagger, cors, compressão etc.).
+    /// </summary>
+    private static string GenerateAPIDependencyInjection(string solutionName)
     {
         StringBuilder content = new();
-
+     
+        content.AppendLine($"using {solutionName}.Domain.Consts;");
         content.AppendLine("using Microsoft.AspNetCore.ResponseCompression;");
         content.AppendLine("using System.IO.Compression;");
         content.AppendLine("using System.Text.Json.Serialization;");
@@ -395,7 +516,7 @@ public static class SolutionRepository
         content.AppendLine("    {");
         content.AppendLine("        services.AddSwaggerGen(c =>");
         content.AppendLine("        {");
-        content.AppendLine($"            c.SwaggerDoc(\"v1\", new() {{ Title = \"{apiName}\", Version = \"v1\" }});");
+        content.AppendLine($"            c.SwaggerDoc(\"v1\", new() {{ Title = SystemConsts.App.NameApi, Version = \"v1\" }});");
         content.AppendLine("        });");
         content.AppendLine("    }");
         content.AppendLine();
@@ -461,10 +582,15 @@ public static class SolutionRepository
         return content.ToString();
     }
 
-    private static string GenerateAPIAppConfigurationDependencyInjection(string solutionName, string apiName)
+    /// <summary>
+    /// Gera a classe responsável por configurar o pipeline da API (UseAppConfiguration),
+    /// incluindo middlewares, Swagger, CORS, compressão e inicialização de banco.
+    /// </summary>
+    private static string GenerateAPIAppConfigurationDependencyInjection(string solutionName)
     {
         StringBuilder content = new();
-
+     
+        content.AppendLine($"using {solutionName}.Domain.Consts;");
         content.AppendLine("using Microsoft.AspNetCore.Mvc.Controllers;");
         content.AppendLine("using Swashbuckle.AspNetCore.SwaggerUI;");
         content.AppendLine();
@@ -500,7 +626,7 @@ public static class SolutionRepository
         content.AppendLine();
         content.AppendLine("            app.UseSwaggerUI(c =>");
         content.AppendLine("            {");
-        content.AppendLine($"                c.SwaggerEndpoint(\"/swagger/v1/swagger.json\", \"{apiName}\");");
+        content.AppendLine($"                c.SwaggerEndpoint(\"/swagger/v1/swagger.json\", SystemConsts.App.NameApi);");
         content.AppendLine("                c.DocExpansion(DocExpansion.None);");
         content.AppendLine();
         content.AppendLine("                if (OperatingSystem.IsMacOS() || OperatingSystem.IsWindows())");
@@ -590,6 +716,10 @@ public static class SolutionRepository
         return content.ToString();
     }
 
+    /// <summary>
+    /// Gera o arquivo DependencyInjection.cs do projeto Application para registrar use-cases
+    /// e serviços da camada de aplicação (atualmente inicia vazio para customização posterior).
+    /// </summary>
     private static string GenerateApplicationDependencyInjection(string solutionName, string contextName)
     {
         StringBuilder content = new();
@@ -597,6 +727,10 @@ public static class SolutionRepository
         return content.ToString();
     }
 
+    /// <summary>
+    /// Gera o arquivo DependencyInjection.cs do projeto Infrastructure com registros de serviços
+    /// como autenticação, factories, contexto de dados e demais infraestruturas necessárias.
+    /// </summary>
     private static string GenerateInfrastructureDependencyInjection(string solutionName, string contextName)
     {
         StringBuilder content = new();
@@ -619,6 +753,7 @@ public static class SolutionRepository
         content.AppendLine($"using {solutionName}.Infrastructure.Services.Env;");
         content.AppendLine("using System.Text;");
         content.AppendLine("using System.Text.Json;");
+        content.AppendLine($"using {solutionName}.Domain.Consts;");     
         content.AppendLine();
         content.AppendLine($"namespace {solutionName}.Infrastructure;");
         content.AppendLine();
@@ -723,7 +858,7 @@ public static class SolutionRepository
         content.AppendLine("                         string result = JsonSerializer.Serialize(new");
         content.AppendLine("                         {");
         content.AppendLine("                             Code = statusCode,");
-        content.AppendLine("                             Date = GetDateDetails(),");
+        content.AppendLine("                             Date = $\"{DateTime.UtcNow:dd/MM/yyyy} às {DateTime.UtcNow:HH:mm:ss}\",");
         content.AppendLine("                             context.HttpContext.Request.Path,");
         content.AppendLine("                             Messages = message,");
         content.AppendLine("                             HasError = true");
@@ -760,6 +895,9 @@ public static class SolutionRepository
         return content.ToString();
     }
 
+    /// <summary>
+    /// Escreve o conteúdo no arquivo alvo, criando diretórios intermediários se necessário.
+    /// </summary>
     private static void Write(string rootPath, string relativePath, string content)
     {
         string path = Path.Combine(rootPath, relativePath);
