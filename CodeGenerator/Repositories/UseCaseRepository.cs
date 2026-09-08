@@ -134,6 +134,7 @@ public sealed class Get{useCaseName}({context} context) : IGet{useCaseName}
         string parameters = $"PaginationInput pagination, {useCaseName}Input input";
 
         content.AppendLine($@"using {solutionName}.Application.UseCases.Shared;
+using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Shared;
 using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -355,6 +356,7 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
         if (useCaseType == GetEnumDesc(UseCaseEnum.GetAll))
         {
             content.AppendLine($"using {solutionName}.Application.UseCases.Shared;");
+            content.AppendLine($"using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Shared;");
         }
 
         if (useCaseType != GetEnumDesc(UseCaseEnum.Delete))
