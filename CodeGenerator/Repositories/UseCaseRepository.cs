@@ -133,8 +133,7 @@ public sealed class Get{useCaseName}({context} context) : IGet{useCaseName}
         StringBuilder content = new();
         string parameters = $"PaginationInput pagination, {useCaseName}Input input";
 
-        content.AppendLine($@"using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.Shared;
-using {solutionName}.Application.UseCases.Shared;
+        content.AppendLine($@"using {solutionName}.Application.UseCases.Shared;
 using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -148,7 +147,7 @@ public sealed class GetAll{useCaseName}({context} context) : IGetAll{useCaseName
     public async Task<(IEnumerable<{useCaseName}> linq, int count)> Execute({parameters})
     {{
         var query = _context.{GetStrPlural(useCaseName)}.
-        OrderBy(x => x.{GetClassId(useCaseName, isPKGuid: false, isLowerCaseFirstLetter: true)}).
+        OrderBy(x => x.{FirstCharToUpper(GetClassIdWithoutType(useCaseName, isLowerCaseFirstLetter: true))}).
         Where(x =>
         x.Status == true &&"
         );
@@ -197,6 +196,7 @@ public sealed class Create{useCaseName}({context} context) : ICreate{useCaseName
 
         content.AppendLine($@"using {solutionName}.Domain.Entities;
 using {solutionName}.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.CreateRange;
 
@@ -221,9 +221,7 @@ public sealed class CreateRange{useCaseName}({context} context) : ICreateRange{u
 
     private async Task<List<{useCaseName}>> GetAllPrevious()
     {{
-        var linq = await _context.{GetStrPlural(useCaseName)}.
-                   Where(x => x.Status == true).
-                   AsNoTracking().ToListAsync();
+        var linq = await _context.{GetStrPlural(useCaseName)}.Where(x => x.Status == true).ToListAsync();
 
         return linq;
     }}
@@ -235,7 +233,7 @@ public sealed class CreateRange{useCaseName}({context} context) : ICreateRange{u
             return;
         }}
 
-        foreach (var l in linqPrevious)
+        foreach (var l in linqPrevious!)
         {{
             l.Status = false;
         }}
@@ -354,6 +352,13 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
         string executeMethod = GetInterfaceExecuteMethod(useCaseType, useCaseName, parameters);
 
         StringBuilder content = new();
+
+        if (useCaseType == GetEnumDesc(UseCaseEnum.GetAll))
+        {
+            content.AppendLine($"using {solutionName}.Application.UseCases.Shared;");
+            content.AppendLine();
+        }
+
         content.AppendLine($"using {solutionName}.Domain.Entities;");
         content.AppendLine();
         content.AppendLine($"namespace {useCaseNamespace};");
@@ -368,7 +373,7 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
 
     private static string GetInterfaceExecuteMethod(string useCaseType, string useCaseName, string parameters)
     {
-        if (useCaseType == GetEnumDesc(UseCaseEnum.Delete))
+        if (useCaseType == GetEnumDesc(UseCaseEnum.Delete) || useCaseType == GetEnumDesc(UseCaseEnum.CreateRange))
         {
             return $"Task Execute({parameters});";
         }

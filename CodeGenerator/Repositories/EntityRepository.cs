@@ -51,6 +51,12 @@ public sealed class EntityRepository
             content.AppendLine("[Key]");
             content.AppendLine($"public {paramId} {{ get; set; }}");
             content.AppendLine();
+
+            if (!HasProperty(props, "Status"))
+            {
+                content.AppendLine("public bool Status { get; set; }");
+                content.AppendLine();
+            }
         }
 
         GenerateCustomTextStringBuilderByProps(stringBuilder: content, props, $"{Misc.Tab}public REPLACE_VAR_TYPE REPLACE_VAR_NAME {{ get; set; }}");
@@ -58,5 +64,14 @@ public sealed class EntityRepository
         content.AppendLine("}");
 
         return GetIndentedCode(content.ToString());
+    }
+
+    private static bool HasProperty(List<string> props, string propertyName)
+    {
+        return props.Any(prop =>
+        {
+            string[] parts = prop.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length > 0 && parts[0].Equals(propertyName, StringComparison.OrdinalIgnoreCase);
+        });
     }
 }

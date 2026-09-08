@@ -64,7 +64,7 @@ public static class Get
             }
         }
 
-        return [..descriptions.OrderBy(d => d)];
+        return [.. descriptions.OrderBy(d => d)];
     }
 
     public static string GetStrPlural(string singular, bool isEnglish = true)
@@ -264,9 +264,13 @@ public static class Get
             if (parts.Length == 2)
             {
                 string attrName = parts[0];
-                string attrNameLowerCase = GetStringLowerCaseFirstLetter(attrName);
 
-                stringBuilder.AppendLine($"(string.IsNullOrEmpty({(hasInputPrefix ? "input." : string.Empty)}{attrNameLowerCase}) || x.{attrName} == {attrNameLowerCase}) {(i < max ? "&&" : string.Empty)}");
+                string inputPrefix = hasInputPrefix ? "input." : string.Empty;
+                string valueName = $"{inputPrefix}{attrName}";
+                string condition = $"string.IsNullOrEmpty({valueName}) || x.{attrName} == {valueName}";
+                string operatorSuffix = i < max ? "&&" : string.Empty;
+
+                stringBuilder.AppendLine($"{condition} {operatorSuffix}");
             }
         }
 
@@ -293,7 +297,8 @@ public static class Get
                 if (getBothNameAndType)
                 {
                     content.Append($"{attrType}{(addQuestionMark ? "?" : string.Empty)} {GetStringLowerCaseFirstLetter(attrName)}, ");
-                } else
+                }
+                else
                 {
                     content.Append($"{GetStringLowerCaseFirstLetter(attrName)}, ");
                 }
@@ -446,5 +451,15 @@ public static class Get
         }
 
         return File.ReadAllBytes(path);
+    }
+
+    public static string FirstCharToUpper(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            return string.Empty;
+        }
+
+        return $"{char.ToUpper(input[0])}{input[1..]}";
     }
 }
