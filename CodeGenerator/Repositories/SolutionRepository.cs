@@ -30,7 +30,7 @@ public static class SolutionRepository
         Write(rootPath, Path.Combine(apiProject, "Program.cs"), GenerateApiProgram(solutionName, apiName));
         Write(rootPath, Path.Combine(apiProject, "appsettings.json"), GenerateAppSettingsJson());
         Write(rootPath, Path.Combine(apiProject, "DependencyInjection.cs"), GenerateAPIDependencyInjection(solutionName, apiName));
-        Write(rootPath, Path.Combine(apiProject, "DependencyAppConfiguration.cs"), GenerateAPIAppConfigurationDependencyInjection(solutionName, contextName));
+        Write(rootPath, Path.Combine(apiProject, "DependencyAppConfiguration.cs"), GenerateAPIAppConfigurationDependencyInjection(solutionName, apiName));
 
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PaginationInput.cs"), GeneratePaginationInput(solutionName));
         Write(rootPath, Path.Combine(applicationProject, "UseCases", "Shared", "PagedQuery.cs"), GeneratePagedQuery(solutionName));
@@ -458,9 +458,131 @@ public static class SolutionRepository
         return content.ToString();
     }
 
-    private static string GenerateAPIAppConfigurationDependencyInjection(string solutionName, string contextName)
+    private static string GenerateAPIAppConfigurationDependencyInjection(string solutionName, string apiName)
     {
         StringBuilder content = new();
+
+        content.AppendLine("using Microsoft.AspNetCore.Mvc.Controllers;");
+        content.AppendLine("using Swashbuckle.AspNetCore.SwaggerUI;");
+        content.AppendLine();
+        content.AppendLine($"namespace {solutionName}.API;");
+        content.AppendLine();
+        content.AppendLine("public static class DependencyAppConfiguration");
+        content.AppendLine("{");
+        content.AppendLine("    public static async Task<WebApplication> UseAppConfiguration(this WebApplication app, WebApplicationBuilder builder)");
+        content.AppendLine("    {");
+        content.AppendLine("        AddMiddleware(app);");
+        content.AppendLine("        AddSwagger(app);");
+        content.AppendLine("        AddHttpsRedirection(app);");
+        content.AppendLine("        AddCors(app, builder);");
+        content.AppendLine("        AddCompression(app);");
+        content.AppendLine("        AddAuth(app);");
+        content.AppendLine("        AddCaching(app);");
+        content.AppendLine("        AddDeveloperExceptionPage(app);");
+        content.AppendLine("        await HandleDbInitialize(app);");
+        content.AppendLine();
+        content.AppendLine("        return app;");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddMiddleware(WebApplication app)");
+        content.AppendLine("    {");
+        content.AppendLine("\t\t// TO DO;");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddSwagger(WebApplication app)");
+        content.AppendLine("    {");
+        content.AppendLine("        if (app.Environment.IsDevelopment())");
+        content.AppendLine("        {");
+        content.AppendLine("            app.UseSwagger();");
+        content.AppendLine();
+        content.AppendLine("            app.UseSwaggerUI(c =>");
+        content.AppendLine("            {");
+        content.AppendLine($"                c.SwaggerEndpoint(\"/swagger/v1/swagger.json\", \"{apiName}\");");
+        content.AppendLine("                c.DocExpansion(DocExpansion.None);");
+        content.AppendLine();
+        content.AppendLine("                if (OperatingSystem.IsMacOS() || OperatingSystem.IsWindows())");
+        content.AppendLine("                {");
+        content.AppendLine("                    c.RoutePrefix = string.Empty;");
+        content.AppendLine("                }");
+        content.AppendLine("            });");
+        content.AppendLine("        }");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddHttpsRedirection(WebApplication app)");
+        content.AppendLine("    {");
+        content.AppendLine("        if (app.Environment.IsProduction())");
+        content.AppendLine("        {");
+        content.AppendLine("            app.UseHttpsRedirection();");
+        content.AppendLine("        }");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddCors(WebApplication app, WebApplicationBuilder builder)");
+        content.AppendLine("    {");
+        content.AppendLine("        app.UseCors(builder.Configuration[\"CORSSettings:Cors\"] ?? string.Empty);");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddCompression(WebApplication app)");
+        content.AppendLine("    {");
+        content.AppendLine("        /// <summary>");
+        content.AppendLine("        /// O trecho \"app.UseWhen\" abaixo é necessário quando a API tem uma resposta IAsyncEnumerable/Yield;");
+        content.AppendLine("        /// O \"UseResponseCompression\" conflita com esse tipo de requisição, portanto é obrigatória a verificação abaixo;");
+        content.AppendLine("        /// Caso não existam requisições desse tipo na API, é apenas necessário o trecho \"app.UseResponseCompression()\";");
+        content.AppendLine("        /// </summary>");
+        content.AppendLine("        app.UseWhen(context => !IsStreamingRequest(context), x =>");
+        content.AppendLine("        {");
+        content.AppendLine("            x.UseResponseCompression();");
+        content.AppendLine("        });");
+        content.AppendLine();
+        content.AppendLine("        static bool IsStreamingRequest(HttpContext context)");
+        content.AppendLine("        {");
+        content.AppendLine("            Endpoint? endpoint = context.GetEndpoint();");
+        content.AppendLine();
+        content.AppendLine("            if (endpoint is RouteEndpoint routeEndpoint)");
+        content.AppendLine("            {");
+        content.AppendLine("                ControllerActionDescriptor? action = routeEndpoint.Metadata.GetMetadata<ControllerActionDescriptor>();");
+        content.AppendLine();
+        content.AppendLine("                if (action is not null)");
+        content.AppendLine("                {");
+        content.AppendLine("                    Type? tipo = action.MethodInfo.ReturnType;");
+        content.AppendLine();
+        content.AppendLine("                    if (tipo.IsGenericType && tipo.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>))");
+        content.AppendLine("                    {");
+        content.AppendLine("                        return true;");
+        content.AppendLine("                    }");
+        content.AppendLine();
+        content.AppendLine("                    return false;");
+        content.AppendLine("                }");
+        content.AppendLine("            }");
+        content.AppendLine();
+        content.AppendLine("            return false;");
+        content.AppendLine("        }");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddAuth(WebApplication app)");
+        content.AppendLine("    {");
+        content.AppendLine("        app.UseAuthentication();");
+        content.AppendLine("        app.UseAuthorization();");
+        content.AppendLine("        app.MapControllers();");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddCaching(WebApplication app)");
+        content.AppendLine("    {");
+        content.AppendLine("        app.UseResponseCaching();");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static void AddDeveloperExceptionPage(WebApplication app)");
+        content.AppendLine("    {");
+        content.AppendLine("        if (app.Environment.IsDevelopment())");
+        content.AppendLine("        {");
+        content.AppendLine("            app.UseDeveloperExceptionPage();");
+        content.AppendLine("        }");
+        content.AppendLine("    }");
+        content.AppendLine();
+        content.AppendLine("    private static async Task HandleDbInitialize(WebApplication app)");
+        content.AppendLine("    {");
+        content.AppendLine("\t\t// TO DO;");
+        content.AppendLine("    }");
+        content.AppendLine("}");
 
         return content.ToString();
     }
@@ -475,22 +597,6 @@ public static class SolutionRepository
     private static string GenerateInfrastructureDependencyInjection(string solutionName, string contextName)
     {
         StringBuilder content = new();
-
-        content.AppendLine("using Microsoft.EntityFrameworkCore;");
-        content.AppendLine("using Microsoft.Extensions.Configuration;");
-        content.AppendLine("using Microsoft.Extensions.DependencyInjection;");
-        content.AppendLine($"using {solutionName}.Infrastructure.Data;");
-        content.AppendLine();
-        content.AppendLine($"namespace {solutionName}.Infrastructure;");
-        content.AppendLine();
-        content.AppendLine("public static class DependencyInjection");
-        content.AppendLine("{");
-        content.AppendLine("    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)");
-        content.AppendLine("    {");
-        content.AppendLine($"       services.AddDbContext<{contextName}>(options => options.UseSqlite(configuration.GetConnectionString(\"DefaultConnection\"))); ");
-        content.AppendLine("        return services;");
-        content.AppendLine("    }");
-        content.AppendLine("}");
 
         return content.ToString();
     }
