@@ -76,6 +76,15 @@ public sealed class UseCaseRepository
             fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName: $"{GetStrPlural(useCaseName)}/Shared/{useCaseName}Input", contentDirectory, extension)
         ));
 
+        // Output;
+        finalContent.Add(new(
+            value: EntityRepository.GenerateContent(solutionName, className: useCaseName, props, isPKGuid, isOutput: true),
+            contentDirectory,
+            extension,
+            solutionName,
+            fileFinalPath: GetFinalFilePath(solutionName, rootPath, fileName: $"{GetStrPlural(useCaseName)}/Shared/{useCaseName}Output", contentDirectory, extension)
+        ));
+
         return finalContent;
     }
 
