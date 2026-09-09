@@ -1,7 +1,6 @@
-- authorize (Filter + Controller)
 - arrumar README ("mais profissional" e open source)
 - log
-- exception (filter)
+- error (filter)
 - testar se roda com banco de vdd
 
 - colocar no GitHub como projeto principal

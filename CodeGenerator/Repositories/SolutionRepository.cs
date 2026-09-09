@@ -475,6 +475,72 @@ public static class SolutionRepository
         Write(rootPath, Path.Combine($"{solutionName}.API", "Middlewares", "TokenRefreshMiddleware.cs"), tokenRefresh.ToString());
         #endregion
 
+        #region Filter de erro em API/Filters
+        StringBuilder errorFilter = new();
+
+        errorFilter.AppendLine("using Microsoft.AspNetCore.Mvc;");
+        errorFilter.AppendLine("using Microsoft.AspNetCore.Mvc.Filters;");
+        errorFilter.AppendLine($"using {solutionName}.API.Filters.Base;");
+        errorFilter.AppendLine($"using {solutionName}.Domain.Enums;");
+        errorFilter.AppendLine($"using static {solutionName}.Infrastructure.Utils.Get;");
+        errorFilter.AppendLine();
+        errorFilter.AppendLine($"namespace {solutionName}.API.Filters;");
+        errorFilter.AppendLine();
+        errorFilter.AppendLine("public sealed class ErrorFilter(ILogger<ErrorFilter> logger) : ExceptionFilterAttribute");
+        errorFilter.AppendLine("{");
+        errorFilter.AppendLine("    private readonly ILogger _logger = logger;");
+        errorFilter.AppendLine("    // private readonly ICreateLog _createLog = createLog;");
+        errorFilter.AppendLine();
+        errorFilter.AppendLine("    public override async Task OnExceptionAsync(ExceptionContext context)");
+        errorFilter.AppendLine("    {");
+        errorFilter.AppendLine("        Exception ex = context.Exception;");
+        errorFilter.AppendLine("        string date = $\"{GetDate():dd/MM/yyyy} às {GetDate():HH:mm:ss}\";");
+        errorFilter.AppendLine("        string errorDetailed = $\"Ocorreu um erro ao processar sua requisição. Data: {date}. Caminho: {context.HttpContext.Request.Path}. {( !string.IsNullOrEmpty(ex.InnerException?.Message) ? $\"Mais informações: {ex.InnerException.Message}\" : $\"Mais informações: {ex.Message}\") }\";");
+        errorFilter.AppendLine("        string errorSimple = !string.IsNullOrEmpty(ex.InnerException?.Message) ? ex.InnerException.Message : ex.Message;");
+        errorFilter.AppendLine();
+        errorFilter.AppendLine("        BadRequestObjectResult result = new(new");
+        errorFilter.AppendLine("        {");
+        errorFilter.AppendLine("            Code = StatusCodes.Status500InternalServerError,");
+        errorFilter.AppendLine("            Date = date,");
+        errorFilter.AppendLine("            context.HttpContext.Request.Path,");
+        errorFilter.AppendLine("            Messages = new string[] { errorSimple },");
+        errorFilter.AppendLine("            HasError = true");
+        errorFilter.AppendLine("        });");
+        errorFilter.AppendLine();
+        errorFilter.AppendLine("        (Guid? userId, string _, UserRoleEnum[] _) = new BaseFilter().GetUserInfo(context);");
+        errorFilter.AppendLine("        // await CreateLog(context, errorSimple, errorDetailed, userId);");
+        errorFilter.AppendLine("        Logger(ex, errorDetailed);");
+        errorFilter.AppendLine();
+        errorFilter.AppendLine("        context.Result = result;");
+        errorFilter.AppendLine("        context.ExceptionHandled = true;");
+        errorFilter.AppendLine("    }");
+        errorFilter.AppendLine();
+        errorFilter.AppendLine("    // private async Task CreateLog(ExceptionContext context, string errorSimple, string errorDetailed, Guid? userId)");
+        errorFilter.AppendLine("    // {");
+        errorFilter.AppendLine("    //     Log log = new()");
+        errorFilter.AppendLine("    //     {");
+        errorFilter.AppendLine("    //         LogType = LogTypeEnum.Exception,");
+        errorFilter.AppendLine("    //         RequestType = context.HttpContext.Request.Method ?? string.Empty,");
+        errorFilter.AppendLine("    //         Endpoint = context.HttpContext.Request.Path.ToString() ?? string.Empty,");
+        errorFilter.AppendLine("    //         Parameters = string.Empty,");
+        errorFilter.AppendLine("    //         Exception = errorSimple,");
+        errorFilter.AppendLine("    //         Description = errorDetailed,");
+        errorFilter.AppendLine("    //         Status = StatusCodes.Status500InternalServerError,");
+        errorFilter.AppendLine("    //         UserId = userId is null || userId == Guid.Empty ? null : userId");
+        errorFilter.AppendLine("    //     }; ");
+        errorFilter.AppendLine();
+        errorFilter.AppendLine("    //     await _createLog.Execute(log);");
+        errorFilter.AppendLine("    // }");
+        errorFilter.AppendLine();
+        errorFilter.AppendLine("    private void Logger(Exception ex, string error)");
+        errorFilter.AppendLine("    {");
+        errorFilter.AppendLine("        _logger.LogError(ex, \"{error}\", error);");
+        errorFilter.AppendLine("    }");
+        errorFilter.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.API", "Filters", "ErrorFilter.cs"), errorFilter.ToString());
+        #endregion
+
         #region Middleware de CSRF em API/Middlewares
         StringBuilder csrf = new();
 
@@ -1103,6 +1169,7 @@ public static class SolutionRepository
     {
         StringBuilder content = new();
 
+        content.AppendLine($"using {solutionName}.API.Filters;");
         content.AppendLine($"using {solutionName}.Domain.Consts;");
         content.AppendLine("using Microsoft.AspNetCore.ResponseCompression;");
         content.AppendLine("using System.IO.Compression;");
