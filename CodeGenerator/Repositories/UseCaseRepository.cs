@@ -115,8 +115,10 @@ public sealed class UseCaseRepository
 
         string useCaseNameNormalized = getUseCaseNamePlural.GetValueOrDefault() ? GetStrPlural(useCaseName) : useCaseName;
 
+        contentPathEnums.Remove("Shared"); // Não precisa do Shared para o DI;
+
         finalContent.Add(new(
-            value: GenerateDependencyInjection(solutionName, useCaseName, contentPathEnums),
+            value: GenerateDependencyInjection(solutionName, useCaseName, contentPathEnums, getUseCaseNamePlural.GetValueOrDefault()),
             contentDirectory,
             extension,
             solutionName,
@@ -423,19 +425,20 @@ public sealed class Delete{useCaseName}({context} context) : IDelete{useCaseName
         return $"Task<{returnType}> Execute({parameters});";
     }
 
-    private static string GenerateDependencyInjection(string solutionName, string useCaseName, List<string> contentPathEnums)
+    private static string GenerateDependencyInjection(string solutionName, string useCaseName, List<string> contentPathEnums, bool getUseCaseNamePlural)
     {
         StringBuilder content = new();
+        string useCaseNameNormalized = getUseCaseNamePlural ? GetStrPlural(useCaseName) : useCaseName;
 
-        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)}.REPLACE_VAR;", shouldIncludeSharedFolder: false);
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{useCaseNameNormalized}.REPLACE_VAR;", shouldIncludeSharedFolder: false);
 
         content.AppendLine(@$"using Microsoft.Extensions.DependencyInjection;
 
-namespace {solutionName}.Application.UseCases.{GetStrPlural(useCaseName)};
+namespace {solutionName}.Application.UseCases.{useCaseNameNormalized};
 
 public static class DependencyInjection
 {{
-    public static IServiceCollection Add{GetStrPlural(useCaseName)}Application(this IServiceCollection services)
+    public static IServiceCollection Add{useCaseNameNormalized}Application(this IServiceCollection services)
     {{");
 
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"services.AddScoped<IREPLACE_VAR{useCaseName}, REPLACE_VAR{useCaseName}>();", shouldIncludeSharedFolder: false);

@@ -1172,7 +1172,7 @@ public static class SolutionRepository
         content.AppendLine("    {");
         content.AppendLine("        services.AddControllers(options =>");
         content.AppendLine("        {");
-        content.AppendLine("            x.Filters.Add<ErrorFilter>();");
+        content.AppendLine("            options.Filters.Add<ErrorFilter>();");
         content.AppendLine("        })");
         content.AppendLine("        .AddJsonOptions(x =>");
         content.AppendLine("        {");
