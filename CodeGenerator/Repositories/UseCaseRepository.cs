@@ -8,7 +8,9 @@ namespace CodeGenerator.Console.Repositories;
 
 public sealed class UseCaseRepository
 {
-    #region Main
+    /// <summary>
+    /// Criação dinâmica com base nos parâmetros;
+    /// </summary>
     public static List<Content> GenerateUseCaseAndAllItsDependencies(string solutionName, string context, string rootPath, string useCaseName, List<string> props, bool isPKGuid)
     {
         List<string> contentPathEnums = GenerateFolders(solutionName, rootPath, useCaseName);
@@ -18,13 +20,14 @@ public sealed class UseCaseRepository
         return finalContent;
     }
 
+    #region Main (extras)
     private static List<string> GenerateFolders(string solutionName, string rootPath, string useCaseName)
     {
         string mainFolderPath = Path.Combine(rootPath, $"{solutionName}.{GetEnumDesc(ContentDirectoryEnum.UseCase)}", GetStrPlural(useCaseName));
         GenerateFolder(solutionName, folderPath: mainFolderPath);
 
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<UseCaseEnum>();
-        List<string> contentPathExtra = ["Shared"]; // Extra items if needed;
+        List<string> contentPathExtra = ["Shared"]; // Itens extras;
         GenerateFolderByPathList(solutionName, mainFolderPath, paths: contentPathEnums.Concat(contentPathExtra).ToList());
 
         return contentPathEnums;
