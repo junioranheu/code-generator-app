@@ -63,7 +63,7 @@ public static class SolutionRepository
         sb.AppendLine("  <ItemGroup>");
         sb.AppendLine($"    <ProjectReference Include=\"..\\{applicationProject}\\{applicationProject}.csproj\" />");
         sb.AppendLine($"    <ProjectReference Include=\"..\\{infrastructureProject}\\{infrastructureProject}.csproj\" />");
-        sb.AppendLine($"    <PackageReference Include=\"AutoMapper.Extensions.Microsoft.DependencyInjection\" Version=\"{Misc.AutoMapperVersion}\" />");
+        sb.AppendLine($"    <PackageReference Include=\"Mapster\" Version=\"{Misc.MapsterVersion}\" />");
         sb.AppendLine($"    <PackageReference Include=\"Swashbuckle.AspNetCore\" Version=\"{Misc.SwaggerVersion}\" />");
         sb.AppendLine("  </ItemGroup>");
         sb.AppendLine("</Project>");

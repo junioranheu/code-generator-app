@@ -3,11 +3,10 @@
 public static class Misc
 {
     public const string Tab = "    ";
-    public const string WarningEmpty = "Nenhum dado foi encontrado para esta ocorrência";
     public const string FolderTemp = "Temp";
     public const string TargetFramework = "net10.0";
     public const string EntityFrameworkVersion = "10.0.0";
-    public const string AutoMapperVersion = "12.0.1";
+    public const string MapsterVersion = "10.0.0";
     public const string SwaggerVersion = "6.6.2";
     public const string AspNetCoreHttpAbstractionsVersion = "10.0.0";
     public const string IdentityModelVersion = "8.0.1";

@@ -439,20 +439,54 @@ public static class Get
     }
 
     /// <summary>
-    /// string[] props = { "Name", "Age", "Email" };
-    /// GenerateCustomTextStringBuilderByListOfStrings(stringBuilder, props, $"There you go: REPLACE_VAR.");
+    /// Gera um texto formatado para cada propriedade e o adiciona ao <see cref="StringBuilder"/> informado.
+    /// Quando <paramref name="shouldIncludeSharedFolder"/> é verdadeiro, a propriedade "Shared" é adicionada à lista.
+    /// Quando <paramref name="removeLastCommaIfApplicable"/> é verdadeiro, todas as propriedades são geradas na mesma linha,
+    /// separadas por vírgula e espaço, e a última vírgula e os espaços seguintes são removidos.
     /// </summary>
-    public static void GenerateCustomTextStringBuilderByListOfStrings(StringBuilder stringBuilder, List<string> props, string customText, bool shouldIncludeSharedFolder)
+    public static void GenerateCustomTextStringBuilderByListOfStrings(
+        StringBuilder stringBuilder,
+        List<string> props,
+        string customText,
+        bool shouldIncludeSharedFolder,
+        bool? removeLastCommaIfApplicable = false)
     {
         if (shouldIncludeSharedFolder)
         {
             props.Add("Shared"); // Forçar a inclusão de "Shared" na lista de propriedades;
         }
 
-        foreach (var prop in props)
+        bool removeLastComma = removeLastCommaIfApplicable.GetValueOrDefault();
+
+        foreach (string prop in props)
         {
             string formattedText = customText.Replace("REPLACE_VAR_CAPITALIZEDFIRSTLETTER", GetStrCapitalizedFirstLetter(prop)).Replace("REPLACE_VAR", prop);
-            stringBuilder.AppendLine(formattedText);
+
+            if (removeLastComma)
+            {
+                stringBuilder.Append(formattedText.TrimEnd(',', ' '));
+                stringBuilder.Append(", ");
+            }
+            else
+            {
+                stringBuilder.AppendLine(formattedText);
+            }
+        }
+
+        if (removeLastComma && stringBuilder.Length > 0)
+        {
+            int index = stringBuilder.Length - 1;
+
+            while (index >= 0 && char.IsWhiteSpace(stringBuilder[index]))
+            {
+                index--;
+            }
+
+            if (index >= 0 && stringBuilder[index] == ',')
+            {
+                // Remove a última vírgula e qualquer espaço depois dela;
+                stringBuilder.Remove(index, stringBuilder.Length - index);
+            }
         }
     }
 

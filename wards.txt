@@ -8,3 +8,4 @@
 - colocar no GitHub como principal
 - colocar no portfólio
 - log
+- exception

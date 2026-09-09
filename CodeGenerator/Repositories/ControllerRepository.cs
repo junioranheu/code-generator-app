@@ -1,5 +1,4 @@
-﻿using CodeGenerator.Console.Consts;
-using CodeGenerator.Console.Enums;
+﻿using CodeGenerator.Console.Enums;
 using CodeGenerator.Console.Models;
 using System.Text;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
@@ -64,22 +63,23 @@ public sealed class ControllerRepository
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;", shouldIncludeSharedFolder: true);
 
         content.AppendLine($@"using {solutionName}.Application.UseCases.Shared;
+using {solutionName}.Domain.Consts;
 using {solutionName}.Domain.Entities;
-using AutoMapper;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace {solutionName}.API.Controllers;
 
 [ApiController]
-[Route(""api/[controller]"")]
-public class {className}Controller(");
+[Route(""api/[controller]"")]");
 
-        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} REPLACE_VAR,", shouldIncludeSharedFolder: false);
+        content.Append($"public class {className}Controller("); // Intencionalmente Append apenas;
 
-        content.AppendLine($@"IMapper mapper) : BaseController<{className}Controller>
-{{
-    private readonly IMapper _mapper = mapper;");
+        GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} REPLACE_VAR,", shouldIncludeSharedFolder: false, removeLastCommaIfApplicable: true);
+
+        content.AppendLine($") : BaseController<{className}Controller>");
+        content.AppendLine("{");
 
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"private readonly IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} _REPLACE_VAR = REPLACE_VAR;", shouldIncludeSharedFolder: false);
         content.AppendLine();
@@ -88,25 +88,27 @@ public class {className}Controller(");
     [HttpGet]
     public async Task<ActionResult> Get({className}Input input)
     {{
-        var result = await _get.Execute(input) ?? throw new InvalidOperationException(""{Misc.WarningEmpty}"");
-        return Ok(_mapper.Map<{className}Output>(result));
+        {className} result = await _get.Execute(input) ?? throw new KeyNotFoundException(SystemConsts.Warnings.NotFoundData);
+        {className}Output output = result.Adapt<{className}Output>();
+
+        return Ok(output);
     }}
 
     [AllowAnonymous]
     [HttpGet(""GetAll"")]
     public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, {className}Input input)
     {{
-        var result = await _getAll.Execute(pagination, input);
-        var output = _mapper.Map<IEnumerable<{className}Output>>(result.linq);
+        (IEnumerable<{className}>? linq, int count) = await _getAll.Execute(pagination, input);
+        IEnumerable<{className}Output> output = linq.Adapt<IEnumerable<{className}Output>>();
 
-        return Ok(new {{ output, result.count }});
+        return Ok(new {{ output, count }});
     }}
 
     [AllowAnonymous]
     [HttpPost]
     public async Task<ActionResult> Create({className}Input input)
     {{
-        var item = _mapper.Map<{className}>(input);
+        {className} item = input.Adapt<{className}>();
         await _create.Execute(item);
 
         return Ok(true);
@@ -116,7 +118,7 @@ public class {className}Controller(");
     [HttpPost]
     public async Task<ActionResult> CreateRange(List<{className}Input> input)
     {{
-        var list = _mapper.Map<List<{className}>>(input);
+        List<{className}> list = input.Adapt<List<{className}>>();
         await _createRange.Execute(list);
 
         return Ok(true);
@@ -126,7 +128,7 @@ public class {className}Controller(");
     [HttpPut]
     public async Task<ActionResult> Update({className}Input input)
     {{
-        var item = _mapper.Map<{className}>(input);
+        {className} item = input.Adapt<{className}>();
         await _update.Execute(item);
 
         return Ok(true);
