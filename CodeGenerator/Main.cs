@@ -23,6 +23,10 @@ public class Main
         CreateEntityRefreshToken(solutionName, rootPath);
         CreateControllerBaseAndAllDependencies(solutionName, rootPath);
 
+        // Criar use case Auth (placeholder apenas);
+        List<Content> useCaseAuthContent = UseCaseRepository.GenerateUseCaseForAuth(solutionName, rootPath);
+        GenerateFiles(contents: useCaseAuthContent);
+
         foreach (var model in models)
         {
             List<string> props = GetEntityPropsSplitted(classDefinition: model.Props, rootPath);

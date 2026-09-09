@@ -449,7 +449,7 @@ public static class SolutionRepository
         tokenRefresh.AppendLine("        try");
         tokenRefresh.AppendLine("        {");
         tokenRefresh.AppendLine("            using IServiceScope scope = _scopeFactory.CreateScope();");
-        tokenRefresh.AppendLine("            ICreateRefreshToken createRefreshToken = scope.ServiceProvider.GetRequiredService<ICreateRefreshToken>();");
+        tokenRefresh.AppendLine("            ICreateRefreshTokenJWTAuth createRefreshToken = scope.ServiceProvider.GetRequiredService<ICreateRefreshTokenJWTAuth>();");
         tokenRefresh.AppendLine();
         tokenRefresh.AppendLine("            (string newJwtToken, CookieOptions cookieOptions) = await createRefreshToken.RefreshToken(userIdAuth);");
         tokenRefresh.AppendLine();
