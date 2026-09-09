@@ -95,7 +95,7 @@ namespace {solutionName}.API.Controllers;
     }}
 
     [AllowAnonymous]
-    [HttpGet(""GetAll"")]
+    [HttpGet(nameof(GetAll))]
     public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, {className}Input input)
     {{
         (IEnumerable<{className}>? linq, int count) = await _getAll.Execute(pagination, input);
@@ -115,7 +115,7 @@ namespace {solutionName}.API.Controllers;
     }}
 
     [AllowAnonymous]
-    [HttpPost]
+    [HttpPost(nameof(CreateRange))]
     public async Task<ActionResult> CreateRange(List<{className}Input> input)
     {{
         List<{className}> list = input.Adapt<List<{className}>>();

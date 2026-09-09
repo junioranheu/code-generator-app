@@ -431,7 +431,6 @@ public static class SolutionRepository
         sb.AppendLine("  </PropertyGroup>");
         sb.AppendLine("  <ItemGroup>");
         sb.AppendLine($"    <ProjectReference Include=\"..\\{domainProject}\\{domainProject}.csproj\" />");
-        sb.AppendLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Sqlite\" Version=\"{Misc.EntityFrameworkVersion}\" />");
         sb.AppendLine($"    <PackageReference Include=\"Npgsql.EntityFrameworkCore.PostgreSQL\" Version=\"{Misc.EntityFrameworkVersion}\" />");
         sb.AppendLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Design\" Version=\"{Misc.EntityFrameworkVersion}\">\n      <PrivateAssets>all</PrivateAssets></PackageReference>");
         sb.AppendLine($"    <PackageReference Include=\"System.IdentityModel.Tokens.Jwt\" Version=\"{Misc.IdentityModelVersion}\" />");
@@ -522,8 +521,11 @@ public static class SolutionRepository
         StringBuilder sb = new();
 
         sb.AppendLine("{");
+        sb.AppendLine("  \"SystemSettings\": {");
+        sb.AppendLine("    \"ConnectionStringName\": \"DefaultConnection\"");
+        sb.AppendLine("  },");
         sb.AppendLine("  \"ConnectionStrings\": {");
-        sb.AppendLine("    \"DefaultConnection\": \"Data Source=generated.db\"");
+        sb.AppendLine("    \"DefaultConnection\": \"Host=192.xxx.x.xxx;Port=5432;Database=xxx;Username=xxx;Password=xxx;\"");
         sb.AppendLine("  },");
         sb.AppendLine("  \"JwtSettings\": {");
         sb.AppendLine("     \"TokenExpiryMinutes\": \"30\",");
