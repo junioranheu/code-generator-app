@@ -1,31 +1,41 @@
-# Gerador de Código Automático (API) .NET 10 **[BETA]**
+# .NET 10 API Code Generator [BETA]
 
-Este projeto é um gerador de código automático desenvolvido em .NET 10. Ele facilita e acelera a criação de APIs, gerando a estrutura inicial do projeto, incluindo as camadas necessárias (API, Domain, Application) e os usings apropriados. Ideal para desenvolvedores que desejam evitar a configuração manual e repetitiva dessas estruturas.
+![.NET Version](https://img.shields.io/badge/.NET-10.0-purple)
+![Status](https://img.shields.io/badge/Status-BETA-orange)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
-## 🚀 Funcionalidades **[BETA]**
+Um gerador de código automatizado desenvolvido para acelerar a criação de APIs em .NET 10. 
 
-- **Geração de Estrutura de API**: Cria a estrutura inicial da API com todos os arquivos e pastas necessários, incluindo todos os casos de usos típicos (GET, GETALL, POST, INSERT, DELETE, etc).
-- **Configuração de Contexto**: Permite definir o nome do contexto e suas respectivas classes e atributos.
-- **Camadas Separadas**: Gera o código dividido corretamente nas camadas API, Domain e Application.
-- **Mapeamento de Usings**: Inclui os usings corretos em cada camada para facilitar a integração.
-- **Execução Flexível**: O algoritmo pode ser executado tanto via prompt de comando quanto por meio de uma API.
+O projeto elimina a configuração manual repetitiva ao gerar instantaneamente a estrutura base do projeto, separando as responsabilidades de acordo com as melhores práticas de Clean Architecture e CQRS (ou quase isso).
 
-## 💡 Como Funciona
+## Funcionalidades
 
-1. **Insira o Nome da Solução**: Defina o nome da solução do seu projeto.
-2. **Defina o Contexto**: Informe o nome do contexto que será utilizado.
-3. **Adicione Classes e Atributos**: Liste as classes e seus atributos conforme necessário.
-4. **Geração do Código**: O algoritmo processa as informações e gera a estrutura inicial do projeto.
-5. **Copie e Cole**: Copie o código gerado e cole em seu projeto existente.
+- **Scaffolding Estrutural:** Criação automática de toda a estrutura de pastas e arquivos da API.
+- **Clean Architecture & CQRS:** O código gerado é estritamente dividido nas camadas API, Domain e Application, estruturado em Commands e Queries.
+- **Casos de Uso Prontos:** Geração das operações CRUD completas (GET, GET ALL, POST, INSERT, DELETE) utilizando LINQ para consultas.
+- **Modelagem Dinâmica:** Permite definir o nome do contexto de banco de dados, além das classes e seus respectivos atributos.
+- **Resolução de Dependências:** Mapeamento e inclusão automática dos usings corretos em cada camada para garantir a compilação imediata.
+- **Interface Flexível:** Pode ser executado via Prompt de Comando (CLI) ou integrado via API.
 
-## ⚠️ Aviso Importante sobre o Código Gerado
+## Como Utilizar
 
-O código gerado por esta ferramenta segue um padrão estabelecido de **CQRS** com **Clean Architecture**. Este padrão foi escolhido para garantir uma estrutura organizada e de fácil manutenção. No entanto, é importante observar que:
+1. **Nome da Solução:** Defina o nome base do projeto/solution.
+2. **Definição de Contexto:** Informe o nome do contexto que será utilizado.
+3. **Modelagem de Entidades:** Liste as classes e seus atributos conforme a necessidade do negócio.
+4. **Execução:** O algoritmo processará as entradas e gerará a estrutura do projeto.
+5. **Integração:** Copie o código gerado para o seu repositório destino.
 
-- **Padrão CQRS com Clean Architecture**: O código gerado é baseado em CQRS e Clean Architecture, que ajudam a separar claramente as responsabilidades e melhorar a escalabilidade e manutenção do projeto. Esse padrão pode não ser adequado para todos os cenários e pode exigir ajustes conforme as necessidades específicas do seu projeto.
+## Arquitetura e Considerações
 
-- **Personalização Necessária**: Embora a estrutura inicial seja fornecida, você pode precisar fazer modificações para alinhar o código gerado com os requisitos específicos do seu projeto. A ferramenta oferece uma base sólida, mas ajustes adicionais podem ser necessários para atender completamente aos seus objetivos e especificidades.
+O código gerado entrega uma base funcional altamente coesa e de baixo acoplamento. Desenvolvedores devem observar que:
 
-- **Cobertura de Use Cases**: Os casos de uso incluídos cobrem operações básicas, como GET, POST, INSERT, DELETE e GETALL, utilizando LINQ para consultas. Esses casos de uso são projetados para proporcionar uma base funcional, mas pode ser necessário expandir ou modificar esses casos para atender a casos de uso específicos do seu domínio.
+- **Base Arquitetural:** O uso de CQRS e Clean Architecture exige disciplina na manutenção das camadas. A ferramenta fornece a estrutura, mas adaptações podem ser necessárias dependendo da complexidade do domínio.
+- **Personalização:** Os casos de uso cobrem operações básicas. Cenários específicos de negócio ou consultas de alta performance devem ser adaptados manualmente após a geração.
 
-Lembre-se de revisar e adaptar o código gerado conforme necessário para garantir que ele atenda às necessidades exclusivas do seu projeto e siga as melhores práticas para a sua situação particular.
+## Como Contribuir
+
+1. Faça o Fork do projeto
+2. Crie uma Branch para sua modificação (git checkout -b feature/NovaFuncionalidade)
+3. Faça o Commit das alterações (git commit -m 'Add: nova funcionalidade X')
+4. Faça o Push para a Branch (git push origin feature/NovaFuncionalidade)
+5. Abra um Pull Request

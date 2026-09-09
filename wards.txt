@@ -1,6 +1,4 @@
 - arrumar README ("mais profissional" e open source)
-- log
-- error (filter)
 - testar se roda com banco de vdd
 
 - colocar no GitHub como projeto principal
