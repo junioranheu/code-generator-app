@@ -375,6 +375,40 @@ public static class SolutionRepository
         Write(rootPath, Path.Combine($"{solutionName}.Infrastructure", "Utils", "Get.cs"), utilsGet.ToString());
         #endregion
 
+        #region BrasiliaDateTimeConverter em Infrastructure/Serialization
+        StringBuilder brasiliaDateTimeConverter = new();
+
+        brasiliaDateTimeConverter.AppendLine("using System.Text.Json;");
+        brasiliaDateTimeConverter.AppendLine("using System.Text.Json.Serialization;");
+        brasiliaDateTimeConverter.AppendLine();
+        brasiliaDateTimeConverter.AppendLine($"namespace {solutionName}.Infrastructure.Serialization;");
+        brasiliaDateTimeConverter.AppendLine();
+        brasiliaDateTimeConverter.AppendLine("public sealed class BrasiliaDateTimeConverter : JsonConverter<DateTime>");
+        brasiliaDateTimeConverter.AppendLine("{");
+        brasiliaDateTimeConverter.AppendLine("    private static readonly TimeZoneInfo _brasiliaZone = TimeZoneInfo.FindSystemTimeZoneById(\"E. South America Standard Time\");");
+        brasiliaDateTimeConverter.AppendLine();
+        brasiliaDateTimeConverter.AppendLine("    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)");
+        brasiliaDateTimeConverter.AppendLine("    {");
+        brasiliaDateTimeConverter.AppendLine("        string? str = reader.GetString();");
+        brasiliaDateTimeConverter.AppendLine();
+        brasiliaDateTimeConverter.AppendLine("        if (string.IsNullOrEmpty(str))");
+        brasiliaDateTimeConverter.AppendLine("        {");
+        brasiliaDateTimeConverter.AppendLine("            return default;");
+        brasiliaDateTimeConverter.AppendLine("        }");
+        brasiliaDateTimeConverter.AppendLine();
+        brasiliaDateTimeConverter.AppendLine("        return DateTime.Parse(str);");
+        brasiliaDateTimeConverter.AppendLine("    }");
+        brasiliaDateTimeConverter.AppendLine();
+        brasiliaDateTimeConverter.AppendLine("    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)");
+        brasiliaDateTimeConverter.AppendLine("    {");
+        brasiliaDateTimeConverter.AppendLine("        DateTime brasiliaTime = TimeZoneInfo.ConvertTime(value, _brasiliaZone);");
+        brasiliaDateTimeConverter.AppendLine("        writer.WriteStringValue(brasiliaTime.ToString(\"yyyy-MM-ddTHH:mm:ss\"));");
+        brasiliaDateTimeConverter.AppendLine("    }");
+        brasiliaDateTimeConverter.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.Infrastructure", "Serialization", "DateTimeConverter.cs"), brasiliaDateTimeConverter.ToString());
+        #endregion
+
         #region Middleware de token refresh em API/Middlewares
         StringBuilder tokenRefresh = new();
 
@@ -963,13 +997,14 @@ public static class SolutionRepository
         sb.AppendLine("    \"ConnectionStringName\": \"DefaultConnection\"");
         sb.AppendLine("  },");
         sb.AppendLine("  \"ConnectionStrings\": {");
-        sb.AppendLine("    \"DefaultConnection\": \"Host=192.xxx.x.xxx;Port=5432;Database=xxx;Username=xxx;Password=xxx;\"");
+        sb.AppendLine("    \"DefaultConnection\": \"Host=192.xxx.x.xxx;Port=5432;Database=xxx;Username=xxx;Password=xxx;\" // Isso deve ser movido para secrets.json!!!");
         sb.AppendLine("  },");
         sb.AppendLine("  \"JwtSettings\": {");
         sb.AppendLine("     \"TokenExpiryMinutes\": \"30\",");
         sb.AppendLine("     \"RefreshTokenExpiryMinutes\": \"20160\",");
         sb.AppendLine("     \"Issuer\": \"xxx\",");
-        sb.AppendLine("     \"Audience\": \"xxx\"");
+        sb.AppendLine("     \"Audience\": \"xxx\",");
+        sb.AppendLine("     \"Secret\": \"xxx\" // Isso deve ser movido para secrets.json!!!");
         sb.AppendLine("  },");
         sb.AppendLine("  \"Logging\": {");
         sb.AppendLine("    \"LogLevel\": {");
@@ -1171,6 +1206,7 @@ public static class SolutionRepository
 
         content.AppendLine($"using {solutionName}.API.Filters;");
         content.AppendLine($"using {solutionName}.Domain.Consts;");
+        content.AppendLine($"using {solutionName}.Infrastructure.Serialization;");
         content.AppendLine("using Microsoft.AspNetCore.ResponseCompression;");
         content.AppendLine("using System.IO.Compression;");
         content.AppendLine("using System.Text.Json.Serialization;");
@@ -1240,8 +1276,7 @@ public static class SolutionRepository
         content.AppendLine("        services.AddControllers(options =>");
         content.AppendLine("        {");
         content.AppendLine("            options.Filters.Add<ErrorFilter>();");
-        content.AppendLine("        })");
-        content.AppendLine("        .AddJsonOptions(x =>");
+        content.AppendLine("        }).AddJsonOptions(x =>");
         content.AppendLine("        {");
         content.AppendLine("            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;");
         content.AppendLine("            x.JsonSerializerOptions.WriteIndented = env.IsDevelopment();");
