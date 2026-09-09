@@ -64,11 +64,12 @@ public sealed class ControllerRepository
 
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;", shouldIncludeSharedFolder: true);
 
-        content.AppendLine($@"using {solutionName}.Application.UseCases.Shared;
+        content.AppendLine($@"using {solutionName}.API.Filters;
+using {solutionName}.Application.UseCases.Shared;
 using {solutionName}.Domain.Consts;
 using {solutionName}.Domain.Entities;
+using {solutionName}.Domain.Enums;
 using Mapster;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace {solutionName}.API.Controllers;
@@ -88,7 +89,7 @@ namespace {solutionName}.API.Controllers;
         content.AppendLine("#endregion");
         content.AppendLine();
 
-        content.AppendLine($@"[AllowAnonymous]
+        content.AppendLine($@"[AuthorizeFilter]
     [HttpGet]
     public async Task<ActionResult> Get([FromQuery] {className}Input input)
     {{
@@ -98,7 +99,7 @@ namespace {solutionName}.API.Controllers;
         return Ok(output);
     }}
 
-    [AllowAnonymous]
+    [AuthorizeFilter]
     [HttpGet(nameof(GetAll))]
     public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, [FromQuery] {className}Input input)
     {{
@@ -108,7 +109,7 @@ namespace {solutionName}.API.Controllers;
         return Ok(new {{ output, count }});
     }}
 
-    [AllowAnonymous]
+    [AuthorizeFilter]
     [HttpPost]
     public async Task<ActionResult> Create([FromBody] {className}Input input)
     {{
@@ -118,7 +119,7 @@ namespace {solutionName}.API.Controllers;
         return Ok(true);
     }}
 
-    [AllowAnonymous]
+    [AuthorizeFilter]
     [HttpPost(nameof(CreateRange))]
     public async Task<ActionResult> CreateRange([FromBody] List<{className}Input> input)
     {{
@@ -128,7 +129,7 @@ namespace {solutionName}.API.Controllers;
         return Ok(true);
     }}
 
-    [AllowAnonymous]
+    [AuthorizeFilter([UserRoleEnum.Common, UserRoleEnum.Administrator])]
     [HttpPut]
     public async Task<ActionResult> Update([FromBody] {className}Input input)
     {{
@@ -138,7 +139,7 @@ namespace {solutionName}.API.Controllers;
         return Ok(true);
     }}
 
-    [AllowAnonymous]
+    [AuthorizeFilter([UserRoleEnum.Administrator])]
     [HttpDelete(""{{{paramIdWithoutType}:{guidOrInt}}}"")]
     public async Task<ActionResult> Delete([FromRoute] {paramId})
     {{
@@ -161,13 +162,13 @@ namespace {solutionName}.API.Controllers;
         content.AppendLine();
         content.AppendLine("public enum UserRoleEnum");
         content.AppendLine("{");
-        content.AppendLine("    [Description(\"Usuário do sistema\")]\r");
-        content.AppendLine("    Common = 1,\r");
+        content.AppendLine("    [Description(\"Usuário do sistema\")]");
+        content.AppendLine("    Common = 1,");
         content.AppendLine();
-        content.AppendLine("    [Description(\"Suporte do sistema\")]\r");
-        content.AppendLine("    Maintainer = 999,\r");
+        content.AppendLine("    [Description(\"Suporte do sistema\")]");
+        content.AppendLine("    Maintainer = 999,");
         content.AppendLine();
-        content.AppendLine("    [Description(\"Administrador do sistema\")]\r");
+        content.AppendLine("    [Description(\"Administrador do sistema\")]");
         content.AppendLine("    Administrator = 1000");
         content.AppendLine("}");
 

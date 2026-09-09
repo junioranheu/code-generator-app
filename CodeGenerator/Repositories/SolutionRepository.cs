@@ -582,6 +582,170 @@ public static class SolutionRepository
 
         Write(rootPath, Path.Combine($"{solutionName}.API", "Middlewares", "CsrfOriginMiddleware.cs"), csrf.ToString());
         #endregion
+
+        #region BaseFilter em API/Filters/Base
+        StringBuilder baseFilter = new();
+
+        baseFilter.AppendLine($"using {solutionName}.Domain.Enums;");
+        baseFilter.AppendLine("using Microsoft.AspNetCore.Mvc.Filters;");
+        baseFilter.AppendLine("using System.Security.Claims;");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine($"namespace {solutionName}.API.Filters.Base;");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine("public sealed class BaseFilter");
+        baseFilter.AppendLine("{");
+        baseFilter.AppendLine("#pragma warning disable CA1822");
+        baseFilter.AppendLine("    internal (Guid? userId, string email, UserRoleEnum[] roles) GetUserInfo(dynamic context)");
+        baseFilter.AppendLine("#pragma warning restore CA1822 ");
+        baseFilter.AppendLine("    {");
+        baseFilter.AppendLine("        if (context is ActionExecutedContext actionExecutedContext)");
+        baseFilter.AppendLine("        {");
+        baseFilter.AppendLine("            return BaseGetUserInfo(actionExecutedContext);");
+        baseFilter.AppendLine("        }");
+        baseFilter.AppendLine("        else if (context is AuthorizationFilterContext authorizationFilterContext)");
+        baseFilter.AppendLine("        {");
+        baseFilter.AppendLine("            return BaseGetUserInfo(authorizationFilterContext);");
+        baseFilter.AppendLine("        }");
+        baseFilter.AppendLine("        else if (context is ExceptionContext exceptionContext)");
+        baseFilter.AppendLine("        {");
+        baseFilter.AppendLine("            return BaseGetUserInfo(exceptionContext);");
+        baseFilter.AppendLine("        }");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine("        return (null, string.Empty, []);");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine("        static (Guid? userId, string email, UserRoleEnum[] roles) BaseGetUserInfo(dynamic context)");
+        baseFilter.AppendLine("        {");
+        baseFilter.AppendLine("            if (context.HttpContext.User.Identity!.IsAuthenticated)");
+        baseFilter.AppendLine("            {");
+        baseFilter.AppendLine("                ClaimsPrincipal? user = (ClaimsPrincipal)context.HttpContext.User;");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine("                if (user is null)");
+        baseFilter.AppendLine("                {");
+        baseFilter.AppendLine("                    return (null, string.Empty, []);");
+        baseFilter.AppendLine("                }");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine("                string userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;");
+        baseFilter.AppendLine("                string email = user.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;");
+        baseFilter.AppendLine("                string[] rolesStr = [.. user.FindAll(ClaimTypes.Role).Select(claim => claim.Value)];");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine("                List<UserRoleEnum> rolesList = [];");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine("                foreach (var item in rolesStr)");
+        baseFilter.AppendLine("                {");
+        baseFilter.AppendLine("                    UserRoleEnum role = Enum.Parse<UserRoleEnum>(item);");
+        baseFilter.AppendLine("                    rolesList.Add(role);");
+        baseFilter.AppendLine("                }");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine("                UserRoleEnum[] roles = [.. rolesList];");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine("                return (Guid.Parse(userId), email, roles);");
+        baseFilter.AppendLine("            }");
+        baseFilter.AppendLine();
+        baseFilter.AppendLine("            return (null, string.Empty, []);");
+        baseFilter.AppendLine("        }");
+        baseFilter.AppendLine("    }");
+        baseFilter.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.API", "Filters", "Base", "BaseFilter.cs"), baseFilter.ToString());
+        #endregion
+
+        #region AuthorizeFilter em API/Filters
+        StringBuilder authorizeFilter = new();
+
+        authorizeFilter.AppendLine($"using {solutionName}.API.Filters.Base;");
+        authorizeFilter.AppendLine($"using {solutionName}.Domain.Enums;");
+        authorizeFilter.AppendLine("using Microsoft.AspNetCore.Mvc;");
+        authorizeFilter.AppendLine("using Microsoft.AspNetCore.Mvc.Filters;");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine($"namespace {solutionName}.API.Filters;");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("#region attribute");
+        authorizeFilter.AppendLine("public sealed class AuthorizeFilterAttribute : TypeFilterAttribute");
+        authorizeFilter.AppendLine("{");
+        authorizeFilter.AppendLine("    public AuthorizeFilterAttribute() : base(typeof(AuthorizeFilter))");
+        authorizeFilter.AppendLine("    {");
+        authorizeFilter.AppendLine("        Arguments = [Array.Empty<UserRoleEnum>()];");
+        authorizeFilter.AppendLine("    }");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("    public AuthorizeFilterAttribute(UserRoleEnum[] roles) : base(typeof(AuthorizeFilter))");
+        authorizeFilter.AppendLine("    {");
+        authorizeFilter.AppendLine("        Arguments = [roles ?? []];");
+        authorizeFilter.AppendLine("    }");
+        authorizeFilter.AppendLine("}");
+        authorizeFilter.AppendLine("#endregion");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("public sealed class AuthorizeFilter(UserRoleEnum[] rolesRequired) : IAsyncAuthorizationFilter");
+        authorizeFilter.AppendLine("{");
+        authorizeFilter.AppendLine("    private readonly UserRoleEnum[] _rolesRequired = rolesRequired ?? [];");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("    public async Task OnAuthorizationAsync(AuthorizationFilterContext context)");
+        authorizeFilter.AppendLine("    {");
+        authorizeFilter.AppendLine("        if (!IsAuthenticated(context))");
+        authorizeFilter.AppendLine("        {");
+        authorizeFilter.AppendLine("            return;");
+        authorizeFilter.AppendLine("        }");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("        (Guid? userId, string _, UserRoleEnum[] rolesFromToken) = new BaseFilter().GetUserInfo(context);");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("        if (userId is null)");
+        authorizeFilter.AppendLine("        {");
+        authorizeFilter.AppendLine("            context.Result = new UnauthorizedResult();");
+        authorizeFilter.AppendLine("            return;");
+        authorizeFilter.AppendLine("        }");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("        bool isAdmin = rolesFromToken.Any(x => x == UserRoleEnum.Administrator);");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("        if (isAdmin)");
+        authorizeFilter.AppendLine("        {");
+        authorizeFilter.AppendLine("            return;");
+        authorizeFilter.AppendLine("        }");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("        bool hasRoles = CheckRoles(context, rolesFromToken ?? [], _rolesRequired);");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("        if (!hasRoles)");
+        authorizeFilter.AppendLine("        {");
+        authorizeFilter.AppendLine("            return;");
+        authorizeFilter.AppendLine("        }");
+        authorizeFilter.AppendLine("    }");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("    #region extras");
+        authorizeFilter.AppendLine("    private static bool IsAuthenticated(AuthorizationFilterContext context)");
+        authorizeFilter.AppendLine("    {");
+        authorizeFilter.AppendLine("        if (!context.HttpContext.User.Identity?.IsAuthenticated ?? true)");
+        authorizeFilter.AppendLine("        {");
+        authorizeFilter.AppendLine("            context.Result = new UnauthorizedResult();");
+        authorizeFilter.AppendLine("            return false;");
+        authorizeFilter.AppendLine("        }");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("        return true;");
+        authorizeFilter.AppendLine("    }");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("    private static bool CheckRoles(AuthorizationFilterContext context, UserRoleEnum[] userRoles, UserRoleEnum[] requiredRoles)");
+        authorizeFilter.AppendLine("    {");
+        authorizeFilter.AppendLine("        if (requiredRoles is null || requiredRoles.Length == 0)");
+        authorizeFilter.AppendLine("        {");
+        authorizeFilter.AppendLine("            return true;");
+        authorizeFilter.AppendLine("        }");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("        bool ok = userRoles.Any(x => requiredRoles.Contains(x));");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("        if (!ok)");
+        authorizeFilter.AppendLine("        {");
+        authorizeFilter.AppendLine("            context.Result = new ObjectResult(\"Você não tem permissão de acesso.\")");
+        authorizeFilter.AppendLine("            {");
+        authorizeFilter.AppendLine("                StatusCode = StatusCodes.Status403Forbidden");
+        authorizeFilter.AppendLine("            }; ");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("            return false;");
+        authorizeFilter.AppendLine("        }");
+        authorizeFilter.AppendLine();
+        authorizeFilter.AppendLine("        return true;");
+        authorizeFilter.AppendLine("    }");
+        authorizeFilter.AppendLine("    #endregion");
+        authorizeFilter.AppendLine("}");
+
+        Write(rootPath, Path.Combine($"{solutionName}.API", "Filters", "AuthorizeFilter.cs"), authorizeFilter.ToString());
+        #endregion
     }
 
     /// <summary>
@@ -1008,12 +1172,13 @@ public static class SolutionRepository
         content.AppendLine("    {");
         content.AppendLine("        services.AddControllers(options =>");
         content.AppendLine("        {");
-        content.AppendLine("            //");
+        content.AppendLine("            x.Filters.Add<ErrorFilter>();");
         content.AppendLine("        })");
         content.AppendLine("        .AddJsonOptions(x =>");
         content.AppendLine("        {");
         content.AppendLine("            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;");
         content.AppendLine("            x.JsonSerializerOptions.WriteIndented = env.IsDevelopment();");
+        content.AppendLine("            x.JsonSerializerOptions.Converters.Add(new BrasiliaDateTimeConverter());");
         content.AppendLine("        });");
         content.AppendLine("    }");
         content.AppendLine();
@@ -1039,7 +1204,7 @@ public static class SolutionRepository
     private static string GenerateAPIAppConfigurationDependencyInjection(string solutionName)
     {
         StringBuilder content = new();
-    
+
         content.AppendLine($"using {solutionName}.API.Middlewares;");
         content.AppendLine($"using {solutionName}.Domain.Consts;");
         content.AppendLine("using Microsoft.AspNetCore.Mvc.Controllers;");
