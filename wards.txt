@@ -1,9 +1,8 @@
-- deixar tudo perfeito compilando
-- Authorize (?)
-- ver se roda com banco de vdd
-- ver questão de pacotes padrões (banco e Swagger?)
-- arrumar README para ser algo open source
+- authorize (Filter + Controller)
+- arrumar README ("mais profissional" e open source)
 - log
-- exception
-- colocar no GitHub como principal
+- exception (filter)
+- testar se roda com banco de vdd
+
+- colocar no GitHub como projeto principal
 - colocar no portfólio

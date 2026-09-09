@@ -59,6 +59,8 @@ public sealed class ControllerRepository
         List<string> contentPathEnums = GetEnumDescriptionOfAllItemsAndAssignInListStr<UseCaseEnum>();
         List<string> contentPathEnums_LowerCase = [.. contentPathEnums.Select(GetStringLowerCaseFirstLetter)];
         string paramId = GetClassId(className, isPKGuid, isLowerCaseFirstLetter: true);
+        string paramIdWithoutType = GetClassIdWithoutType(className, isLowerCaseFirstLetter: true);
+        string guidOrInt = isPKGuid ? "guid" : "int";
 
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums, $"using {solutionName}.Application.UseCases.{GetStrPlural(className)}.REPLACE_VAR;", shouldIncludeSharedFolder: true);
 
@@ -81,12 +83,14 @@ namespace {solutionName}.API.Controllers;
         content.AppendLine($") : BaseController<{className}Controller>");
         content.AppendLine("{");
 
+        content.AppendLine("#region constructors");
         GenerateCustomTextStringBuilderByListOfStrings(content, contentPathEnums_LowerCase, $"private readonly IREPLACE_VAR_CAPITALIZEDFIRSTLETTER{className} _REPLACE_VAR = REPLACE_VAR;", shouldIncludeSharedFolder: false);
+        content.AppendLine("#endregion");
         content.AppendLine();
 
         content.AppendLine($@"[AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult> Get({className}Input input)
+    public async Task<ActionResult> Get([FromQuery] {className}Input input)
     {{
         {className} result = await _get.Execute(input) ?? throw new KeyNotFoundException(SystemConsts.Warnings.NotFoundData);
         {className}Output output = result.Adapt<{className}Output>();
@@ -96,7 +100,7 @@ namespace {solutionName}.API.Controllers;
 
     [AllowAnonymous]
     [HttpGet(nameof(GetAll))]
-    public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, {className}Input input)
+    public async Task<ActionResult> GetAll([FromQuery] PaginationInput pagination, [FromQuery] {className}Input input)
     {{
         (IEnumerable<{className}>? linq, int count) = await _getAll.Execute(pagination, input);
         IEnumerable<{className}Output> output = linq.Adapt<IEnumerable<{className}Output>>();
@@ -106,7 +110,7 @@ namespace {solutionName}.API.Controllers;
 
     [AllowAnonymous]
     [HttpPost]
-    public async Task<ActionResult> Create({className}Input input)
+    public async Task<ActionResult> Create([FromBody] {className}Input input)
     {{
         {className} item = input.Adapt<{className}>();
         await _create.Execute(item);
@@ -116,7 +120,7 @@ namespace {solutionName}.API.Controllers;
 
     [AllowAnonymous]
     [HttpPost(nameof(CreateRange))]
-    public async Task<ActionResult> CreateRange(List<{className}Input> input)
+    public async Task<ActionResult> CreateRange([FromBody] List<{className}Input> input)
     {{
         List<{className}> list = input.Adapt<List<{className}>>();
         await _createRange.Execute(list);
@@ -126,7 +130,7 @@ namespace {solutionName}.API.Controllers;
 
     [AllowAnonymous]
     [HttpPut]
-    public async Task<ActionResult> Update({className}Input input)
+    public async Task<ActionResult> Update([FromBody] {className}Input input)
     {{
         {className} item = input.Adapt<{className}>();
         await _update.Execute(item);
@@ -135,8 +139,8 @@ namespace {solutionName}.API.Controllers;
     }}
 
     [AllowAnonymous]
-    [HttpDelete]
-    public async Task<ActionResult> Delete({paramId})
+    [HttpDelete(""{{{paramIdWithoutType}:{guidOrInt}}}"")]
+    public async Task<ActionResult> Delete([FromRoute] {paramId})
     {{
         await _delete.Execute({GetStringLowerCaseFirstLetter(className)}Id);
 
