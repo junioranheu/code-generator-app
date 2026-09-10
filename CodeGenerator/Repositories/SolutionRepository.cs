@@ -65,6 +65,8 @@ public static class SolutionRepository
         sb.AppendLine($"    <ProjectReference Include=\"..\\{infrastructureProject}\\{infrastructureProject}.csproj\" />");
         sb.AppendLine($"    <PackageReference Include=\"Mapster\" Version=\"{Misc.MapsterVersion}\" />");
         sb.AppendLine($"    <PackageReference Include=\"Swashbuckle.AspNetCore\" Version=\"{Misc.SwaggerVersion}\" />");
+        sb.AppendLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Design\" Version=\"{Misc.EntityFrameworkVersion}\">\n      <PrivateAssets>all</PrivateAssets></PackageReference>");
+        sb.AppendLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Tools\" Version=\"{Misc.EntityFrameworkVersion}\">\n      <PrivateAssets>all</PrivateAssets></PackageReference>");
         sb.AppendLine("  </ItemGroup>");
         sb.AppendLine("</Project>");
 
@@ -883,6 +885,9 @@ public static class SolutionRepository
         sb.AppendLine("    <Nullable>enable</Nullable>");
         sb.AppendLine("    <ImplicitUsings>enable</ImplicitUsings>");
         sb.AppendLine("  </PropertyGroup>");
+        sb.AppendLine("  <ItemGroup>");
+        sb.AppendLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore\" Version=\"{Misc.EntityFrameworkVersion}\" />");
+        sb.AppendLine("  </ItemGroup>");
         sb.AppendLine("</Project>");
 
         return sb.ToString();
@@ -903,6 +908,7 @@ public static class SolutionRepository
         sb.AppendLine("  </PropertyGroup>");
         sb.AppendLine("  <ItemGroup>");
         sb.AppendLine($"    <ProjectReference Include=\"..\\{domainProject}\\{domainProject}.csproj\" />");
+        sb.AppendLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore\" Version=\"{Misc.EntityFrameworkVersion}\" />");
         sb.AppendLine($"    <PackageReference Include=\"Npgsql.EntityFrameworkCore.PostgreSQL\" Version=\"{Misc.EntityFrameworkVersion}\" />");
         sb.AppendLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Design\" Version=\"{Misc.EntityFrameworkVersion}\">\n      <PrivateAssets>all</PrivateAssets></PackageReference>");
         sb.AppendLine($"    <PackageReference Include=\"System.IdentityModel.Tokens.Jwt\" Version=\"{Misc.IdentityModelVersion}\" />");

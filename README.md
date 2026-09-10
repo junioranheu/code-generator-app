@@ -1,4 +1,4 @@
-# .NET 10 API Code Generator [BETA]
+# .NET 10 API Code Generator
 
 ![.NET Version](https://img.shields.io/badge/.NET-10.0-purple)
 ![Status](https://img.shields.io/badge/Status-BETA-orange)
@@ -24,6 +24,16 @@ O projeto elimina a configuração manual repetitiva ao gerar instantaneamente a
 3. **Modelagem de Entidades:** Liste as classes e seus atributos conforme a necessidade do negócio.
 4. **Execução:** O algoritmo processará as entradas e gerará a estrutura do projeto.
 5. **Integração:** Copie o código gerado para o seu repositório destino.
+
+### Rodando o Projeto Gerado
+
+Como o projeto exportado já vem com a estrutura de banco de dados configurada, para rodar a aplicação basta:
+
+1. Inserir a sua Connection String no arquivo `appsettings.json` (ou preferivelmente no `user secrets`) do projeto gerado.
+2. Abrir Package Manager Console.
+3. Apontar a camada para `Infraestructure`, ainda no Package Manager Console.  
+4. Criar a migration executando o comando: `add-migration Initial`.
+5. Atualizar o banco de dados executando: `update-database`.
 
 ## Arquitetura e Considerações
 
