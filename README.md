@@ -1,4 +1,4 @@
-# .NET 10 API Code Generator
+# Mais que scaffolding. Sua API pronta para rodar em segundos. Gerador de Código Automático .NET 10.
 
 ![.NET Version](https://img.shields.io/badge/.NET-10.0-purple)
 ![Status](https://img.shields.io/badge/Status-BETA-orange)
