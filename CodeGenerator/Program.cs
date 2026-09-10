@@ -2,8 +2,9 @@
 using CodeGenerator.Console.Enums;
 using CodeGenerator.Console.Models;
 using Spectre.Console;
-using static CodeGenerator.Console.Utils.Fixtures.Prompt;
 using static CodeGenerator.Console.Utils.Fixtures.Get;
+using static CodeGenerator.Console.Utils.Fixtures.Prompt;
+using static CodeGenerator.Console.Utils.Fixtures.Validate;
 
 #region Input
 Console.Title = AppDomain.CurrentDomain.FriendlyName;
@@ -12,11 +13,13 @@ GenerateCodeRequest request = new()
 {
     SolutionName = GetStrCapitalizedFirstLetter(PromptInput("Solution name:", allowSpaces: false, allowQuestionMark: false)),
     ContextName = GetStrCapitalizedFirstLetter(PromptInput("Context name:", allowSpaces: false, allowQuestionMark: false)),
-    IsPKGuid = PromptInputForBool("Are the primary keys (PKs) Guids?", defaultValue: true),
+    IsPKGuid = PromptInputForBool("Are the primary keys (PKs) Guids? -- else they will be integers", defaultValue: true),
     IsGenerateZip = PromptInputForBool("Do you want to generate a ZIP file?", defaultValue: false),
     Models = PromptInputForModel(),
     RequestType = RequestTypeEnum.Console
 };
+
+ValidateDbContextName(request.ContextName);
 #endregion
 
 Main.Execute(request);

@@ -59,4 +59,46 @@ public static partial class Validate
             }
         }
     }
+
+    /// <summary>
+    /// Validates that the specified DbContext name does not conflict with
+    /// common .NET or Entity Framework types and APIs.
+    /// </summary>
+    /// <param name="name">The name to validate.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when the name is null, empty, or consists only of whitespace.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the specified name is reserved or may cause conflicts
+    /// with .NET or Entity Framework APIs.
+    /// </exception>
+    public static void ValidateDbContextName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("O nome do DbContext não pode ser nulo, vazio ou conter apenas espaços em branco.", nameof(name));
+        }
+
+        HashSet<string> forbiddenNames =
+        [
+            with(StringComparer.OrdinalIgnoreCase),
+            "Context",
+            "DbContext",
+            "Database",
+            "Model",
+            "Configuration",
+            "Options",
+            "Connection",
+            "Transaction",
+            "Entity",
+            "Migration",
+            "Command",
+            "DataContext"
+        ];
+
+        if (forbiddenNames.Contains(name))
+        {
+            throw new InvalidOperationException($"O nome '{name}' não pode ser utilizado para um DbContext, pois pode entrar em conflito com APIs do .NET ou do Entity Framework.");
+        }
+    }
 }
