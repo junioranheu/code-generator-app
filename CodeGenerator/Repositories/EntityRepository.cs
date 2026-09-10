@@ -69,7 +69,9 @@ public sealed partial class EntityRepository
             content.AppendLine("{");
         }
 
-        if (isNormalEntity)
+        string[] classesWithoutKey = ["Audit"];
+
+        if (isNormalEntity && !classesWithoutKey.Contains(className))
         {
             content.AppendLine("[Key]");
             content.AppendLine($"public {paramId} {{ get; set; }}");
