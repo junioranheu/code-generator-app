@@ -36,17 +36,18 @@ public static class Prompt
 
         AnsiConsole.MarkupLine("\nClass name example: [cyan]User[/]");
         AnsiConsole.MarkupLine("Class properties example: [cyan]Name string Password string Height double? IsUnder18 bool Country Country[/]\n");
+        int count = 1;
 
         while (keepWhile)
         {
-            string className = PromptInput("Class name:", allowSpaces: false, allowQuestionMark: false);
-
+            string className = PromptInput($"Class name #{count}:", allowSpaces: false, allowQuestionMark: false);
+     
             // Ler as propriedades até que correspondam ao padrão esperado (pares: nome tipo);
             string propsInput;
 
             while (true)
             {
-                propsInput = PromptInput("Props:", allowSpaces: true, allowQuestionMark: true);
+                propsInput = PromptInput($"Props #{count}:", allowSpaces: true, allowQuestionMark: true);
 
                 // Normalizar os separadores e dividir a string em partes;
                 string normalized = propsInput.Replace(',', ' ').Replace(';', ' ').Replace('\n', ' ').Replace('\r', ' ').Replace('\t', ' ');
@@ -81,7 +82,13 @@ public static class Prompt
 
             models.Add(new() { Name = GetStrCapitalizedFirstLetter(className), Props = propsInput });
 
+            count++;
             keepWhile = PromptInputForBool("\nDo you want to add one more item? (Answer y or n)", false);
+
+            if (keepWhile)
+            {
+                AnsiConsole.MarkupLine("");
+            }
         }
 
         return models;
