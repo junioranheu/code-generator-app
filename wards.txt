@@ -1,5 +1,0 @@
-- arrumar README ("mais profissional" e open source)
-- testar se roda com banco de vdd
-
-- colocar no GitHub como projeto principal
-- colocar no portfólio
