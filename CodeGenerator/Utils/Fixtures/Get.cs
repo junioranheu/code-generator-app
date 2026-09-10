@@ -221,17 +221,34 @@ public static class Get
 
                 bool isCommonType = GetIsCommonTypeName(attrType);
 
+                // Trata tipos genéricos de coleção (ex.: List<User>) como propriedades de navegação colecionáveis,
+                // evitando que sejam interpretadas como FK (e evitando remover os sinais '<' '>').
+                bool isGenericCollection = attrType.Contains('<') && attrType.Contains('>');
+
                 if (!isCommonType && isInputOrOutput)
                 {
+                    // Em DTOs de input/output, tipos complexos não são processados aqui; sair silenciosamente.
                     return;
                 }
 
                 if (!isCommonType)
                 {
-                    stringBuilder.AppendLine($"[ForeignKey(nameof({attrName}))]");
-                    stringBuilder.AppendLine($"public int {attrName}Id {{ get; set; }}");
+                    if (isGenericCollection)
+                    {
+                        // Mantém o tipo como foi informado (ex.: List<User>) e não cria FK.
+                        if (!isInputOrOutput)
+                        {
+                            formattedText = customText.Replace("REPLACE_VAR_NAME", attrName).Replace("REPLACE_VAR_TYPE", attrType);
+                        }
+                    }
+                    else
+                    {
+                        // Tipo complexo singular: cria FK (int) e a propriedade de navegação (nullable).
+                        stringBuilder.AppendLine($"[ForeignKey(nameof({attrName}))]");
+                        stringBuilder.AppendLine($"public int {attrName}Id {{ get; set; }}");
 
-                    formattedText = customText.Replace("REPLACE_VAR_NAME", GetStrPlural(attrName)).Replace("REPLACE_VAR_TYPE", $"{attrType}?");
+                        formattedText = customText.Replace("REPLACE_VAR_NAME", GetStrPlural(attrName)).Replace("REPLACE_VAR_TYPE", $"{attrType}?");
+                    }
                 }
                 else
                 {
@@ -344,7 +361,7 @@ public static class Get
 
                 if (getBothNameAndType)
                 {
-                    string nullableMark = addQuestionMark && !attrType.EndsWith("?") ? "?" : string.Empty;
+                    string nullableMark = addQuestionMark && !attrType.EndsWith('?') ? "?" : string.Empty;
                     content.Append($"{attrType}{nullableMark} {GetStringLowerCaseFirstLetter(attrName)}, ");
                 }
                 else

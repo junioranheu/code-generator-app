@@ -118,7 +118,7 @@ public static class Prompt
                 continue;
             }
 
-            if (char.IsLetterOrDigit(c) || (allowSpaces && char.IsWhiteSpace(c)) || (allowQuestionMark && c == '?'))
+            if (char.IsLetterOrDigit(c) || (allowSpaces && char.IsWhiteSpace(c)) || (allowQuestionMark && (c == '?' || c == '<' || c == '>')))
             {
                 builder.Append(c);
             }
